@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-10T20:10:16.103Z",
+  "updatedAt": "2025-07-10T22:51:46.724Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
   "active": true,
@@ -483,7 +483,9 @@
     },
     {
       "parameters": {
-        "options": {}
+        "options": {
+          "reset": false
+        }
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
@@ -545,17 +547,6 @@
         1220
       ],
       "typeVersion": 1
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        2580,
-        1480
-      ],
-      "id": "9ff4c288-ae39-4d84-abe6-fb024739329a",
-      "name": "No Operation, do nothing"
     },
     {
       "parameters": {
@@ -668,6 +659,19 @@
       ],
       "id": "d847c072-ec6d-4515-980d-59912d068b58",
       "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Este código pode ser usado em um nó \"Code\" (ou \"Function\") no n8n.\n// Ele simplesmente retorna um array vazio, o que faz com que o nó\n// não passe nenhum item para o próximo nó no workflow.\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        1440
+      ],
+      "id": "886e707b-868c-4fb8-a918-fa13acb76650",
+      "name": "Code"
     }
   ],
   "connections": {
@@ -828,7 +832,7 @@
         ],
         [
           {
-            "node": "No Operation, do nothing",
+            "node": "Code",
             "type": "main",
             "index": 0
           }
@@ -892,6 +896,17 @@
           }
         ]
       ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -906,7 +921,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c84adf93-3bc8-48eb-9a78-1319c9492d9c",
+  "versionId": "0f7d1174-3a4b-4b9a-b480-cb39b3abbb62",
   "triggerCount": 1,
   "tags": []
 }
