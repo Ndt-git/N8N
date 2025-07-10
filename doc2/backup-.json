@@ -1,16 +1,19 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-10T16:49:19.296Z",
+  "updatedAt": "2025-07-10T16:53:11.521Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {
         "rule": {
           "interval": [
-            {}
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
           ]
         }
       },
@@ -423,7 +426,8 @@
           "mode": "list",
           "cachedResultName": "N8N",
           "cachedResultUrl": "https://github.com/Ndt-git/N8N"
-        }
+        },
+        "filePath": "doc2"
       },
       "type": "n8n-nodes-base.github",
       "typeVersion": 1.1,
@@ -542,12 +546,16 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1c059e19-b997-40b9-a54e-0dccb0b565d2",
-  "triggerCount": 0,
+  "versionId": "1352d92c-0d32-4644-96ad-5a3f4b472a35",
+  "triggerCount": 1,
   "tags": []
 }
