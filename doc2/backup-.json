@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-10T19:55:02.990Z",
+  "updatedAt": "2025-07-10T20:09:35.046Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
   "active": true,
@@ -31,7 +31,10 @@
         "fieldsToAggregate": {
           "fieldToAggregate": [
             {
-              "fieldToAggregate": "name"
+              "fieldToAggregate": "nobackup"
+            },
+            {
+              "fieldToAggregate": "backup"
             }
           ]
         },
@@ -40,8 +43,8 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        1800,
-        920
+        1600,
+        940
       ],
       "id": "db6f24bb-eb79-4358-a1a7-b30bfe13c0db",
       "name": "Aggregate"
@@ -57,7 +60,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        2380,
+        2140,
         920
       ],
       "id": "4492c063-a7dc-4105-acdb-a8d7ce936a3a",
@@ -71,7 +74,7 @@
       "type": "n8n-nodes-base.n8n",
       "typeVersion": 1,
       "position": [
-        2100,
+        1900,
         920
       ],
       "id": "31774139-f2bd-4a0e-9224-b9ced1f45df2",
@@ -91,7 +94,7 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        2700,
+        2460,
         920
       ],
       "id": "f948d227-d1de-43dd-875e-665ecd2c96cf",
@@ -102,7 +105,7 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{ $('Aggregate').item.json.name }}",
+              "value1": "={{ $('Aggregate').item.json.backup }}",
               "operation": "contains",
               "value2": "={{ $('Retrieve workflows').item.json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $('Retrieve workflows').item.json.tags[0].name }}.json"
             }
@@ -113,8 +116,8 @@
       "name": "Check if file exists",
       "type": "n8n-nodes-base.if",
       "position": [
-        3280,
-        920
+        3460,
+        900
       ],
       "typeVersion": 1
     },
@@ -141,7 +144,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2980,
+        2780,
         920
       ],
       "id": "b6761f13-b0df-45d0-b22d-834682959052",
@@ -172,8 +175,8 @@
       "name": "Update file",
       "type": "n8n-nodes-base.github",
       "position": [
-        3560,
-        340
+        3900,
+        360
       ],
       "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
       "typeVersion": 1,
@@ -208,8 +211,8 @@
       "name": "Upload file",
       "type": "n8n-nodes-base.github",
       "position": [
-        3580,
-        940
+        3920,
+        960
       ],
       "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
       "typeVersion": 1,
@@ -341,8 +344,8 @@
       "name": "Sticky Note9",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3000,
-        600
+        3320,
+        580
       ],
       "typeVersion": 1
     },
@@ -357,8 +360,8 @@
       "name": "Sticky Note10",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3420,
-        0
+        3760,
+        20
       ],
       "typeVersion": 1
     },
@@ -373,8 +376,8 @@
       "name": "Sticky Note11",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3440,
-        600
+        3780,
+        620
       ],
       "typeVersion": 1
     },
@@ -497,8 +500,8 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        2600,
-        1240
+        2880,
+        1200
       ],
       "id": "90f3acd1-6817-4c5f-8b71-e2e864f10ef2"
     },
@@ -548,59 +551,11 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2820,
-        1460
+        2580,
+        1480
       ],
       "id": "9ff4c288-ae39-4d84-abe6-fb024739329a",
       "name": "No Operation, do nothing"
-    },
-    {
-      "parameters": {
-        "jsCode": "const n8nWorkflowUpdatedAt = new Date(\"$input.first().json.updatedAt\");\nconst githubCommitDate = new Date(\"2025-06-09T17:00:25Z\");\n\nlet result = {};\n\nif (n8nWorkflowUpdatedAt > githubCommitDate) {\n  result.status = \"O workflow do n8n é MAIS NOVO que o do GitHub.\";\n  result.needsUpdate = true;\n} else if (n8nWorkflowUpdatedAt < githubCommitDate) {\n  result.status = \"O workflow do n8n é MAIS ANTIGO que o do GitHub.\";\n  result.needsUpdate = false;\n} else {\n  result.status = \"O workflow do n8n e o do GitHub têm a MESMA data de atualização.\";\n  result.needsUpdate = false; // Ou true, dependendo se você quer forçar a atualização mesmo se for igual\n}\n\nreturn [{ json: result }];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2840,
-        1120
-      ],
-      "id": "ecff7c26-ddc2-4467-91c4-7c62a2bfc142",
-      "name": "Code"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "8a6dd1fb-0a5d-46f2-b76c-83aaaa22ccc7",
-              "name": "updatedAt",
-              "value": "={{ new Date($json.updatedAt) > new Date($('HTTP Request1').item.json.commit.committer.date) }}",
-              "type": "string"
-            },
-            {
-              "id": "e91112e8-1206-4090-aaac-253540f3b03d",
-              "name": "commit.committer.date",
-              "value": "={{ $('HTTP Request1').item.json.commit.committer.date }}",
-              "type": "string"
-            },
-            {
-              "id": "2cc37808-1981-43fa-96a7-4f8d787d3e40",
-              "name": "updatedAt",
-              "value": "={{ $json.updatedAt }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        2660,
-        1120
-      ],
-      "id": "9fc020c8-9831-41b7-8746-ed202bd31e04",
-      "name": "Edit Fields"
     },
     {
       "parameters": {
@@ -614,7 +569,7 @@
           "conditions": [
             {
               "id": "ac260348-cf49-43de-93b6-65777287549f",
-              "leftValue": "={{ new Date($json.updatedAt) < new Date($('HTTP Request1').item.json.commit.committer.date) }}",
+              "leftValue": "={{ new Date($json.updatedAt) > new Date($('HTTP Request1').item.json.commit.committer.date) }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -635,6 +590,84 @@
       ],
       "id": "1330ca20-8dd5-47fb-8635-c06fe59d2e2d",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d911be9e-2340-4cc1-979b-e2e55f3c9c4e",
+              "name": "backup",
+              "value": "={{ $('Loop Over Items').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2640,
+        1060
+      ],
+      "id": "44cf1e10-4ae7-469b-a335-e6a1772e61d7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d911be9e-2340-4cc1-979b-e2e55f3c9c4e",
+              "name": "nobackup",
+              "value": "={{ $('Loop Over Items').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2620,
+        1200
+      ],
+      "id": "09f1e291-efed-46a9-8318-a5892df4c376",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Aggregate').item.json.nobackup }}",
+              "operation": "notContains",
+              "value2": "={{ $('Retrieve workflows').item.json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $('Retrieve workflows').item.json.tags[0].name }}.json"
+            }
+          ]
+        }
+      },
+      "id": "d6a47a52-8e35-4db3-a15b-074c1871a037",
+      "name": "Check if file exists2",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3100,
+        920
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3260,
+        1180
+      ],
+      "id": "d847c072-ec6d-4515-980d-59912d068b58",
+      "name": "No Operation, do nothing1"
     }
   ],
   "connections": {
@@ -715,7 +748,7 @@
       "main": [
         [
           {
-            "node": "Check if file exists",
+            "node": "Check if file exists2",
             "type": "main",
             "index": 0
           }
@@ -725,11 +758,6 @@
     "List files": {
       "main": [
         [
-          {
-            "node": "Aggregate",
-            "type": "main",
-            "index": 0
-          },
           {
             "node": "Loop Over Items",
             "type": "main",
@@ -751,7 +779,13 @@
     },
     "Loop Over Items": {
       "main": [
-        [],
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "HTTP Request1",
@@ -801,22 +835,58 @@
         ]
       ]
     },
-    "Edit Fields": {
+    "If": {
       "main": [
         [
           {
-            "node": "Code",
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "Edit Fields": {
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if file exists2": {
+      "main": [
+        [
+          {
+            "node": "Check if file exists",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
             "type": "main",
             "index": 0
           }
@@ -836,7 +906,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "34350b77-bf25-477c-aa6a-30311dc789d2",
+  "versionId": "609681e3-141e-48a2-bea6-20b024b78c30",
   "triggerCount": 1,
   "tags": []
 }
