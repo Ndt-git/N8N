@@ -1,0 +1,486 @@
+{
+  "createdAt": "2025-07-10T20:51:50.828Z",
+  "updatedAt": "2025-07-10T22:41:21.140Z",
+  "id": "2GUWbA9vo8uoHomd",
+  "name": "zip to JSONL whats",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        40,
+        0
+      ],
+      "id": "40dc8559-e583-4d1b-9998-ea0c56474ab3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=unzip -o \"{{ $('Loop Over Items').item.json.path }}\" -d \"/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        -60
+      ],
+      "id": "14391f93-74ab-4bcd-8f24-ca807b164c0b",
+      "name": "Extrair zip"
+    },
+    {
+      "parameters": {
+        "command": "ls /mnt/externo/whatsapp_exports/*.zip"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        260,
+        0
+      ],
+      "id": "a7950f7f-c4fb-4e80-9b5f-818068d346cb",
+      "name": "list .zip"
+    },
+    {
+      "parameters": {
+        "command": "find /mnt/externo/whatsapp_exports/extracted/ -maxdepth 1 -mindepth 1 -type d"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "1773d076-ac6a-499a-b4cc-d572c94c0b8b",
+      "name": "list past extraidos"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recebe stdout do Execute Command e transforma em array de caminhos\nconst paths = $json.stdout.trim().split('\\n');\nreturn paths.map(path => ({ json: { path } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "b424a8db-b4dc-4ab2-9c26-0aedc89c4f83",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        720,
+        0
+      ],
+      "id": "c6b32a67-f480-4f34-b943-7469df578afe",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        280
+      ],
+      "id": "678a4bc9-5f9c-4a71-87e5-db98de2b0876"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c50ea02-80b5-4a1f-a752-54a4d7a120d0",
+              "leftValue": "={{ $('list past extraidos').item.json.stdout }}",
+              "rightValue": "={{ $('Loop Over Items').item.json.path.replace(/\\/$/, '').split('/').pop().match(/\\+55 (\\d{2} \\d{4}-\\d{4})|(\\d{2} \\d{5}-\\d{4})|(\\d{2} \\d{4}-\\d{5})/)?.filter(match => match)[1] || '' }}",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "434aa013-0197-403e-b51a-6231a6ac5bfe",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/Conversa do WhatsApp com +55 {{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        20
+      ],
+      "id": "b2eabda7-d23e-4fe4-9e5d-3061f3e1292d",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        20
+      ],
+      "id": "02675593-ea49-48da-9d4b-f35c3fe3d2bf",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.data;\nconst lines = text.split('\\n');\n\nconst result = [];\nlet lastMessage = null;\n\nfor (const line of lines) {\n    const match = line.match(/^(\\d{2}\\/\\d{2}\\/\\d{4}) (\\d{2}:\\d{2}) - (.*?): (.*)$/);\n    if (match) {\n        const [_, data, hora, remetente1, mensagem] = match;\n        let tipo = \"texto\";\n        let arquivo = null;\n        let mensagem_final = mensagem;\n\n        // Determina se é vendedor ou cliente\n        let remetente = (remetente1.trim() === \"Guardião Lajes\") ? \"vendedor\" : \"cliente\";\n\n        if (mensagem.includes('(arquivo anexado)')) {\n            const fileMatch = mensagem.match(/([\\w\\s\\-\\.\\(\\)]+\\.(opus|mp3|pdf|jpg|jpeg|png))/i);\n            if (fileMatch) {\n                arquivo = fileMatch[1].trim();\n                if (arquivo.match(/\\.(opus|mp3)$/i)) {\n                    tipo = 'audio';\n                    mensagem_final = `#ANEXO_AUDIO:${arquivo}`;\n                } else if (arquivo.endsWith('.pdf')) {\n                    tipo = 'pdf';\n                    mensagem_final = `#ANEXO_PDF:${arquivo}`;\n                } else if (arquivo.match(/\\.(jpg|jpeg|png)$/i)) {\n                    tipo = 'imagem';\n                    mensagem_final = `#ANEXO_IMAGEM:${arquivo}`;\n                } else {\n                    tipo = 'arquivo';\n                    mensagem_final = `#ANEXO:${arquivo}`;\n                }\n            } else {\n                tipo = 'arquivo';\n                mensagem_final = `#ANEXO_INDEFINIDO`;\n            }\n        }\n\n        lastMessage = {\n            data,\n            hora,\n            remetente,   // campo adicional\n            mensagem: mensagem_final,\n            tipo,\n            arquivo\n        };\n\n        result.push({ json: lastMessage });\n    } else if (lastMessage && line.trim() !== '') {\n        // Adiciona linhas quebradas como continuação da última mensagem\n        lastMessage.mensagem += ' ' + line.trim();\n    }\n}\n\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2140,
+        20
+      ],
+      "id": "b685f0cb-fee9-4a83-af2e-499ff178015f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "=texto",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ae50a909-cdd7-40ab-9c8b-aee03b41d426"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXTO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e7af592e-d78d-4b72-8019-82c38e002938",
+                    "leftValue": "audio",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AUDIO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "485667e0-d5ec-4825-adb9-992f0c5c096c",
+                    "leftValue": "pdf",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "045b4889-6dc7-4861-b5ae-07b9710d4467",
+                    "leftValue": "imagem",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IMAGEM"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "63807e63-56dc-4472-b8df-3c079f8c1c0e",
+                    "leftValue": "indefinido",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "INDEFINIDO"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        2360,
+        20
+      ],
+      "id": "cd1bf749-14c3-4fe9-91d6-38c5c78f6ab0",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5918ae19-e7fd-4a5e-83ae-2911545a83d3",
+              "name": "mensagem",
+              "value": "={{ $json.mensagem }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2880,
+        -120
+      ],
+      "id": "8607d942-ceef-4533-8dd0-bda4c9d62838",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "list .zip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list .zip": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list past extraidos": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair zip": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "list past extraidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Extrair zip",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e83a8ecf-c763-46e3-8a54-9850dbec035d",
+  "triggerCount": 0,
+  "tags": []
+}
