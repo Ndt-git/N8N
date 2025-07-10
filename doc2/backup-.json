@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-10T20:09:35.046Z",
+  "updatedAt": "2025-07-10T20:10:16.103Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
   "active": true,
@@ -175,8 +175,8 @@
       "name": "Update file",
       "type": "n8n-nodes-base.github",
       "position": [
-        3900,
-        360
+        3880,
+        320
       ],
       "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
       "typeVersion": 1,
@@ -211,8 +211,8 @@
       "name": "Upload file",
       "type": "n8n-nodes-base.github",
       "position": [
-        3920,
-        960
+        3900,
+        920
       ],
       "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
       "typeVersion": 1,
@@ -360,8 +360,8 @@
       "name": "Sticky Note10",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3760,
-        20
+        3740,
+        -20
       ],
       "typeVersion": 1
     },
@@ -376,8 +376,8 @@
       "name": "Sticky Note11",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3780,
-        620
+        3760,
+        580
       ],
       "typeVersion": 1
     },
@@ -906,7 +906,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "609681e3-141e-48a2-bea6-20b024b78c30",
+  "versionId": "c84adf93-3bc8-48eb-9a78-1319c9492d9c",
   "triggerCount": 1,
   "tags": []
 }
