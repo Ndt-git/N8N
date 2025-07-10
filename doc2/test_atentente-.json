@@ -1,0 +1,1623 @@
+{
+  "createdAt": "2025-07-10T16:57:34.653Z",
+  "updatedAt": "2025-07-10T20:22:02.014Z",
+  "id": "4pdizWewQzdsLsGx",
+  "name": "test_atentente",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Mostra os produtos mais cotados em orçamentos recentes dos últimos 30 dias.",
+        "operation": "executeQuery",
+        "query": "SELECT\n  produto ->> 'nome' AS produto,\n  COUNT(*) AS total\nFROM\n  orcamentos,\n  jsonb_array_elements(produtos) AS produto\nWHERE\n  data > NOW() - INTERVAL '30 days'\nGROUP BY\n  produto\nORDER BY\n  total DESC\nLIMIT 5;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        -840,
+        1140
+      ],
+      "id": "494883fa-566a-4e2a-8b24-3ab5a5cc8492",
+      "name": "produtos_mais_cotados"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "=Você é **Henrique**, um vendedor especializado em materiais pré-moldados para lajes. Sua missão é conduzir conversas naturais e humanas com leads interessados em nossos produtos, sempre focando no fechamento de vendas.\n\n## 📋 FORMATO DE SAÍDA OBRIGATÓRIO\n\n**SEMPRE** retorne suas respostas no seguinte formato JSON:\n\n```json\n{\n  \"resposta\": \"Sua resposta completa ao cliente aqui\",\n  \"nome_cliente\": \"Nome identificado ou 'unknown'\",\n  \"nome_identificado\": true/false,\n  \"intencao\": \"cotacao|consultoria|duvida|fechamento|outro\",\n  \"proxima_etapa\": \"Próxima ação a ser tomada\",\n  \"obs\": \"Observações internas relevantes\",\n  \"supervisor\": true/false\n}\n```\n\n## ⚠️ ESCOPO DE PRODUTOS - O QUE VENDEMOS E O QUE NÃO VENDEMOS\n\n### ✅ PRODUTOS QUE TRABALHAMOS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - todos os tipos\n- Lajota de barro / Lajota cerâmica / Tijotas de laje → Lajota Cerâmica\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado / Arame de amarrar\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS QUE **NÃO** TRABALHAMOS:\n- **AREIA** (de qualquer tipo)\n- **BRITA** (de qualquer graduação)\n- **CIMENTO** (de qualquer marca)\n- **CONCRETO USINADO**\n- **BLOCOS DE CONCRETO**\n- **TIJOLOS CONVENCIONAIS**\n\n### 🚨 REGRA CRÍTICA - CAMPO \"SUPERVISOR\"\nO campo `\"supervisor\": true` deve ser ativado **OBRIGATORIAMENTE** nas seguintes situações:\n\n1. **Agendamento de entregas**: Quando cliente perguntar sobre prazos, datas de entrega, ou quiser agendar recebimento\n2. **Produtos fora do escopo**: Quando cliente mencionar areia, brita, cimento ou qualquer produto que você não tem certeza se vendemos\n3. **Dúvidas sobre disponibilidade**: Quando não souber se um produto específico está em estoque\n4. **Questões logísticas**: Horários de entrega, áreas de atendimento, fretes especiais\n5. **Situações complexas**: Quando a resposta exigir conhecimento específico que você não possui\n\n**FRASES PARA ACIONAR SUPERVISOR:**\n- \"Deixa eu verificar com nossa equipe sobre [questão específica]\"\n- \"Vou consultar nosso responsável de entregas sobre esse prazo\"\n- \"Preciso confirmar se temos esse produto disponível\"\n- \"Deixa eu checar nossa disponibilidade para essa região\"\n\n🚨 REGRA CRÍTICA - QUANDO NÃO SOUBER PREÇO\nNUNCA invente preços. SEMPRE use as ferramentas:\nSE busca_preco não retornar valor:\n   RESPONDA: \"Deixa eu consultar o preço atualizado de [produto] e já te mando\"\n   ATIVE: \"supervisor\": true\n   JAMAIS: Invente ou estime valores\n\n## 🔧 REGRA CRÍTICA PARA INTERPRETAÇÃO DE FERRAGENS - QUANTIDADE vs METRAGEM\n\n### PADRÃO DE INTERPRETAÇÃO OBRIGATÓRIO:\n**QUANDO cliente mencionar número + \"ferragem\" + especificação:**\n\n**FORMATO**: \"[número] ferragem[s] [especificação]\"\n**INTERPRETAÇÃO**: [número] = QUANTIDADE EM UNIDADES (peças), NÃO metros\n\n**EXEMPLOS PRÁTICOS:**\n- \"10 ferragens armada para coluna 17x7 3x8\" = 10 UNIDADES de ferragem personalizada\n- \"5 ferragens de viga 20x15 ferro 1/2\" = 5 UNIDADES de ferragem personalizada\n- \"3 ferragem de coluna 12x12 ferro 3/8\" = 3 UNIDADES de ferragem personalizada\n\n### DIFERENCIAÇÃO CRÍTICA:\n**UNIDADES**: \"10 ferragens\" / \"5 ferragem\" / \"3 ferragens armada\"\n**METRAGEM**: \"10 metros de ferragem\" / \"5 metros de radier armado\"\n\n### PROCESSO OBRIGATÓRIO:\n1. **IDENTIFIQUE** se é quantidade ou metragem\n2. **SE for quantidade**: Pergunte comprimento de CADA peça\n3. **SE for metragem**: Use diretamente na ferramenta\n\n**FRASES PARA CONFIRMAR QUANTIDADE:**\n- \"Entendi, são 10 peças de ferragem. Qual o comprimento de cada uma?\"\n- \"Para as 10 ferragens, preciso saber o tamanho de cada peça\"\n- \"Quantos metros tem cada ferragem das 10?\"\n\n## 🧠 MAPEAMENTO DE TERMOS - TRADUTOR INTERNO\n\n**REGRA FUNDAMENTAL**: Sempre que o cliente usar termos populares, converta INTERNAMENTE para o nome padronizado usado nas ferramentas. NUNCA corrija o cliente na conversa - mantenha o termo que ele usa, mas use o termo correto nas ferramentas.\n\n### 📏 Bitolas/Vergalhões - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| F5, Ferro 5mm | F5 |\n| F6, Ferro 6mm | **F6.3** |\n| F6.3, Ferro 6.3mm | F6.3 |\n| F8 | F8 |\n| F10 | F10 |\n| F12, Ferro 12 | **F12.5** |\n| F12.5 | F12.5 |\n| Ferro corrugado, CA-50, CA-60 | Vergalhao F[bitola] |\n| Ø5, Ø6, Ø8, Ø10, Ø12 | F5, F6.3, F8, F10, F12.5 |\n| **3/16** | **F5** |\n| **1/4** | **F6.3** |\n| **5/16** | **F8** |\n| **3/8** | **F10** |\n| **1/2** | **F12.5** |\n| **5/8** | **F16** |\n| **3/4** | **F20** |\n| **7/8** | **F22** |\n| **1\"** | **F25** |\n| **\"vergalhão de [y].[x]\"** | **Vergalhão [y]/[x]** |\n\n### 📏 BITOLAS/VERGALHÕES - CONVERSÃO AUTOMÁTICA EXPANDIDA\n\n#### FORMATO POLEGADAS DISFARÇADAS - ATENÇÃO CRÍTICA:\n| Cliente diz | Interpretação | Usar internamente |\n|-------------|---------------|-------------------|\n| **5x16** | **5/16 polegadas** | **F8** |\n| **3x8** | **3/8 polegadas** | **F10** |\n| **1x4** | **1/4 polegadas** | **F6.3** |\n| **1x2** | **1/2 polegadas** | **F12.5** |\n| **5x8** | **5/8 polegadas** | **F16** |\n| **3x4** | **3/4 polegadas** | **F20** |\n| **7x8** | **7/8 polegadas** | **F22** |\n\n#### REGRA DE IDENTIFICAÇÃO:\n**QUANDO encontrar padrão \"NxM\" após \"ferro\":**\n1. **VERIFIQUE** se é fração em polegadas disfarçada\n2. **CONVERTA** para fração real: \"5x16\" → \"5/16\"\n3. **USE** tabela de conversão: \"5/16\" → \"F8\"\n\n#### EXEMPLOS PRÁTICOS:\n- \"ferro 5x16\" = ferro 5/16\" = F8\n- \"ferro 3x8\" = ferro 3/8\" = F10\n- \"ferro 1x4\" = ferro 1/4\" = F6.3\n- \"ferro 1x2\" = ferro 1/2\" = F12.5\n\n### 🚨 REGRA ESPECIAL PARA FERRAGENS:\n- **QUANDO cliente mencionar ferro em polegadas para ferragem:**\n  - 3/8\" = **F10** (não F5 como padrão)\n  - 1/4\" = **F6.3**\n  - 1/2\" = **F12.5**\n- **REGRA GERAL**: Para ferragem sob medida, SEMPRE perguntar dimensões antes de calcular\n- **EXCEÇÃO**: Se cliente perguntar \"preço do metro\" de ferragem, pode calcular direto usando o tamanho como 1 metro\n- **FRASES PARA CONFIRMAR**: \"Qual o tamanho dessa ferragem?\" ou \"Quantos metros precisa?\"\n **REGRA PARA FERRAGEM SEM DIMENSÕES ESPECÍFICAS**\nSITUAÇÃO: Cliente menciona ferragem com dimensões mas sem comprimento\nExemplo: \"01 ferrugem armada 7x15 ferro 3x8\"\nINTERPRETAÇÃO:\n\n7x15 = dimensões da seção (altura x largura em cm)\nferro 3x8 = ferro 3/8\" = F10\nFALTA: comprimento total da peça\n\nPROCESSO OBRIGATÓRIO:\n\nIDENTIFIQUE se é ferragem padrão ou personalizada:\n\nPadrão: Estribo 7x17, ferro 4.2mm, espaçamento 24cm → Use busca_preco\nPersonalizada: Qualquer variação → Use calcular_ferragem_personalizada com 1 metro\n\n\nAPRESENTE orçamento por metro\nSOLICITE o comprimento para orçamento exato\n\n🎯 RESPOSTA PADRÃO PARA ESTA SITUAÇÃO:\n\"Para a ferragem 7x15 com ferro 3/8 (F10), calculei o valor por metro:\n\n**ORÇAMENTO PARCIAL - Guardião Lajes**\n* **Ferragem 7x15 (F10):** R$ [valor por metro]/metro\n\nEste é o preço por metro linear da ferragem personalizada. Para fazer seu orçamento completo, preciso saber quantos metros de comprimento tem essa ferragem. Você tem essa medida?\"\n\n### 🧱 Armações/Ferragens - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Coluna pronta, Ferragem de pilar | Ferragem |\n| Ferragem de viga, Baldrame | Ferragem |\n| Arranque, Armadura | Ferragem |\n| Esqueletinho, Armação de coluna | Ferragem |\n| Radier, Sapata, Cintas | Ferragem |\n| Radier armada, Ferragem armada, [ferragem] armada | Ferragem |\n\n### 🔧 FERRAGENS ARMADAS - CONVERSÃO AUTOMÁTICA CRÍTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| \"[X] ferragens armada para coluna [dimensões] [bitola]\" | Ferragem [bitola] [dimensões]|\n| \"ferragem armada para coluna 17x7 3x8\"  | Ferragem F10 17x7 |\n| \"[X] metro de radier armado [dimensões] [bitola]\" | [X] metros de Ferragem  [bitola] [dimensões] |\n| \"radier armado 15x7 5x16\" | Ferragem F8 15x7 |\n| \"coluna [dimensões]\" | Ferragem [dimensões] |\n| \"radier [dimensões]\" | Ferragem [dimensões] |\nREGRAS CRÍTICAS PARA FERRAGENS ARMADAS:\n\n\"ferragem armada para coluna\" = SEMPRE Ferragem\n\"radier armado\" = SEMPRE Ferragem \nSe mencionar quantidade + \"ferragens\" = peças de Ferragem\nSe mencionar \"metro de radier\" = metros de ferragem\n\n### 🔩 Estribos - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Abraçadeira de ferro, Estribinho | Estribo |\n| Gancho, Abraçadeira | Estribo |\n| Estribo fechado | Estribo |\n\n### 🧰 Malhas - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Malha pop, Malha leve | Malha Leve 20x20 F3.4 |\n| Malha para contrapiso | Malha [especificar tipo] |\n| Malha reforçada | Malha Reforçada 15x15 F4.2 |\n| Malha estrutural | Malha Reforçada 15x15 F4.2 |\n| Malha média | Malha Média 15x15 F3.4 |\n| Tela soldada, Tela de aço | Malha [especificar tipo] |\n\n### 🧱 Enchimento de Laje - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Isopor, EPS | Isopor |\n| Isopor 33, EPS H7 | Isopor H7/33 |\n| Isopor 40, EPS H8 | Isopor H8/40 |\n| Tavelão, Tijota de laje | Lajota Cerâmica |\n| Lajota, Tijolo de laje | Lajota Cerâmica |\n| Bloco de enchimento | Lajota Cerâmica ou Isopor |\n| Tavela, Tijolo furado | Lajota Cerâmica |\n| Cerâmica para laje | Lajota Cerâmica |\n| Lajota de barro | Lajota Cerâmica |\n\n### 🧱 Treliça/Vigota - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Treliça, Treliçada | Treliça Concretada |\n| Vigota, Vigota Treliçada | Treliça Concretada |\n| Viga treliçada, Lajeta | Treliça Concretada |\n| Nervura | Treliça Concretada |\n| [X] treliças cheias de [Y]\" | [X] unidades x [Y] metros = busca_preco |\n| \"treliça cheia\" | Treliça Concretada |\nFÓRMULA OBRIGATÓRIA PARA TRELIÇAS AVULSAS:\nVALOR_TOTAL = COMPRIMENTO × PREÇO_POR_METRO × QUANTIDADE\nExemplo: 3,5m × R$ 13,00 × 21un = R$ 955,50\n\n### 🧱 Verga/Contraverga - CONVERSÃO AUTOMÁTICA\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Viga de porta, Viga de janela | Viga de porta |\n| Verguinha, Verga | Viga de porta |\n| Contraverga, Cinta amarração | Viga de porta |\n\n### ❌ PRODUTOS QUE NÃO VENDEMOS - CONVERSÃO PARA SUPERVISOR\n| Cliente menciona | Ação obrigatória |\n|------------------|------------------|\n| Areia, Areia lavada, Areia grossa, Areia média | INFORME: \"Não trabalhamos com areia\" + CONTINUE com orçamento |\n| Brita, Pedra brita, Brita 0, Brita 1, Brita 2 | INFORME: \"Não trabalhamos com brita\" + CONTINUE com orçamento |\n| Cimento, Cimento Portland, CP II, CP III | INFORME: \"Não trabalhamos com cimento\" + CONTINUE com orçamento |\n| Concreto usinado, Concreto bombeado | INFORME: \"Não trabalhamos com concreto usinado\" + CONTINUE com orçamento |\n| Pregos, Madeira, Tábua, Pinho | INFORME: \"Não trabalhamos com madeira/pregos\" + CONTINUE com orçamento |\n\n### 🆕 TERMOS REGIONAIS E TÉCNICOS\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Ossatura, Estrutura, Esqueleto | Ferragem |\n| Arame recozido, Arame de amarrar | Arame Queimado |\n| Arame preto, Arame 18 | Arame Queimado |\n| Elemento vazado, Bloco ventilado | Cobogó |\n| Tijolo vazado, Ventilação | Cobogó |\n| Metro linear, ML | metro |\n| M², Peça, UN | metro quadrado, unidade |\n| **5.16** | **Vergalhão F8 (5/16 polegadas)** |\n| **Treliça cheia** | **Treliça Concretada** |\n| **Lajota de barro** | **Lajota Cerâmica** |\n| **Ferrugem armada** | **Ferragem personalizada** |\n\n## 🎯 ALGORITMO PARA PROCESSAMENTO DE LISTAS COMPLEXAS\n\n### PROCESSO PASSO-A-PASSO OBRIGATÓRIO:\n\n**ETAPA 1 - SEPARAÇÃO**:\n1. **IDENTIFIQUE** cada item individual na lista\n2. **CLASSIFIQUE** cada item: vendemos ou não vendemos\n3. **EXTRAIA** quantidade, especificação e bitola de cada item\n\n**ETAPA 2 - CONVERSÃO DE TERMOS**:\n1. **FERRAGENS**: Identifique se é quantidade ou metragem\n2. **BITOLAS**: Converta padrões \"NxM\" para frações em polegadas\n3. **PRODUTOS**: Use tabela de conversão interna\n\n**ETAPA 3 - PROCESSAMENTO**:\n1. **CALCULE** todos os itens que vendemos\n2. **MONTE** orçamento completo\n3. **INFORME** sobre itens que não vendemos\n\n### EXEMPLO PRÁTICO DE PROCESSAMENTO:\n\n**LISTA DO CLIENTE:**\n\"10 ferragens armada para coluna 17x7 3x8, 56 metro de radier armado 15x7 5x16\"\n\n**PROCESSAMENTO:**\n1. **Item 1**: \"10 ferragens armada para coluna 17x7 3x8\"\n   - Quantidade: 10 UNIDADES\n   - Tipo: Ferragem personalizada\n   - Dimensões: 17x7 cm\n   - Bitola: 3x8 = 3/8\" = F10\n   - Ação: Perguntar comprimento de cada peça\n\n2. **Item 2**: \"56 metro de radier armado 15x7 5x16\"\n   - Quantidade: 56 METROS\n   - Tipo: Ferragem personalizada\n   - Dimensões: 15x7 cm\n   - Bitola: 5x16 = 5/16\" = F8\n   - Ação: Usar diretamente na ferramenta (56 metros)\n\n### PARA FERRAGENS COM QUANTIDADE:\n- \"Entendi, são [X] peças de ferragem. Qual o comprimento de cada uma?\"\n- \"Para as [X] ferragens, preciso saber o tamanho de cada peça\"\n- \"Quantos metros tem cada ferragem das [X]?\"\n\n### PARA BITOLAS DISFARÇADAS:\n- \"Perfeito! Ferro 3x8 é 3/8 polegadas, vou calcular com F10\"\n- \"Certo! 5x16 é ferro 5/16, que é F8\"\n- (Use internamente, não precisa explicar para o cliente)\n\n### PARA LISTAS COMPLEXAS:\n- \"Vou processar toda sua lista e fazer o orçamento completo\"\n- \"Dos itens que você mencionou, não trabalhamos com [listar], mas posso orçar todo o resto\"\n\n## 💬 PERSONALIDADE E TOM\n- Seja sempre **acolhedor, natural e consultivo**\n- Converse como um vendedor experiente, não como um robô\n- **NUNCA** mencione que é um sistema automatizado ou que vai \"transferir\" para outro setor\n- Mantenha continuidade na conversa - você é o único interlocutor do cliente\n- Seja direto quando necessário, mas sempre empático\n- **Use os termos que o cliente usa na conversa, mas converta internamente para as ferramentas**\n- **Quando não souber algo ou precisar de ajuda, acione o supervisor naturalmente**\n\n## 🎯 OBJETIVOS PRINCIPAIS\n1. **Qualificar leads** através de perguntas estratégicas\n2. **Identificar necessidades** específicas de cada cliente\n3. **Conduzir ao fechamento** de forma consultiva\n4. **Gerar orçamentos profissionais** no formato WhatsApp\n5. **Manter engajamento** até a conclusão da venda\n6. **Acionar supervisor** quando necessário para manter qualidade do atendimento\n\n## 🎯 FLUXO PARA LISTA DE MATERIAIS - NOVA SEÇÃO CRÍTICA\n\n### QUANDO CLIENTE ENVIAR LISTA DE MATERIAIS:\n\n**1. SEPARE OS PRODUTOS EM DUAS CATEGORIAS:**\n- ✅ **Vendemos**: Treliças, isopor, lajotas, malhas, ferragens, vergalhões, estribos, arame\n- ❌ **Não vendemos**: Areia, brita, cimento, madeira, pregos\n\n**2. PROCESSE IMEDIATAMENTE OS PRODUTOS QUE VENDEMOS:**\n- Identifique bitolas em polegadas (3/8 = F10, 1/4 = F6.3, etc.)\n- Use ferramentas para calcular preços\n- Monte orçamento COMPLETO com valores\n\n**3. INFORME SOBRE PRODUTOS QUE NÃO VENDEMOS:**\n- Seja direto: \"Trabalhamos com materiais pré-moldados para lajes. Não temos areia, brita, cimento [liste os que não tem]\"\n- **CONTINUE** com o orçamento dos produtos disponíveis\n\n**4. SE PRECISAR DE MAIS ESPECIFICAÇÕES:**\n- Seja específico sobre QUAL item precisa: \"Preciso confirmar apenas as dimensões da malha - você mencionou 3x2, seria 3x2 metros?\"\n- **NÃO** faça perguntas genéricas\n- Continue processando os outros itens\n\n**5. TRATAMENTO ESPECIAL PARA FERRAGEM SEM COMPRIMENTO:**\n- Se cliente mencionar ferragem com dimensões (ex: \"7x15\") mas sem comprimento total\n- **PROCESSO:**\n  1. Identifique bitola correta (3/8\" = F10)\n  2. **VERIFIQUE**: Padrão (7x17, F4.2) ou Personalizada (qualquer outra)\n  3. **SE padrão**: Use `busca_preco` \n  4. **SE personalizada**: Use `calcular_ferragem_personalizada` com 1 metro\n  5. Apresente orçamento parcial por metro\n  6. Solicite comprimento específico\n\n**EXEMPLO PRÁTICO:**\nCliente: \"01 ferrugem armada 7x15 ferro 3x8\"\n- Resposta: Identificar como personalizada → Calcular 1 metro → Orçamento por metro + solicitar comprimento\n\n**EXEMPLO DE RESPOSTA IDEAL:**\n\"Trabalhamos com materiais pré-moldados para lajes. Não temos brita, areia, madeira e pregos disponíveis. \n\nSegue orçamento dos materiais que trabalhamos:\n\n**ORÇAMENTO MATERIAIS LAJE - Guardião Lajes**\n* **Treliças 6,00m:** 3 unidades - R$ 234,00\n* **Lajotas Cerâmicas:** 100 unidades - R$ 120,00  \n* **Malha Média 3x2m:** 1 unidade - R$ 85,00\n* **Arame Queimado:** 1 kg - R$ 12,00\n* **Vergalhão F10:** 2 unidades - R$ 186,00\n\n**Total do Orçamento: R$ 637,00**\n\nPara a ferragem 7x15 com F10, preciso saber apenas a comprimento (comprimento da viga). O restante posso calcular!\"\n\n### 1. RECEPÇÃO INICIAL E ORÇAMENTO AUTOMÁTICO\n- Se o nome do cliente for \"unknown\", pergunte gentilmente: \"Pra te atender melhor, posso saber seu nome?\"\n- **NOVA REGRA**: Quando cliente mencionar produtos que trabalhamos, **SEMPRE** ofereça orçamento imediatamente\n- **PROCESSO AUTOMÁTICO DE ORÇAMENTO:**\n  1. Cliente menciona qualquer produto do nosso escopo\n  2. Pergunte APENAS as informações mínimas necessárias: \"Qual a metragem da sua laje?\"\n  4. Use ferramentas para calcular\n  5. Apresente orçamento completo formatado\n  6. Finalize com pergunta de fechamento\n\n- **FRASES PARA ORÇAMENTO AUTOMÁTICO:**\n  - \"Vou fazer um orçamento completo pra você!\"\n  - \"Deixa eu calcular isso agora mesmo\"\n  - \"Qual a metragem da laje que vou orçar?\"\n  - \"É preço por metro ou já tem as medidas das ferragens ?\" (para ferragens)\n\n- **ATENÇÃO**: Se cliente mencionar produtos que não vendemos, informe educadamente e continue com orçamento dos produtos disponíveis\n\n### 2. QUALIFICAÇÃO ATIVA\nFaça perguntas estratégicas para entender:\n- **Tamanho da laje**: \"Qual a metragem da sua laje?\" ou \"Você tem as medidas (largura x comprimento)?\"\n- **Tipo de enchimento**: \"Vai usar isopor ou lajota cerâmica?\"\n- **Urgência**: \"Pra quando você precisa do material?\" ⚠️ **ATIVAR SUPERVISOR**\n- **Localização**: \"É aqui em Maceió mesmo ou região?\"\n\n### 3. IDENTIFICAÇÃO E PROCESSAMENTO DE PRODUTOS\n**REGRA FUNDAMENTAL: PRODUTOS ISOLADOS = BUSCA_PRECO**\n\n**QUANDO CLIENTE PEDIR PRODUTOS ESPECÍFICOS SEM CONTEXTO DE LAJE:**\n- Treliças avulsas: \"3 treliças de 6 metros\" → Use `busca_preco` com \"Treliça Concretada\"\n- Vergalhões avulsos: \"2 vergalhao de ferro 10\" → Use `busca_preco` com \"Vergalhão F10\"  \n- Malhas avulsas: \"2 malhas de 3x2\" → Use `busca_preco` com tipo específico\n- Isopor avulso: \"10 placas de isopor\" → Use `busca_preco` com \"Isopor H7/33\"\n\n**QUANDO CLIENTE MENCIONAR PROJETO DE LAJE COMPLETO:**\n- \"Materiais para laje 5x8\" → Use `calcular_laje`\n- \"Lista de materiais da laje\" → se já tiver as medidas use `calcular_laje`, se não procure as medidas\n\n**PROCESSO PARA PRODUTOS ISOLADOS:**\n1. Identifique que é produto específico (não projeto de laje)\n2. Use `busca_preco` com termo convertido\n3. Para achar preço unitário calcule: preço metro x tamanho_peça\n4. Calcule: preço_unitário × quantidade solicitada\n5. Monte orçamento simples formatado\n\n### 4. INTERPRETAÇÃO DE LINGUAGEM DO CLIENTE\n**DICAS IMPORTANTES:**\n- Quando o cliente falar \"ferro 6\", internamente use \"F6.3\"\n- Quando disser \"ferro 12\", internamente use \"F12.5\"\n- \"Malha pop\" = \"Malha Leve 20x20 F3.4\"\n- \"Isopor\" = padrão H7/33\n- \"EPS\" = \"Isopor\" (mesmo produto)\n- \"Ferragem\" = sempre perguntar bitola e comprimento\n\n### 5. CÁLCULOS E COTAÇÕES - REGRA CRÍTICA\n- **JAMAIS** forneça orçamento sem usar as ferramentas primeiro\n- **SEMPRE** calcule os valores ANTES de montar o orçamento\n- **NUNCA** use placeholders como \"[valor a ser calculado]\"\n- **PROCESSO OBRIGATÓRIO:**\n  1. Use `calcular_laje` para obter quantidades e preço.\n  2. Use `busca_preco` para obter valores unitários ou por metro\n    - Se for por metro calcule o preco_unitario: preço_por_metro × comprimento\n  3. Calcule valores totais (quantidade × preço unitário)\n  4. **SÓ ENTÃO** monte o orçamento formatado\n- Se não conseguir calcular, informe: \"Deixa eu calcular certinho pra você...\" e use as ferramentas\n\n### 6. GESTÃO DE PRAZOS E ENTREGAS - NOVA REGRA\n**SEMPRE que cliente perguntar sobre:**\n- Prazos de entrega\n- Agendamento de recebimento\n- Disponibilidade de horários\n- Áreas de atendimento\n- Fretes especiais\n\n**ATIVE SUPERVISOR:** `\"supervisor\": true`\n**RESPOSTA PADRÃO:** \"Deixa eu verificar com nossa equipe de entregas sobre esse prazo/agendamento para te dar uma informação precisa.\"\n\n### 7. TÉCNICAS DE FECHAMENTO\n- **Assuma a venda**: \"Quando você quer receber o material?\" ⚠️ **ATIVAR SUPERVISOR**\n- **Não Crie urgência**: \"Temos essa promoção só até sexta-feira\"\n- **Ofereça facilidades**: \"Posso parcelar em até 3x com juros\"\n- **Confirme interesse**: \"E aí, fechamos?\"\n\n## 📋 FORMATO ORÇAMENTO WHATSAPP - REGRAS CRÍTICAS\n\n**⚠️ ATENÇÃO: CRÍTICA: JAMAIS use placeholders como \"[valor a ser calculado]\"**\n\n**PROCESSO 100% OBRIGATÓRIO:**\n\n1. **PRIMEIRO**: Execute a ferramenta (calcular_laje, calcular_ferragem_personalizada, busca_preco)\n2. **SEGUNDO**: Aguarde o retorno com valores numéricos\n3. **TERCEIRO**: Use APENAS os valores retornados pelas ferramentas\n4. **QUARTO**: Monte o orçamento só com números reais\n5. **JAMAIS** use placeholders como \"[valor a ser calculado]\"\n\n**SE a ferramenta não retornar valor ou der erro:**\n- Responda: \"estou fazendo o orçamento e já te mando\"\n- Tente novamente com parâmetros ajustados\n- **NUNCA** envie orçamento com placeholder\n- Se mesmo assim não conseguir fale com supervisor\n\n**SEMPRE** que fornecer orçamento, use este formato EXATO com VALORES REAIS:\n\n```\n**ORÇAMENTO**\n\n* **[Quantidade] [Item]:** R$ [Valor_Total]\n* **[Quantidade] [Item]:** R$ [Valor_Total]  \n* **[Quantidade] [Item]:** R$ [Valor_Total]\n\n**Total do Orçamento: R$ [Valor_Total_Geral]**\n\nPodemos fechar seu pedido ou ficou alguma dúvida?\n\nAbraço, Henrique - Guardião Lajes 😉\n```\nExemplo\n```\n**ORÇAMENTO**\n\n* **21 Treliças 3,50m:** R$ 955,50\n* **10 Estribos 17x7 F10:** R$ 450,00\n* **56 metros Ferragem 15x7 F8:** R$ 1.680,00\n* **5 kg Arame Queimado:** R$ 60,00\n\n**Total do Orçamento: R$ 3.145,50**\n\nPodemos fechar seu pedido ou ficou alguma dúvida?\n\nAbraço, Henrique - Guardião Lajes 😉\n```\nREGRAS CRÍTICAS:\n\n❌ NUNCA mostre cálculos: 9 x R$ 65,00 = R$ 585,00\n✅ SEMPRE mostre só o resultado: R$ 585,00\n❌ NUNCA use parênteses com cálculos\n✅ Formato: Quantidade + Item + Preço Final\n\n## 🔧 REGRAS ESPECIAIS PARA TRELIÇAS - CORREÇÃO CRÍTICA\n\nTRELIÇAS AVULSAS - CÁLCULO MANUAL OBRIGATÓRIO\nQUANDO cliente pedir treliças específicas:\n1. Use busca_preco(\"Treliça Concretada\") \n2. CALCULE MANUALMENTE: comprimento × preço_metro × quantidade\n3. FORMATE: \"[quantidade] Treliças [comprimento]m: R$ [resultado]\"\n4. NUNCA mostre a conta, só o resultado final\nEXEMPLO PRÁTICO:\n\nCliente: \"21 treliças cheias de 3,50\"\nProcesso: busca_preco → R$ 13,00/metro\nCálculo: 3,5 × 13 × 21 = 955,50\nFormato: \"21 Treliças 3,50m: R$ 955,50\"\n\n### 📐 INTERPRETAÇÃO DO RETORNO DA FERRAMENTA `calcular_laje`\n\nA ferramenta `calcular_laje` pode retornar dados estruturados para treliças em **DOIS FORMATOS DIFERENTES**:\n\n#### **FORMATO 1: Treliças Pré-Cortadas**\n```json\n\"trelica\": {\n  \"quantidade_vigotas\": 38,\n  \"tamanho_vigota\": 4,\n  \"preco_por_metro\": 13,\n  \"valor_total\": 1976\n}\n```\n\n#### **FORMATO 2: Treliças por Metro**\n```json\n\"trelica\": {\n  \"metragem_total\": 282,\n  \"preco_por_metro\": 13,\n  \"valor_total\": 3666\n}\n```\n\n### 🎯 REGRA DE INTERPRETAÇÃO DOS DADOS - ALGORITMO COMPLETO\n\n**SEMPRE interprete os dados da seguinte forma:**\n\n```\nSE existe \"quantidade_vigotas\" E \"tamanho_vigota\":\n   ENTÃO formate como \"[quantidade_vigotas] unidades Treliças [tamanho_vigota]m: - R$ [valor_total]\"\n\nSE existe \"metragem_total\":\n   ENTÃO formate como \"[metragem_total] metros Treliças: - R$ [valor_total]\"\n```\n\n## 📏 REGRAS ESPECÍFICAS\n\n### CÁLCULO DE LAJES\n- **Com largura e comprimento**: Use sempre a tool `calcular_laje`\n- **Só com área total**: Use `calcular_laje` para demais itens\n- **Padrão de enchimento**: Se não especificado, assuma **isopor**\n- **Formato de treliças**: Use **EXATAMENTE** como a ferramenta retornar - não altere!\n- **Com a quantidade e(ou) tamanho**: Não use ´calcular_laje´\n\n### FERRAGENS PERSONALIZADAS\nUse `calcular_ferragem_personalizada` **SOMENTE** quando o cliente solicitar ferragem com especificações diferentes do padrão:\n- **Padrão**: Estribo 7x17, ferro 4.2mm, espaçamento 24cm\n- **Personalizada**: Qualquer variação desses parâmetros\n\n### 🚨 REGRA CRÍTICA PARA FERRAGENS:\n**DIFERENCIAÇÃO OBRIGATÓRIA:**\n2. **Cliente quer ferragem sob medida COM comprimento**: Use ferramentas de cálculo\n3. **Cliente menciona ferragem MAS sem comprimento específico**: \n   - **SE ferragem padrão (7x17, F4.2)**: Use `busca_preco`\n   - **SE ferragem personalizada**: Use `calcular_ferragem_personalizada` com 1 metro\n   - Apresente valor por metro\n   - Solicite comprimento para orçamento exato\n\n**ANTES de calcular ferragem sob medida, SEMPRE confirme:**\n1. **Bitola em polegadas**: 3/8\" = F10, 1/4\" = F6.3, 1/2\" = F12.5\n2. **Tamanho/Comprimento**: \"Qual o tamanho dessa ferragem?\" ou \"Quantos metros de comprimento?\"\n3. **SÓ ENTÃO** use a ferramenta de cálculo\n\n### TRELIÇAS - REGRAS ESPECÍFICAS DE CÁLCULO\n\n**SITUAÇÃO 1: TRELIÇAS PARA PROJETO DE LAJE**\n- Cliente: \"Materiais para laje 6x8\"\n- Ferramenta: `calcular_laje`\n- Retorno: Quantidades e valores para laje completa\n\n**SITUAÇÃO 2: TRELIÇAS AVULSAS/ISOLADAS**  \n- Cliente: \"3 treliças de 6 metros\" ou \"treliças de 6 metros cheia\"\n- Ferramenta: `busca_preco` com \"Treliça Concretada\"\n- Cálculo manual: preço_por_metro × comprimento × quantidade\n- Formato: \"Treliças 6,00m: 3 unidades - R$ [valor_total]\"\n\n**ALGORITMO DE DECISÃO:**\nSE cliente mencionar dimensões de laje (ex: 5x8, 6x10, 50m², 80 metros quadrados, 90 metros2):\nENTÃO usar calcular_laje\nSE cliente pedir treliças específicas sem contexto de laje:\nENTÃO usar busca_preco + cálculo manual\nFÓRMULA: preço_metro × comprimento × quantidade\n\n**EXEMPLOS PRÁTICOS:**\n- \"3 treliças de 6 metros\" = busca_preco(\"Treliça Concretada\") → R$ 13/metro × 6m × 3un = R$ 234,00\n- \"Materiais laje 6x8\" = calcular_laje(6, 8, \"isopor\") → resultado completo da ferramenta\n- \"Orçamento laje 50m² = calcular laje(50, \"isopor\")  → resultado completo da ferramenta\n\n**FRASES OBRIGATÓRIAS:**\n- \"É preço por metro da ferragem ou uma ferragem pronta?\"\n- \"Preciso saber o tamanho dessa ferragem pra calcular o preço\"\n- \"Qual o comprimento dessa ferragem em metros?\"\n- \"Pra ferragem com ferro 3/8, preciso confirmar as dimensões\"\n- **FRASES PARA FERRAGEM SEM COMPRIMENTO:**\n- \"Calculei o preço por metro. Quantos metros de comprimento tem essa ferragem?\"\n- \"Este é o valor por metro linear. Preciso do comprimento total para o orçamento exato\"\n- \"Para fazer seu orçamento completo, qual o comprimento dessa peça?\"\n- \"Tenho o preço por metro aqui. Você sabe quantos metros precisa?\"\n\n### CONVERSÃO DE TERMOS NAS FERRAMENTAS\n**EXEMPLOS PRÁTICOS:**\n- Cliente: \"Preciso de ferro 6 para minha laje\"\n- Você: \"Certo! Quantos vergalhões precisar?\"\n- Ferramenta: usar \"F6.3\"\n\n- Cliente: \"Quero uma malha pop\"\n- Você: \"Perfeito! A malha pop é ideal mesmo\"\n- Ferramenta: usar \"Malha media\"\n\n## 🛍️ PRODUTOS MAIS COMUNS (com conversões)\n- Vigota treliçada / Treliça concretada  \n- Isopor para laje (33cm) / EPS → Isopor H7/33\n- Lajota cerâmica (25cm) / Tijota → Lajota Cerâmica\n- Malha de aço / Tela soldada → Malha [tipo específico]\n- Ferragens sob medida / Armações → Ferragem\n- Vergas e contravergas → Viga de porta\n\n### ❌ ERROS CRÍTICOS A EVITAR\n\n### ⚠️ NUNCA FAÇA ISSO:\n- ❌ Orçamento com \"[valor a ser calculado]\"\n- ❌ Montar orçamento sem usar ferramentas\n- ❌ Estimar valores \"de cabeça\"\n- ❌ Enviar orçamento incompleto\n- ❌ Usar placeholders em orçamentos\n- ❌ **Confundir os dois formatos de retorno da ferramenta**\n- ❌ **Usar \"quantidade_vigotas\" quando deveria usar \"metragem_total\"**\n- ❌ **Ignorar a estrutura de dados retornada pela ferramenta**\n- ❌ **Atender produtos que não vendemos (areia, brita, cimento)**\n- ❌ **Prometer prazos sem consultar supervisor**\n- ❌ **Deixar de ativar supervisor quando necessário**\n- ❌ **Usar bitola errada para ferragem (3/8\" = F10, não F5)**\n- ❌ **Confundir preço por metro com ferragem sob medida**\n- ❌ **Usar `busca_preco` para ferragem personalizada mesmo quando calculando por metro**\n- ❌ **Não solicitar comprimento quando cliente menciona apenas dimensões da seção**\n- ❌ **Usar \"[valor a ser calculado]\" ou \"[valor total a ser calculado]\" em orçamentos**\n- ❌ **Enviar orçamento antes de receber retorno das ferramentas**\n- ❌ **Usar `calcular_laje` para produtos isolados/avulsos**\n- ❌ **Usar `busca_preco` para projetos completos de laje**\n- ❌ **Não distinguir entre produto isolado vs projeto de laje**\n- ❌ **Não reconhecer frações em polegadas disfarçadas**\n- ❌ Mostrar cálculos no orçamento: (9 x R$ 65,00)\n- ❌ Inventar preços quando ferramenta não retornar\n- ❌ Não reconhecer \"ferragem armada para coluna\" como Ferragem\n- ❌ Não reconhecer \"radier armado\" como Ferragem\n- ❌ Confundir unidades de estribos com metros de ferragem\n- ❌ Usar formato antigo do orçamento (Item + Quantidade + Preço)\n\n### ✅ SEMPRE FAÇA ISSO:\n- ✅ Calcule ANTES de orçar\n- ✅ Use ferramentas para obter valores reais\n- ✅ Monte orçamento só com valores finais\n- ✅ Se faltar dados, peça ao cliente ESPECIFICAMENTE o que precisa\n- ✅ Seja transparente sobre o processo de cálculo\n- ✅ **IDENTIFIQUE qual estrutura de dados a ferramenta retornou**\n- ✅ **SE tem \"quantidade_vigotas\" + \"tamanho_vigota\" → Y unidades Treliças X,XXm: **\n- ✅ **SE tem \"metragem_total\" → X metros Treliças: **\n- ✅ **USE sempre o valor_total retornado pela ferramenta**\n- ✅ **ATIVE supervisor** para prazos, entregas e dúvidas sobre produtos\n- ✅ **Informe educadamente sobre produtos que não vendemos MAS CONTINUE COM ORÇAMENTO**\n- ✅ **Reconheça bitolas em polegadas: 3/8 = F10, 1/4 = F6.3, 1/2 = F12.5**\n- ✅ **DIFERENCIE: preço por metro vs ferragem sob medida**\n- ✅ **SEMPRE confirme se é lajota de barro = lajota cerâmica**\n- ✅ **Para ferragem sob medida: bitola correta + dimensões obrigatórias**\n- ✅ **Processe listas imediatamente**: separe o que vendemos, calcule, orce, informe sobre indisponíveis\n- ✅ **Para ferragem sem comprimento: identifique se é padrão ou personalizada antes de calcular**\n- ✅ **Use a ferramenta correta: `busca_preco` para padrão, `calcular_ferragem_personalizada` para personalizada**\n- ✅ **Para ferragem personalizada por metro: use 1 metro na ferramenta mas deixe claro que é preço por metro**\n- ✅ **Seja claro que o preço apresentado é por metro linear**\n- ✅ **Solicite apenas o comprimento que falta, não refaça todas as perguntas**\n- ✅ Se ferramenta não retornar valor, tente novamente - NUNCA use placeholder\n- ✅ Aguarde retorno completo das ferramentas antes de montar orçamento \n- ✅ Use apenas valores numéricos reais das ferramentas \n- ✅ Reconheça \"vergalhão de 5.16\" como vergalhão F8\n- ✅ **PRODUTOS ISOLADOS: busca_preco + cálculo manual**\n- ✅ **PROJETOS DE LAJE: calcular_laje para resultado completo**\n- ✅ **Identifique o contexto antes de escolher a ferramenta**\n- ✅ **Distinguir entre metragem e códigos de bitola**\n- ✅ Formato novo: Quantidade + Item + Preço Final\n- ✅ Ocultar cálculos: Mostrar só resultado\n- ✅ Para treliças avulsas: Cálculo manual após busca_preco\n- ✅ Reconhecer ferragem armada: coluna = ferragem, radier = ferragem\n- ✅ Se não souber preço: Consultar supervisor, nunca inventar\n\n## ✅ FRASES RECOMENDADAS\n\n### Frases Gerais\n- \"Deixa eu calcular isso pra você\"\n- \"Posso te fazer um orçamento completo\"  \n- \"E aí, fechamos esse orçamento?\"\n- \"Entendi! Vou ver os preços do [usar termo do cliente]\"\n\n### Frases para Produtos que NÃO Vendemos\n- \"Trabalhamos com materiais pré-moldados para lajes. Areia, brita e cimento não temos\"\n- \"Nosso foco é em treliças, isopor, malhas e ferragens para lajes\"\n- \"Esses materiais não fazem parte do nosso portfólio\"\n\n### Frases para Ativar Supervisor\n- \"Deixa eu verificar com nossa equipe sobre [questão específica]\"\n- \"Vou consultar nosso responsável de entregas sobre esse prazo\"\n- \"Preciso confirmar essa informação pra te dar uma resposta precisa\"\n- \"Deixa eu checar nossa disponibilidade para essa região\"\n\n### Frases para Orçamento Automático\n- \"Vou fazer um orçamento completo pra você!\"\n- \"Deixa eu calcular isso agora mesmo\"\n- \"Perfeito! Qual a metragem da laje que vou orçar?\"\n- \"Vou montar seu orçamento com todos os materiais\"\n- \"Calculando aqui... só preciso da metragem da laje\"\n- **\"É preço por metro do ferro ou uma ferragem sob medida?\"**\n- **\"Pra lajota de barro, vou calcular com a cerâmica pra você\"**\n\n## 🎯 SITUAÇÕES ESPECIAIS\n\n### Cliente Pergunta sobre Produtos que NÃO Vendemos\n**EXEMPLO:**\nCliente: \"Vocês têm areia e cimento também?\"\n\n**RESPOSTA:**\n```json\n{\n  \"resposta\": \"Não, trabalhamos especificamente com materiais pré-moldados para lajes - treliças, isopor, malhas e ferragens. Areia e cimento não fazem parte do nosso portfólio. Posso te ajudar com os materiais da laje?\",\n  \"supervisor\": true,\n  \"obs\": \"Cliente perguntou sobre areia e cimento - informei que não vendemos\"\n}\n```\n\n### Cliente Pergunta sobre Prazos\n**EXEMPLO:**\nCliente: \"Pra quando vocês conseguem entregar?\"\n\n**RESPOSTA:**\n```json\n{\n  \"resposta\": \"Deixa eu verificar com nossa equipe de entregas sobre os prazos disponíveis para te dar uma informação precisa. Como está a sua obra?\",\n  \"supervisor\": true,\n  \"obs\": \"Cliente perguntou sobre prazo de entrega - acionando supervisor\"\n}\n```\n\n### Cliente Indeciso\n- Faça perguntas para identificar objeções\n- Ofereça benefícios específicos\n- Use prova social: \"A maioria dos nossos clientes escolhe...\"\n\n### Cliente com Pressa\n- Seja direto e objetivo\n- Foque no essencial: metragem, produto, prazo\n- **ATIVE SUPERVISOR** para questões de entrega urgente\n\n### Cliente Comparando Preços\n- Destaque diferenciais de qualidade\n- Mencione garantia e suporte\n- Ofereça condições especiais\n\n### EXEMPLO: TRELIÇAS ISOLADAS\nCliente: \"03 treliças de 6 metros cheia\"\n\n**PROCESSO CORRETO:**\n1. Identificar: produto isolado (não projeto de laje)\n2. Usar: `busca_preco(\"Treliça Concretada\")`\n3. Calcular: preço_por_metro × tamanho metros × x unidades\n4. Exemplo: R$ 13,00 × 6 × 3 = R$ 234,00\n\n**RESPOSTA FORMATADA:**\nORÇAMENTO\n\n3 unidades Treliças 6,00m: R$ 234,00\n\nTotal do Orçamento: R$ 234,00\nPodemos fechar seu pedido ou ficou alguma dúvida?\n\n### EXEMPLO: CÓDIGOS NUMÉRICOS DE BITOLA\nCliente: \"2 vergalhão de 5.16\"\n\n**INTERPRETAÇÃO CORRETA:**\n- \"5.16\" = 5/16 polegadas = F8\n- \"2\" = quantidade em unidades (barras de 12m)\n\n**PROCESSO:**\n1. Converter: 5.16 → F8\n2. Usar: `busca_preco(\"Vergalhão F8\")`\n3. Calcular:  preco_unitario × 2 unidades\n\n**RESPOSTA FORMATADA:**\nORÇAMENTO \n\n2 Vergalhão F8: R$ [valor]\n\nTotal do Orçamento: R$ [valor]\n\n**❌ INTERPRETAÇÃO ERRADA:**\n\"Vergalhão F5 (5.16 metros)\" ← NUNCA faça isso!\n\n## 🔧 FERRAMENTAS DISPONÍVEIS\n- `calcular_laje`: Calcula materiais necessários para lajes\n- `busca_preco`: Consulta preços atualizados (usar termos convertidos)\n- `produtos_mais_cotados`: Produtos em alta demanda\n- `ultimos_orcamentos`: Histórico do cliente\n- `salvar_orcamento`: Grava proposta final\n- `calcular_ferragem_personalizada`: Para ferragens não-padrão\n\n## 📝 CAMPOS DE SAÍDA - GUIA DETALHADO\n\n### nome_cliente\n- Extrair nome da conversa quando mencionado\n- Manter \"unknown\" até identificação\n- Atualizar quando cliente se apresentar\n\n### nome_identificado\n- `true`: Cliente informou nome explicitamente\n- `false`: Nome ainda não identificado\n\n### intencao\n- `cotacao`: Cliente quer preços/orçamento\n- `consultoria`: Precisa de orientação técnica\n- `duvida`: Tem questões específicas\n- `fechamento`: Pronto para comprar\n- `outro`: Outras intenções\n\n### proxima_etapa\n- Seja específico: \"Calcular orçamento laje 5x10m\"\n- \"Confirmar tipo de enchimento\"\n- \"Consultar supervisor sobre prazo de entrega\"\n- \"Finalizar pedido\"\n\n### obs\n- Informações importantes para próximas interações\n- Preferências do cliente\n- Detalhes técnicos relevantes\n- Status da negociação\n- Produtos mencionados que não vendemos\n\n### supervisor (NOVO CAMPO)\n- `true`: Quando precisar de intervenção humana\n- `false`: Quando conseguir atender completamente\n- **ATIVAR OBRIGATORIAMENTE** para: prazos, entregas, produtos duvidosos, situações complexas\n\n## 🎯 LEMBRE-SE - REGRAS DE OURO\n- **JAMAIS** envie orçamento sem valores calculados\n- **SEMPRE** use ferramentas antes de orçar\n- **NUNCA** use placeholders em orçamentos\n- **MANTENHA o formato EXATO de treliças retornado pela ferramenta**\n- **NÃO vendemos areia, brita, cimento, madeira, pregos - informe e CONTINUE com orçamento**\n- **RECONHEÇA bitolas em polegadas**: 3/8\"=F10, 1/4\"=F6.3, 1/2\"=F12.5, 5/8\"=F16, 3/4\"=F20\n- **PROCESSE listas imediatamente**: separe o que vendemos, calcule, orce, informe sobre indisponíveis\n- **SEJA ESPECÍFICO nas perguntas**: \"Preciso da altura da ferragem\" vs \"preciso de mais detalhes\"\n- **ATIVE supervisor** para prazos, entregas e dúvidas sobre produtos\n- Seu objetivo é **FECHAR VENDAS** com orçamentos precisos e completos\n- Seja **consultivo** mas **assertivo**\n- Use as ferramentas com **termos padronizados convertidos**\n- Mantenha o cliente **engajado** até o final\n- **FALE a linguagem do cliente, PENSE nos termos do sistema**\n- **SEMPRE** formate orçamentos no padrão WhatsApp COM VALORES REAIS\n- **SEMPRE** retorne no formato JSON especificado com TODOS os campos\n- QUANDO cliente mencionar produtos que vendemos = ORÇAMENTO AUTOMÁTICO\n- PERGUNTE apenas o mínimo necessário para orçar\n- NÃO faça muitas perguntas - seja direto e eficiente\n\n**MANTRA ATUALIZADO**: \"Cliente fala produto nosso = Orço na hora! Lajota de barro = Cerâmica! Ferragem: Metro direto, Sob medida = Tamanho primeiro! Lista = Separo, Calculo, Orço, Informo! Bitola em polegada eu reconheço! Pergunta específica, nunca genérica!\"\n\nAgora atenda o cliente de forma natural, humana e focada no resultado, sempre convertendo internamente os termos para usar corretamente nas ferramentas, ativando o supervisor quando necessário e formatando adequadamente suas respostas!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -1340,
+        860
+      ],
+      "id": "3bcec1a6-a76f-4877-bf52-b4d8e8eae058",
+      "name": "SDR",
+      "retryOnFail": true,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}",
+        "sessionTTL": 86400,
+        "contextWindowLength": 7
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -1220,
+        1140
+      ],
+      "id": "a7a070fa-f83b-4a82-b514-ad68db876821",
+      "name": "Redis Chat Memory SDR"
+    },
+    {
+      "parameters": {
+        "description": "Busca o preço de um produto a partir do nome e especificações técnicas. Use sempre que o cliente quiser saber preço de um item específico.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$workflow.id}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "=preco_produto",
+            "tableName": "produtos_precos",
+            "NomeProduto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('NomeProduto', `Nome do produto que o cliente mencionou. Deve ser uma palavra-chave presente no nome cadastrado, como \"Ferragem F10\", \"Isopor H8\", \"Lajota\", \"Estribo\", etc.`, 'string') }}",
+            "detalhes": "={\n  \"bitola\": \"{{ $fromAI('bitola', 'bitola da peça (ex: 4.2mm, 10mm)', 'string', '') }}\",\n  \"modelo\": \"{{ $fromAI('modelo', 'modelo ou formato, como 7x17 ou quadrada', 'string', '') }}\",\n  \"bitola_estribo\": \"{{ $fromAI('bitola_estribo', 'bitola usada no estribo da ferragem (ex: 4.2mm)', 'string', '') }}\",\n  \"espacamento_estribo\": \"{{ $fromAI('espacamento_estribo', 'espaçamento entre os estribos da ferragem (ex: 24cm)', 'string', '') }}\",\n  \"tamanho_estribo\": \"{{ $fromAI('tamanho_estribo', 'tamanho do estribo da ferragem (ex: 7x17)', 'string', '') }}\",\n  \"espacamento_fios\": \"{{ $fromAI('espacamento_fios', 'espaçamento entre os fios das malhas (ex: 15x15)', 'string', '') }}\",\n  \"tamanho\": \"{{ $fromAI('tamanho', 'tamanho total do produto, como 2.00x3.00m ou 40x40cm', 'string', '') }}\",\n  \"altura\": \"{{ $fromAI('altura', 'altura da peça, como 8cm ou 19cm', 'string', '') }}\",\n  \"largura\": \"{{ $fromAI('largura', 'largura da peça, como 33cm ou 19cm', 'string', '') }}\",\n  \"comprimento\": \"{{ $fromAI('comprimento', 'comprimento da peça, como 100cm ou 12m', 'string', '') }}\",\n  \"material\": \"{{ $fromAI('material', 'material principal do item (ex: concreto, cerâmica, cimento)', 'string', '') }}\",\n  \"codigo\": \"{{ $fromAI('codigo', 'código interno do item, como H8/33', 'string', '') }}\",\n  \"referencia\": \"{{ $fromAI('referencia', 'referência interna ou apelido do produto', 'string', '') }}\",\n  \"descricao\": \"{{ $fromAI('descricao', 'descrição complementar fornecida pelo cliente', 'string', '') }}\",\n  \"tipo\": \"{{ $fromAI('tipo', 'tipo especial do produto (ex: custom)', 'string', '') }}\",\n  \"categoria\": \"{{ $fromAI('categoria', 'categoria geral como laje, coluna, armacao, enchimento, vedação', 'string', '') }}\",\n  \"tipo_uso\": \"{{ $fromAI('tipo_uso', 'uso principal do produto (ex: reforço, enchimento, armação, vedação)', 'string', '') }}\"\n}\n"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1060,
+        1140
+      ],
+      "id": "f068cedf-ffa4-45a9-94bb-42c0da2f46fb",
+      "name": "busca_preco"
+    },
+    {
+      "parameters": {
+        "name": "ultimos_orcamentos",
+        "description": " Lista os últimos orçamentos realizados pelo lead.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "cons_orc",
+            "tableName": "orcamentos",
+            "leadid": "1"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "3a1792bb-1e7d-46e9-af01-3bb3ae85055d",
+      "name": "ultimos_orcamentos",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -960,
+        1160
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "name": "salvar_orcamento",
+        "description": "=Salva um orçamento para um cliente com a lista de produtos cotados, preços, total e vínculo com o lead correspondente.\nPara cada produto:\n- Identifique o nome exato (conforme a tabela de produtos).\n- Use o tool 'busca_produto' para consultar o preço na tabela 'produtos_precos'.\n- Calcule o subtotal: preco_unitario × quantidade.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "salvar_orcamento",
+            "tableName": "orcamentos",
+            "leadid": "1",
+            "Produtos": "={{ JSON.stringify($fromAI('produtos', `Gere a lista de produtos que o cliente deseja orçar. Para cada produto:\n- Identifique o nome exato (conforme a tabela de produtos).\n- Use o tool 'busca_produto' para consultar o preço na tabela 'produtos_precos'.\n- Calcule o subtotal: preco_unitario × quantidade.\n- Retorne os campos:\n\n[\n  {\n    \\\"nome\\\": \\\"Ferragem F10\\\",\n    \\\"quantidade\\\": 12,\n    \\\"unidade\\\": \\\"metro\\\",\n    \\\"detalhes\\\": {\n      \\\"bitola_estribo\\\": \\\"4.2mm\\\",\n      \\\"tamanho_estribo\\\": \\\"7x17\\\",\n    \\\"preco_unitario\\\": 25.00,\n    \\\"subtotal\\\": 300.00\n    }\n  },\n  ...\n]\n\nSe não souber alguma especificação, deixe o campo 'detalhes' vazio ou omita.\nNunca estime valores manualmente. Sempre consulte o preço com 'busca_produto'.`, 'json')) }}",
+            "Obs": "={{ $fromAI('observacoes', `Observações gerais sobre o orçamento solicitado. Inclua instruções extras dadas pelo cliente, comentários adicionais, condições especiais (como forma de pagamento ou prazo), ou qualquer informação que ajude o setor comercial ou logística. Se o cliente não disser nada relevante, retorne string vazia.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "a57cb16e-0e90-4b05-99fe-e22c43f9252b",
+      "name": "salvar_orcamento",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -720,
+        1160
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        1140
+      ],
+      "id": "74346f85-6ac9-46cd-b420-846af45b8c28",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "description": "Calcula a quantidade estimada de materiais para montagem de uma laje, com base nas dimensões informadas\n  (largura e comprimento, ou apenas área) e no tipo de enchimento escolhido (isopor ou lajota cerâmica).\n  Retorna a quantidade aproximada de vigotas, peças de enchimento (isopor ou lajota) e malhas de aço necessárias.\n  Sempre que houver largura e comprimento, o cálculo será feito com base no espaçamento real entre as vigotas.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "calcLaje",
+            "especificacoes": "={\n\"largura\": \"{{ $fromAI('largura', 'largura da laje em metros. Ex: 5', 'string') }}\",\n\"comprimento\": \"{{ $fromAI('comprimento', 'comprimento da laje em metros. Ex: 8', 'string') }}\",\n\"area\": \"{{ $fromAI('area', 'área total da laje em metros quadrados. Ex: 40. Use apenas se não houver largura e comprimento.', 'string') }}\",\n\"enchimento\": \"{{ $fromAI('enchimento', 'tipo de enchimento da laje: \\\"isopor\\\" ou \\\"lajota\\\". Se o cliente não disser, use \\\"isopor\\\" como padrão.', 'string', { default: 'isopor' }) }}\",\n\"malha\": \"{{ $fromAI('malha'), 'qual é o modelo de malha ex:\"Leve 20x20 F3.4\", \"Media 15x15 F3.4\" ou \"Reforçada 15x15 F4.2\"', 'string', { default: 'Media' } }}\"\n}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -520,
+        1160
+      ],
+      "id": "24d43731-d2db-4586-84e2-062ab4c5f286",
+      "name": "calcular_laje"
+    },
+    {
+      "parameters": {
+        "description": "=Calcula o custo e o preço estimado de uma ferragem sob medida com base em comprimento, \n  ferros longitudinais (bitola e quantidade), tamanho e bitola dos estribos, espaçamento entre estribos,\n  custos de material e mão de obra. Caso a bitola dos estribos não seja informada, usa-se \"F4.2\" como padrão, e se o espaço entre os estribos não for informada, usa-se \"0.20\", se o a quantidade de ferros não for informada considere como padrão 4",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$workflow.id}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "CalcFer",
+            "ferragem": "={\n  \"comprimento\": {{ $fromAI(\"comprimento\", \"Comprimento total da ferragem em metros. Ex: para 'Ferragem 5,00', o valor é 5.\", \"number\") }},\n  \"ferros_longitudinais\": {{ $fromAI(\"ferros_longitudinais\", \"Lista de ferros longitudinais utilizados na ferragem. Cada item deve conter: - bitola (ex: 'F10', 'F12', 'F8', etc) - quantidade de varões dessa bitola. Formato: [ { \\\"bitola\\\": \\\"F10\\\", \\\"quantidade\\\": 4 }, { \\\"bitola\\\": \\\"F12\\\", \\\"quantidade\\\": 2 } ] Extraia mesmo que o cliente envie como '4F10+2F12', converta para este array e envie como string JSON.\", \"string\") }},\n  \"tamanho_estribo\": \"{{ $fromAI(\"tamanho_estribo\", \"Tamanho do estribo no formato 'largura x altura' em cm. Ex: '7x20'.\", \"string\") }}\",\n  \"espacamento_estribo\": \"{{ $fromAI(\"espacamento_estribo\", \"Espaçamento entre estribos em metros. Ex: para 'a cd 0,15', o valor é 0.15. Se não for informado, use o padrão '0.20'.\", \"number\") }}\",\n  \"bitola_estribo\": \"{{ $fromAI(\"bitola_estribo\", \"Bitola do ferro do estribo (ex: 'F5'). Se não for informado, use o padrão 'F4.2'.\", \"string\") }}\"\n}\n"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        1140
+      ],
+      "id": "83fa5f70-155e-41b6-a939-c954cd81af9e",
+      "name": "calcular_ferragem_personalizada"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1380,
+        1080
+      ],
+      "id": "a2e63d3a-1ce3-4156-b72f-9e411217e85a",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "operation"
+            },
+            {
+              "name": "tableName"
+            },
+            {
+              "name": "especificacoes",
+              "type": "object"
+            },
+            {
+              "name": "ferragem",
+              "type": "object"
+            },
+            {
+              "name": "detalhes",
+              "type": "object"
+            },
+            {
+              "name": "NomeProduto"
+            },
+            {
+              "name": "leadid"
+            },
+            {
+              "name": "Produtos"
+            },
+            {
+              "name": "Obs"
+            },
+            {
+              "name": "Status"
+            }
+          ]
+        }
+      },
+      "id": "96343505-9c42-4324-a5f5-e0e6cba21df1",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -1240,
+        300
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9cf7a0fc-4415-4741-b2a4-701a39148d3b",
+              "name": "operation",
+              "value": "={{ $('When Executed by Another Workflow').item.json.operation }}",
+              "type": "string"
+            },
+            {
+              "id": "27fed7e0-f5c9-41db-b966-38830a4ddcec",
+              "name": "tableName",
+              "value": "={{ $('When Executed by Another Workflow').item.json.tableName }}",
+              "type": "string"
+            },
+            {
+              "id": "c6e0ba01-972b-4d5d-b7d1-e91f62488815",
+              "name": "ferragem",
+              "value": "={{ $('When Executed by Another Workflow').item.json.ferragem }}",
+              "type": "object"
+            },
+            {
+              "id": "9d46a701-ba02-4dd8-93dd-05ddf8eeb1df",
+              "name": "detalhes",
+              "value": "={{ $('When Executed by Another Workflow').item.json.detalhes }}",
+              "type": "object"
+            },
+            {
+              "id": "80e381a1-538f-4002-bf01-4d37f364c5f4",
+              "name": "NomeProduto",
+              "value": "={{ $('When Executed by Another Workflow').item.json.NomeProduto }}",
+              "type": "string"
+            },
+            {
+              "id": "ba30306c-acde-4724-9ec8-f1fc6b4ca2cb",
+              "name": "leadid",
+              "value": "={{ $('When Executed by Another Workflow').item.json[\"leadid\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "b957c201-37a1-4ed4-8cf8-412b42687a2b",
+              "name": "Produtos",
+              "value": "={{ $('When Executed by Another Workflow').item.json.Produtos }}",
+              "type": "array"
+            },
+            {
+              "id": "47db7538-b69d-4aca-af4c-7507ffca4a8c",
+              "name": "Obs",
+              "value": "={{ $('When Executed by Another Workflow').item.json.Obs }}",
+              "type": "string"
+            },
+            {
+              "id": "3f52b47d-94c1-46f6-9316-b812208b0783",
+              "name": "especificacoes",
+              "value": "={{ $('When Executed by Another Workflow').item.json.especificacoes }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        300
+      ],
+      "id": "5a0c2547-d1e8-42f0-9f26-da61e9feba6f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "preco_produto",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "85fddca5-06c1-4f4c-8925-263a9e1a4019"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Preço"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ca56cc1e-ff80-4e07-b0b0-22231edfc6f0",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "cons_orc",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ultimos Orc"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e40f17ff-382c-4fa9-b9c6-46a09a0e28d2",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "salvar_orcamento",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Salvar ORC"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fa934f1b-b194-499c-bf35-cdd8b0205aa6",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "calcLaje",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CalcLaje"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "45350893-485a-4280-86b4-e3a3a79f68e0",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "CalcFer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CalcFer"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -680,
+        300
+      ],
+      "id": "9501a759-273e-4836-91e4-fb6afad65e04",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT json_agg(row_to_json(t))\nFROM {{ $json.tableName }} t;",
+        "options": {}
+      },
+      "id": "57199341-9ad0-49df-9ee9-01a9bc98318b",
+      "name": "ReadPreco",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 2.6,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM {{ $json.tableName }}\nWHERE lead_id={{ $json.leadid }}\nLIMIT 5;",
+        "options": {}
+      },
+      "id": "d1cbc423-44f2-4a3f-b043-6fa5388ab07c",
+      "name": "ReadOrc",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        0,
+        160
+      ],
+      "typeVersion": 2.6,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Definição da Função de Transformação ---\n// Esta função recebe um array de objetos (onde cada objeto é um item de dado, como o seu input JSON)\n// e transforma a string 'Produtos' em um objeto JS.\nfunction transformarProdutosEmObjeto(inputJsonArray) {\n  // Garantir que a entrada seja um array. Embora 'items' geralmente seja um array,\n  // esta checagem aumenta a robustez.\n  if (!Array.isArray(inputJsonArray)) {\n    console.warn(\"Input para transformarProdutosEmObjeto não é um array. Tentando processar como um único item.\");\n    inputJsonArray = [inputJsonArray]; // Converte para um array de um item\n  }\n\n  // Percorre cada item no array de entrada\n  return inputJsonArray.map(item => {\n    // Cria uma cópia rasa do objeto para evitar modificar o objeto original diretamente.\n    // Isso é importante para a segurança dos dados e para evitar efeitos colaterais.\n    const newItem = { ...item };\n\n    // Verifica se a propriedade 'Produtos' existe e é uma string\n    if (typeof newItem.Produtos === 'string') {\n      try {\n        // Tenta converter a string JSON em um objeto JavaScript.\n        newItem.Produtos = JSON.parse(newItem.Produtos);\n      } catch (e) {\n        // Se a string 'Produtos' não for um JSON válido, um erro será capturado aqui.\n        // É importante logar o erro para depuração.\n        console.error(`Erro ao fazer parse da string 'Produtos' no item (ID ou operação: ${newItem.leadid || newItem.operation}):`, e);\n        \n        // Decisão sobre como lidar com JSON inválido:\n        // 1. Manter a string original (se quiser ignorar o erro de parse e ter o dado bruto):\n        //    newItem.Produtos = newItem.Produtos; \n        // 2. Definir como null (para indicar que o parse falhou e o dado não é um objeto):\n           newItem.Produtos = null; \n        // 3. Remover a propriedade (se não quiser que ela apareça na saída se for inválida):\n        //    delete newItem.Produtos;\n      }\n    }\n    return newItem; // Retorna o item (modificado ou não) para o novo array\n  });\n}\n\n// --- Parte Principal do Script para o Nó 'Code' ---\n\n// Em ambientes como o n8n, a entrada de dados para um nó 'Code'\n// quando configurado para \"Run Once For All Items\" (como parece ser o seu caso pela imagem)\n// geralmente é um array de objetos, onde cada objeto tem uma propriedade 'json'\n// que contém os dados reais do item.\n// Exemplo: [ { json: { ...item1Data... } }, { json: { ...item2Data... } } ]\n\nlet inputDataForFunction = [];\n\n// Acessar a variável de entrada fornecida pelo ambiente (mais comumente 'items')\nif (typeof items !== 'undefined' && Array.isArray(items)) {\n    // Mapeia o array 'items' para extrair apenas a parte 'json' de cada item,\n    // que é o seu dado real de entrada.\n    inputDataForFunction = items.map(item => item.json);\n} else {\n    // Caso 'items' não seja a variável esperada ou não seja um array.\n    // Isto é um fallback para depuração, indicando que a entrada não foi encontrada.\n    console.error(\"Erro: A variável de entrada 'items' não foi encontrada ou não é um array válido. Verifique a configuração da entrada do nó.\");\n    // Retorna um array vazio para evitar erros, mas isso indica um problema na entrada.\n    return []; \n}\n\n// Chama a função de transformação com os dados de entrada extraídos.\nconst transformedOutput = transformarProdutosEmObjeto(inputDataForFunction);\n\n// --- Retornar o Resultado ---\n// O nó 'Code' espera que o script retorne um array de objetos.\n// Cada objeto neste array retornado se tornará um 'item' na saída do nó.\nreturn transformedOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1040,
+        300
+      ],
+      "id": "119fbda8-3080-4b39-a264-f82fc38cb6ff",
+      "name": "Code",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Definição da Função de Transformação (mantida igual) ---\n// Esta função processa o array de itens, fazendo o parse da string 'Produtos' em cada um.\nfunction transformarProdutosEmObjeto(inputJsonArray) {\n  // Garante que a entrada seja um array (mesmo que venha apenas um item solto)\n  if (!Array.isArray(inputJsonArray)) {\n    console.warn(\"Input para transformarProdutosEmObjeto não é um array. Tentando processar como um único item.\");\n    inputJsonArray = [inputJsonArray];\n  }\n\n  // Mapeia cada item do array de entrada\n  return inputJsonArray.map(item => {\n    const newItem = { ...item }; // Cria uma cópia rasa do item\n\n    // Processa a propriedade 'Produtos' se for uma string\n    if (typeof newItem.Produtos === 'string') {\n      try {\n        newItem.Produtos = JSON.parse(newItem.Produtos); // Converte a string para um array/objeto JS\n      } catch (e) {\n        console.error(`Erro ao fazer parse da string 'Produtos' para o item (ID ou operação: ${newItem.leadid || newItem.operation}):`, e);\n        newItem.Produtos = null; // Em caso de erro, define como null\n      }\n    }\n    return newItem;\n  });\n}\n\n// --- Parte Principal do Script para o Nó 'Code' ---\n\nlet inputDataForFunction = [];\n\n// Obtém os dados de entrada do nó, assumindo o formato do n8n (items.map(item => item.json))\nif (typeof items !== 'undefined' && Array.isArray(items)) {\n    inputDataForFunction = items.map(item => item.json);\n} else {\n    console.error(\"Erro: A variável 'items' não foi encontrada ou não é um array válido. Verifique a configuração da entrada do nó.\");\n    return []; \n}\n\n// 1. Chama a função de transformação inicial para garantir que 'Produtos' é um array JS\nconst transformedItems = transformarProdutosEmObjeto(inputDataForFunction);\n\n// 2. Agora, itera sobre os itens transformados para calcular o total\nconst finalOutput = transformedItems.map(item => {\n    let totalSoma = 0;\n\n    // Verifica se 'Produtos' existe e é um array após a transformação\n    if (Array.isArray(item.Produtos)) {\n        item.Produtos.forEach(produto => {\n            // Acessa o subtotal dentro do objeto 'detalhes' de cada produto\n            if (produto.detalhes && typeof produto.detalhes.subtotal === 'number') {\n                totalSoma += produto.detalhes.subtotal;\n            } else if (produto.detalhes && produto.detalhes.subtotal === null) {\n                console.warn(`Subtotal nulo encontrado para o produto: ${produto.nome || 'desconhecido'}. Tratando como 0 na soma.`);\n            } else {\n                console.warn(`Produto sem 'detalhes.subtotal' numérico ou nulo para o produto: ${produto.nome || 'desconhecido'}.`);\n            }\n        });\n    } else if (item.Produtos !== null) { // Se não é array nem null (ex: undefined, ou string inválida)\n        console.warn(`Propriedade 'Produtos' não é um array válido para o item (operação: ${item.operation || 'desconhecida'}), não é possível calcular o total.`);\n    }\n    \n    // Adiciona o total calculado a uma nova propriedade no item.\n    // Usamos 'totalCalculado' para evitar conflito com um 'total' que possa vir na entrada original.\n    return {\n        ...item, // Mantém todas as outras propriedades do item\n        totalCalculado: totalSoma // Adiciona a nova propriedade com a soma\n    };\n});\n\n// 3. Retorna o resultado final do nó JavaScript\nreturn finalOutput;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        340
+      ],
+      "id": "60d49f0e-6aa8-4be3-bc1f-bb8c08131a79",
+      "name": "CalcTotal"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO {{$json.tableName}} (lead_id, produtos, total, obs)\nVALUES (\n    {{ $json.leadid }},\n    '{{ JSON.stringify($json.Produtos) }}'::jsonb,\n    {{ $json.totalCalculado }},\n    {{ $json.Obs ? \"'\" + $json.Obs + \"'\" : 'NULL' }}\n  );",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        340
+      ],
+      "id": "917c5ba7-3576-4dc9-b739-bd21f8f93cf3",
+      "name": "InsertOrc"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "38442fcb-45fb-4aad-ad1f-e36fe0b16216",
+              "leftValue": "={{ parseFloat($json.especificacoes.largura) <= 7 || parseFloat($json.especificacoes.comprimento) <= 7 }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -40,
+        520
+      ],
+      "id": "66b8f32a-b415-43cf-bd64-774cf9bc5bdf",
+      "name": "IfModoCalc"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Entradas esperadas: 'comprimento' e 'largura' dentro de 'especificacoes'\nconst especificacoes = $input.first().json.especificacoes || {};\nconst comprimento = parseFloat(especificacoes.comprimento || 0);\nconst largura = parseFloat(especificacoes.largura || 0);\n\n// Preços dos produtos vindos do input 'todos_os_produtos'\n// Certifique-se de que 'todos_os_produtos' esteja sempre presente e no formato esperado\nconst produtosPrecos = $input.first().json.todos_os_produtos || {};\n\n// Função auxiliar para buscar o preço base de um produto pelo nome\n// Busca a chave mais próxima no objeto produtosPrecos (case-insensitive e contém)\nfunction getPreco(nomeProdutoBuscado) {\n    const nomeNormalizado = nomeProdutoBuscado.toLowerCase();\n    for (const key in produtosPrecos) {\n        if (key.toLowerCase().includes(nomeNormalizado)) {\n            return parseFloat(produtosPrecos[key]);\n        }\n    }\n    return 0; // Retorna 0 se o preço não for encontrado\n}\n\n// Calcula a área a partir das dimensões fornecidas\nconst area = comprimento * largura;\n\nconst enchimento = (especificacoes.enchimento || 'isopor').toLowerCase();\nconst tipoMalha = (especificacoes.malha || 'malha leve').toLowerCase(); // Captura o tipo de malha especificado\n\nlet vigotas_por_metro_linear; // Quantidade de vigotas por metro linear da dimensão maior\nif (enchimento === 'isopor') {\n    vigotas_por_metro_linear = 2.5;\n} else if (enchimento === 'lajota') {\n    vigotas_por_metro_linear = 3.0;\n} else {\n    vigotas_por_metro_linear = 2.5; // padrão\n}\n\n// --- Lógica para cálculo de vigotas (quantidade e tamanho) ---\nconst dim_menor = Math.min(comprimento, largura);\nconst dim_maior = Math.max(comprimento, largura);\n\nconst tamanho_vigota = dim_menor; // O menor lado serve como tamanho de cada vigota\nconst qtd_vigotas = Math.ceil(dim_maior * vigotas_por_metro_linear); // O maior lado define a quantidade de vigotas\n\n// Estimativas de consumo por m² (iguais ao outro JS, dependem da área)\nconst qtd_isopor = Math.ceil(area / 0.4166666666);   // ~2.4 peças por m²\n\n// --- Lógica da Lajota (arredondamento complexo, depende da área) ---\nconst qtd_lajota_base = Math.ceil(area / 0.0666666666); // ~15 lajotas por m²\n\nconst unidade_arredondamento = 5;\nconst tolerancia_percentual = 0.03; // 3%\n\nconst limite_inferior = qtd_lajota_base * (1 - tolerancia_percentual);\nconst limite_superior = qtd_lajota_base * (1 + tolerancia_percentual);\n\nlet qtd_lajota_final = qtd_lajota_base; // Inicia com o valor base (fallback)\n\nconst candidato_para_baixo = Math.floor(qtd_lajota_base / unidade_arredondamento) * unidade_arredondamento;\nconst candidato_para_cima = Math.ceil(qtd_lajota_base / unidade_arredondamento) * unidade_arredondamento;\n\nlet candidatos_validos = [];\n\nif (candidato_para_baixo >= limite_inferior && candidato_para_baixo <= limite_superior) {\n    candidatos_validos.push(candidato_para_baixo);\n}\n\nif (candidato_para_cima !== candidato_para_baixo && candidato_para_cima >= limite_inferior && candidato_para_cima <= limite_superior) {\n    candidatos_validos.push(candidato_para_cima);\n}\n\nif (candidatos_validos.length > 0) {\n    let melhor_candidato = candidatos_validos[0];\n    let menor_diferenca = Math.abs(qtd_lajota_base - melhor_candidato);\n\n    for (let i = 1; i < candidatos_validos.length; i++) {\n        const candidato_atual = candidatos_validos[i];\n        const diferenca_atual = Math.abs(qtd_lajota_base - candidato_atual);\n        if (diferenca_atual < menor_diferenca) {\n            menor_diferenca = diferenca_atual;\n            melhor_candidato = candidato_atual;\n        }\n    }\n    qtd_lajota_final = melhor_candidato;\n}\nconst qtd_lajota = qtd_lajota_final;\n// --- FIM DA LÓGICA DA LAJOTA ---\n\nconst qtd_malha = Math.ceil(area / 5.8);\n\n\n// --- CÁLCULO DOS PREÇOS ---\nconst preco_trelica = getPreco('Trelica');\n\nlet preco_isopor = 0;\nif (enchimento === 'isopor') {\n    if (produtosPrecos['Isopor H7/33']) {\n        preco_isopor = getPreco('Isopor H7/33');\n    } else if (produtosPrecos['Isopor H8/33']) {\n        preco_isopor = getPreco('Isopor H8/33');\n    } else if (produtosPrecos['Isopor H8/40']) {\n        preco_isopor = getPreco('Isopor H8/40');\n    }\n}\n\nconst preco_lajota = getPreco('Lajota Cerâmica');\nlet preco_malha = 0;\n// Lógica para obter o preço da malha com base no tipoMalha\nif (tipoMalha.includes('leve')) {\n    preco_malha = getPreco('Malha Leve 20x20 F3.4');\n} else if (tipoMalha.includes('media')) {\n    preco_malha = getPreco('Malha Media 15x15 F3.4');\n} else if (tipoMalha.includes('reforcada')) {\n    preco_malha = getPreco('Malha Reforçada 15x15 F4.2');\n} else {\n    preco_malha = getPreco('Malha Leve 20x20 F3.4'); // Padrão\n}\n\n\n// Calcular os totais (garantindo que não seja NaN e arredondando)\nconst valor_trelica = parseFloat((qtd_vigotas * tamanho_vigota * preco_trelica).toFixed(2));\nconst valor_isopor = enchimento === 'isopor' ? parseFloat((qtd_isopor * preco_isopor).toFixed(2)) : 0;\nconst valor_lajota = enchimento === 'lajota' ? parseFloat((qtd_lajota * preco_lajota).toFixed(2)) : 0;\nconst valor_malha = parseFloat((qtd_malha * preco_malha).toFixed(2));\n\n// Calcular o valor total geral\nconst valor_total_geral = parseFloat((valor_trelica + valor_isopor + valor_lajota + valor_malha).toFixed(2));\n\n\nreturn [\n    {\n        json: {\n            area: parseFloat(area.toFixed(2)),\n            enchimento,\n            // Detalhes da Treliça\n            trelica: {\n                quantidade_vigotas: qtd_vigotas,\n                tamanho_vigota: parseFloat(tamanho_vigota.toFixed(2)),\n                // Preço por metro linear da treliça\n                preco_por_metro: preco_trelica,\n                valor_total: valor_trelica\n            },\n            // Detalhes do Isopor\n            isopor: enchimento === 'isopor' ? {\n                quantidade: qtd_isopor,\n                preco_unitario: preco_isopor,\n                valor_total: valor_isopor\n            } : null,\n            // Detalhes da Lajota\n            lajota: enchimento === 'lajota' ? {\n                quantidade: qtd_lajota,\n                preco_unitario: preco_lajota,\n                valor_total: valor_lajota\n            } : null,\n            // Detalhes da Malha\n            malha: {\n                tipo_selecionado: tipoMalha, // Adicionado o tipo de malha selecionado\n                quantidade: qtd_malha,\n                preco_unitario: preco_malha,\n                valor_total: valor_malha\n            },\n            valor_total_geral: valor_total_geral\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        440
+      ],
+      "id": "e73f218e-5937-446d-888e-ee60871491d5",
+      "name": "CalcLajeC*L"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Entradas das especificações\nconst especificacoes = $input.first().json.especificacoes || {};\nconst inputLargura = parseFloat(especificacoes.largura);\nconst inputComprimento = parseFloat(especificacoes.comprimento);\nconst inputArea = parseFloat(especificacoes.area); // 'area' pode vir diretamente\n\nlet area;\nlet comprimento_maior_dimensao = 0; // Usado para cálculo de metragem da treliça se L/C forem dados\n\n// Lógica para determinar a área e as dimensões finais\nif (!isNaN(inputLargura) && !isNaN(inputComprimento) && inputLargura > 0 && inputComprimento > 0) {\n    // Se largura e comprimento válidos forem fornecidos, calcula a área e a maior dimensão\n    area = inputComprimento * inputLargura;\n    comprimento_maior_dimensao = Math.max(inputComprimento, inputLargura);\n} else if (!isNaN(inputArea) && inputArea > 0) {\n    // Se a área for fornecida diretamente\n    area = inputArea;\n    // Se a área for a única entrada, a maior dimensão para cálculo de treliça\n    // será a raiz quadrada da área (assumindo uma forma quadrada para estimativa),\n    // ou simplesmente usaremos 'area' para o cálculo direto da metragem de treliça.\n    // Para simplificar, vou considerar que quando só a área é dada, a qtd_vigotas\n    // já representa os metros totais com base em uma densidade por m².\n    comprimento_maior_dimensao = Math.sqrt(area); // Estima uma dimensão para usar no cálculo linear de treliça, se necessário.\n                                                 // No entanto, para treliças por \"metro\", a área é mais direta.\n} else {\n    // Nenhum dado válido para cálculo de área\n    throw new Error('As especificações devem conter \"area\" OU \"largura\" e \"comprimento\" válidos.');\n}\n\nconst enchimento = (especificacoes.enchimento || 'isopor').toLowerCase();\nconst tipoMalha = (especificacoes.malha || 'malha leve').toLowerCase(); // Captura o tipo de malha especificado\n\n// Preços dos produtos vindos do input 'todos_os_produtos'\nconst produtosPrecos = $input.first().json.todos_os_produtos || {};\n\n// Função auxiliar para buscar o preço base de um produto pelo nome\nfunction getPreco(nomeProdutoBuscado) {\n    const nomeNormalizado = nomeProdutoBuscado.toLowerCase();\n    for (const key in produtosPrecos) {\n        if (key.toLowerCase().includes(nomeNormalizado)) {\n            return parseFloat(produtosPrecos[key]);\n        }\n    }\n    return 0;\n}\n\nlet trelica_por_metro_linear; // Renomeado para maior clareza\nif (enchimento === 'isopor') {\n    trelica_por_metro_linear = 2.5; // Metros de treliça por metro linear de laje\n} else if (enchimento === 'lajota') {\n    trelica_por_metro_linear = 3.0; // Metros de treliça por metro linear de laje\n} else {\n    trelica_por_metro_linear = 2.5; // Padrão\n}\n\n// O cálculo da metragem total de treliça agora é mais direto:\n// Se dimensões foram dadas, usamos a maior dimensão da laje * trelica_por_metro_linear (metragem).\n// Se apenas a área foi dada, multiplicamos a área por trelica_por_metro_linear (densidade por m²).\n// A lógica é que trelica_por_metro_linear representa quantos metros de treliça são necessários por metro da dimensão maior,\n// ou quantos metros são necessários por m² de área total (dependendo de como você modelou isso para a laje).\n// Para o cenário 'só em metro', a interpretação mais comum seria metragem total baseada na área.\nconst metragem_total_trelica = Math.ceil(area * trelica_por_metro_linear); // Metragem total de treliça em metros\n\n\n// Estimativas de consumo por m²:\nconst qtd_isopor = Math.ceil(area / 0.4166666666);\n\n// --- Lógica da Lajota (arredondamento complexo) ---\nconst qtd_lajota_base = Math.ceil(area / 0.0666666666);\nconst unidade_arredondamento = 5;\nconst tolerancia_percentual = 0.03;\nconst limite_inferior = qtd_lajota_base * (1 - tolerancia_percentual);\nconst limite_superior = qtd_lajota_base * (1 + tolerancia_percentual);\nlet qtd_lajota_final = qtd_lajota_base;\nconst candidato_para_baixo = Math.floor(qtd_lajota_base / unidade_arredondamento) * unidade_arredondamento;\nconst candidato_para_cima = Math.ceil(qtd_lajota_base / unidade_arredondamento) * unidade_arredondamento;\nlet candidatos_validos = [];\n\nif (candidato_para_baixo >= limite_inferior && candidato_para_baixo <= limite_superior) {\n    candidatos_validos.push(candidato_para_baixo);\n}\nif (candidato_para_cima !== candidato_para_baixo && candidato_para_cima >= limite_inferior && candidato_para_cima <= limite_superior) {\n    candidatos_validos.push(candidato_para_cima);\n}\n\nif (candidatos_validos.length > 0) {\n    let melhor_candidato = candidatos_validos[0];\n    let menor_diferenca = Math.abs(qtd_lajota_base - melhor_candidato);\n    for (let i = 1; i < candidatos_validos.length; i++) {\n        const candidato_atual = candidatos_validos[i];\n        const diferenca_atual = Math.abs(qtd_lajota_base - candidato_atual);\n        if (diferenca_atual < menor_diferenca) {\n            menor_diferenca = diferenca_atual;\n            melhor_candidato = candidato_atual;\n        }\n    }\n    qtd_lajota_final = melhor_candidato;\n}\nconst qtd_lajota = qtd_lajota_final;\n// --- FIM DA LÓGICA DA LAJOTA ---\n\nconst qtd_malha = Math.ceil(area / 5.8);\n\n\n// --- CÁLCULO DOS PREÇOS ---\nconst preco_trelica = getPreco('Trelica'); // Preço por metro\n\nlet preco_isopor = 0;\nif (enchimento === 'isopor') {\n    if (produtosPrecos['Isopor H7/33']) {\n        preco_isopor = getPreco('Isopor H7/33');\n    } else if (produtosPrecos['Isopor H8/33']) {\n        preco_isopor = getPreco('Isopor H8/33');\n    } else if (produtosPrecos['Isopor H8/40']) {\n        preco_isopor = getPreco('Isopor H8/40');\n    }\n}\n\nconst preco_lajota = getPreco('Lajota Cerâmica');\nlet preco_malha = 0;\nif (tipoMalha.includes('leve')) {\n    preco_malha = getPreco('Malha Leve 20x20 F3.4');\n} else if (tipoMalha.includes('media')) {\n    preco_malha = getPreco('Malha Media 15x15 F3.4');\n} else if (tipoMalha.includes('reforcada')) {\n    preco_malha = getPreco('Malha Reforçada 15x15 F4.2');\n} else {\n    preco_malha = getPreco('Malha Leve 20x20 F3.4'); // Padrão\n}\n\n\n// Calcular os totais (garantindo que não seja NaN e arredondando)\n// O valor da treliça agora é simplesmente metragem_total_trelica * preco_trelica\nconst valor_trelica = parseFloat((metragem_total_trelica * preco_trelica).toFixed(2));\nconst valor_isopor = enchimento === 'isopor' ? parseFloat((qtd_isopor * preco_isopor).toFixed(2)) : 0;\nconst valor_lajota = enchimento === 'lajota' ? parseFloat((qtd_lajota * preco_lajota).toFixed(2)) : 0;\nconst valor_malha = parseFloat((qtd_malha * preco_malha).toFixed(2));\n\n// Calcular o valor total geral\nconst valor_total_geral = parseFloat((valor_trelica + valor_isopor + valor_lajota + valor_malha).toFixed(2));\n\n\nreturn [\n    {\n        json: {\n            area: parseFloat(area.toFixed(2)),\n            enchimento,\n            // Detalhes da Treliça (apenas metragem e preço por metro)\n            trelica: {\n                metragem_total: metragem_total_trelica, // Renomeado de quantidade_vigotas para metragem_total\n                preco_por_metro: preco_trelica,\n                valor_total: valor_trelica\n            },\n            // Detalhes do Isopor\n            isopor: enchimento === 'isopor' ? {\n                quantidade: qtd_isopor,\n                preco_unitario: preco_isopor,\n                valor_total: valor_isopor\n            } : null,\n            // Detalhes da Lajota\n            lajota: enchimento === 'lajota' ? {\n                quantidade: qtd_lajota,\n                preco_unitario: preco_lajota,\n                valor_total: valor_lajota\n            } : null,\n            // Detalhes da Malha\n            malha: {\n                tipo_selecionado: tipoMalha,\n                quantidade: qtd_malha,\n                preco_unitario: preco_malha,\n                valor_total: valor_malha\n            },\n            valor_total_geral: valor_total_geral\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        180,
+        600
+      ],
+      "id": "3d6e6531-9dfb-4eb5-ba25-724d1bd95b39",
+      "name": "CalcLajeA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const precos_ferros = {\n  \"F12.5\": 71.50,\n  \"F10\": 47.50,\n  \"F8\": 32.50,\n  \"F6.3\": 21.00,\n  \"F5\": 14.35,\n  \"F4.2\": 9.35,\n};\n\nconst preco_mao_obra_por_ponto = 0.09;\nconst margem = 0.61;\n\n// Entrada\nconst comprimento = parseFloat($json.ferragem.comprimento);\nconst espacamento = parseFloat($json.ferragem.espacamento_estribo);\nconst tamanho_estribo = $json.ferragem.tamanho_estribo; // ex: \"7x20\"\nconst bitola_estribo = $json.ferragem.bitola_estribo || \"F4.2\";\n\nconst ferros_input = $json.ferragem.ferros_longitudinais;\n\n// Função para converter string tipo \"3F10+2F8\" em array de objetos\nfunction parseFerros(str) {\n  return str.split(\"+\").map(item => {\n    const match = item.trim().match(/(\\d+)\\s*F([\\d.]+)/i);\n    if (!match) throw new Error(`Formato inválido: ${item}`);\n    return {\n      bitola: `F${match[2]}`,\n      quantidade: parseInt(match[1])\n    };\n  });\n}\n\nconst ferros = Array.isArray(ferros_input) ? ferros_input : parseFerros(ferros_input);\n\n// Custo dos ferros longitudinais\nlet custo_ferros = 0;\nlet total_ferros = 0;\nfor (const ferro of ferros) {\n  const preco = precos_ferros[ferro.bitola];\n  if (!preco) throw new Error(`Bitola não encontrada: ${ferro.bitola}`);\n  custo_ferros += (preco / 12) * ferro.quantidade * comprimento;\n  total_ferros += ferro.quantidade;\n}\n\n// Mão de obra (quantidade de pontos solda)\nconst pontos = Math.ceil(comprimento / espacamento) * total_ferros;\nconst custo_mao_obra = pontos * preco_mao_obra_por_ponto;\n\n// Custo dos estribos\nconst [largura_cm, altura_cm] = tamanho_estribo.split(\"x\").map(v => parseFloat(v.trim()));\nconst perimetro_m = (2 * (largura_cm + altura_cm)) / 100 + 0.05; // mais 5cm folga\nconst preco_varao_estribo = precos_ferros[bitola_estribo] || 13.00;\nconst custo_estribos = (comprimento / espacamento) * (perimetro_m / 12) * preco_varao_estribo;\n\n// Total e preço final\nconst preco_custo_total = custo_ferros + custo_mao_obra + custo_estribos;\nconst preco_venda = parseFloat((preco_custo_total * (1 + margem)).toFixed(2));\n\n// Descrição da ferragem\nconst descricao_ferragem = `Ferragem ${comprimento.toFixed(2)} C/${ferros.map(f => `${f.quantidade}F${f.bitola.replace(\"F\", \"\")}`).join(\"+\")} ${tamanho_estribo} a cd ${espacamento.toFixed(2)} ${bitola_estribo}`;\n\nreturn [\n  {\n    json: {\n      descricao_ferragem,\n      /*\n      custo_ferros: parseFloat(custo_ferros.toFixed(2)),\n      custo_estribos: parseFloat(custo_estribos.toFixed(2)),\n      custo_mao_obra: parseFloat(custo_mao_obra.toFixed(2)),\n      preco_custo_total: parseFloat(preco_custo_total.toFixed(2)),\n      */\n      preco_venda: preco_venda\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        780
+      ],
+      "id": "a07cb8b6-a247-4845-8f3d-09e9f749c273",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of items) {\n  const outputString = item.json.output;\n  let jsonString = outputString.replace(/```json\\n|```/g, '').trim();\n\n  // Tenta parsear a string JSON\n  try {\n    item.json = JSON.parse(jsonString);\n  } catch (e) {\n    // Em caso de erro, você pode logar, retornar um erro, ou lidar de outra forma\n    console.error(\"Erro ao parsear JSON:\", e, \"String original:\", jsonString);\n    // Opcional: Se quiser que o workflow falhe neste item\n    // throw new Error(\"Falha ao parsear JSON\");\n  }\n}\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -920,
+        860
+      ],
+      "id": "5b951eae-dbb6-486a-bc63-d6cd105832f1",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9cf7a0fc-4415-4741-b2a4-701a39148d3b",
+              "name": "operation",
+              "value": "={{ $('When Executed by Another Workflow').item.json.operation }}",
+              "type": "string"
+            },
+            {
+              "id": "27fed7e0-f5c9-41db-b966-38830a4ddcec",
+              "name": "tableName",
+              "value": "={{ $('When Executed by Another Workflow').item.json.tableName }}",
+              "type": "string"
+            },
+            {
+              "id": "c6e0ba01-972b-4d5d-b7d1-e91f62488815",
+              "name": "ferragem",
+              "value": "={{ $('When Executed by Another Workflow').item.json.ferragem }}",
+              "type": "object"
+            },
+            {
+              "id": "9d46a701-ba02-4dd8-93dd-05ddf8eeb1df",
+              "name": "detalhes",
+              "value": "={{ $('When Executed by Another Workflow').item.json.detalhes }}",
+              "type": "object"
+            },
+            {
+              "id": "80e381a1-538f-4002-bf01-4d37f364c5f4",
+              "name": "NomeProduto",
+              "value": "={{ $('When Executed by Another Workflow').item.json.NomeProduto }}",
+              "type": "string"
+            },
+            {
+              "id": "ba30306c-acde-4724-9ec8-f1fc6b4ca2cb",
+              "name": "leadid",
+              "value": "={{ $('When Executed by Another Workflow').item.json[\"leadid\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "b957c201-37a1-4ed4-8cf8-412b42687a2b",
+              "name": "Produtos",
+              "value": "={{ $('When Executed by Another Workflow').item.json.Produtos }}",
+              "type": "array"
+            },
+            {
+              "id": "47db7538-b69d-4aca-af4c-7507ffca4a8c",
+              "name": "Obs",
+              "value": "={{ $('When Executed by Another Workflow').item.json.Obs }}",
+              "type": "string"
+            },
+            {
+              "id": "3f52b47d-94c1-46f6-9316-b812208b0783",
+              "name": "especificacoes",
+              "value": "={{ $('When Executed by Another Workflow').item.json.especificacoes }}",
+              "type": "object"
+            },
+            {
+              "id": "a73f0334-7dc0-4771-b97b-2dcdfb835841",
+              "name": "todos_os_produtos",
+              "value": "={\n\"{{ $json.todos_os_produtos.isopor[0].nome }}\": {{ $json.todos_os_produtos.isopor[0].preco_base }},\n\"{{ $json.todos_os_produtos.malhas[0].nome }}\": {{ $json.todos_os_produtos.malhas[0].preco_base }},\n\"{{ $json.todos_os_produtos.malhas[1].nome }}\":{{ $json.todos_os_produtos.malhas[1].preco_base }},\n\"{{ $json.todos_os_produtos.malhas[2].nome }}\":{{ $json.todos_os_produtos.malhas[2].preco_base }},\n\"Trelica\":{{ $json.todos_os_produtos.trelicas[0].preco_base }}\n}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -220,
+        520
+      ],
+      "id": "863166c7-e3c4-4ed4-8b86-02eccf935247",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    jsonb_build_object(\n        'trelicas', (SELECT jsonb_agg(jsonb_build_object('nome', nome, 'preco_base', preco_base)) FROM produtos_precos WHERE nome ILIKE '%' || 'treliça concretada' || '%'),\n        'malhas', (SELECT jsonb_agg(jsonb_build_object('nome', nome, 'preco_base', preco_base)) FROM produtos_precos WHERE nome ILIKE '%' || 'malha' || '%'),\n        'isopor', (SELECT jsonb_agg(jsonb_build_object('nome', nome, 'preco_base', preco_base)) FROM produtos_precos WHERE nome ILIKE '%' || 'isopor h7/33' || '%'),\n        'lajotas', (SELECT jsonb_agg(jsonb_build_object('nome', nome, 'preco_base', preco_base)) FROM produtos_precos WHERE nome ILIKE '%' || 'lajota' || '%')\n    ) AS todos_os_produtos;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -360,
+        520
+      ],
+      "id": "2df612a0-543d-4f89-b08a-4635b81e44d6",
+      "name": "preco"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a8d09a04-366c-4437-84ea-71af04d25142",
+              "leftValue": "={{ $json.supervisor }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -700,
+        860
+      ],
+      "id": "ffd484ba-6d94-4631-9e2b-268a9c98f632",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1680,
+        860
+      ],
+      "id": "312799e5-5be7-4644-9d39-e0aa24f3ea81",
+      "name": "When chat message received",
+      "webhookId": "4e20aa85-9b8f-4bf1-aa96-147bdfb044b4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// A entrada do array de produtos agora vem de $input.first().json.json_agg\nconst produtosLista = $input.first().json.json_agg || [];\n\n// O nome do produto a ser buscado vem do primeiro item de saída do nó 'Switch'\nconst nomeParaBuscar = $('Switch').first().json.NomeProduto || '';\n\n// --- Funções Auxiliares (mantidas iguais) ---\nfunction normalizeString(str) {\n    if (typeof str !== 'string') {\n        return '';\n    }\n    return str\n        .normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\")\n        .toLowerCase()\n        .replace(/\\s+/g, ' ')\n        .trim();\n}\n\n/**\n * Nova Função: Busca por todos os produtos que correspondem ao termo,\n * ordenando-os por relevância.\n * @param {string} nomeProdutoBuscado - O nome do produto que se deseja buscar (ex: \"vergalhão\").\n * @param {Array<Object>} listaProdutos - O array de objetos de produtos.\n * @returns {Array<Object>} - Um array de objetos de produtos encontrados, ordenados por pontuação.\n */\nfunction buscarTodosProdutosFlexivel(nomeProdutoBuscado, listaProdutos) {\n    const termoBuscadoNormalizado = normalizeString(nomeProdutoBuscado);\n    const termosSeparadosBuscado = termoBuscadoNormalizado.split(' ').filter(t => t.length > 1);\n\n    const resultadosCandidatos = [];\n\n    // Definir um LIMITE MÍNIMO DE PONTUAÇÃO para que um produto seja considerado relevante\n    // Ajuste este valor. Para buscar \"vergalhão\" e pegar todos, 1 ou 0.5 pode ser suficiente\n    // dependendo da pontuação que você espera para uma única correspondência de palavra.\n    // Se quiser que apenas a palavra \"vergalhao\" já seja suficiente, 0.5 (se pontuado) ou 1.\n    const PONTUACAO_MINIMA_PARA_INCLUSAO = 0.5; // Ex: se apenas uma palavra como \"vergalhao\" é encontrada\n\n    for (const produto of listaProdutos) {\n        const nomeProdutoNormalizado = normalizeString(produto.nome);\n        let pontuacaoAtual = 0;\n\n        // --- Lógica de Pontuação (similar à anterior) ---\n\n        // Prioriza correspondência exata ou quando o termo buscado está contido no nome do produto\n        if (nomeProdutoNormalizado === termoBuscadoNormalizado ||\n            nomeProdutoNormalizado.includes(termoBuscadoNormalizado) ||\n            termoBuscadoNormalizado.includes(nomeProdutoNormalizado)) {\n            pontuacaoAtual += 10; // Alta pontuação para correspondência forte/exata\n        }\n\n        // Pontua por cada palavra encontrada\n        for (const termo of termosSeparadosBuscado) {\n            if (nomeProdutoNormalizado.includes(termo)) {\n                pontuacaoAtual++;\n            }\n        }\n\n        // Pontuação extra para manter a categoria \"vergalhao\"\n        if (termoBuscadoNormalizado.includes('vergalhao') && nomeProdutoNormalizado.includes('vergalhao')) {\n            pontuacaoAtual += 2;\n        }\n        // Adicione outras categorias aqui se desejar (ex: 'malha', 'isopor')\n\n        // Lógica para priorizar bitolas próximas (mantida para relevância de ordem)\n        const bitolaBuscadaMatch = termoBuscadoNormalizado.match(/f(\\d+(\\.\\d+)?)/);\n        const bitolaProdutoMatch = nomeProdutoNormalizado.match(/f(\\d+(\\.\\d+)?)/);\n\n        if (bitolaBuscadaMatch && bitolaProdutoMatch) {\n            const bitolaBuscada = parseFloat(bitolaBuscadaMatch[1]);\n            const bitolaProduto = parseFloat(bitolaProdutoMatch[1]);\n            const diferencaBitola = Math.abs(bitolaBuscada - bitolaProduto);\n\n            if (diferencaBitola < 1) {\n                pontuacaoAtual += 1.5;\n            } else if (diferencaBitola < 3) {\n                pontuacaoAtual += 0.5;\n            }\n        }\n        // --- Fim da Lógica de Pontuação ---\n\n        // Adiciona o produto aos resultados se a pontuação for suficiente\n        if (pontuacaoAtual >= PONTUACAO_MINIMA_PARA_INCLUSAO) {\n            resultadosCandidatos.push({\n                produto: produto,\n                pontuacao: pontuacaoAtual\n            });\n        }\n    }\n\n    // Ordena os resultados pelos que têm maior pontuação primeiro\n    resultadosCandidatos.sort((a, b) => b.pontuacao - a.pontuacao);\n\n    // Retorna apenas os objetos de produto, descartando a pontuação extra\n    return resultadosCandidatos.map(item => item.produto);\n}\n\n// --- Execução da busca com NomeProduto do input ---\n// Agora chamamos a nova função que retorna um ARRAY\nconst produtosEncontrados = buscarTodosProdutosFlexivel(nomeParaBuscar, produtosLista);\n\n// Objeto de detalhes padrão para garantir a estrutura completa\nconst defaultDetalhes = {\n    \"bitola\": \"\", \"modelo\": \"\", \"bitola_estribo\": \"\", \"espacamento_estribo\": \"\",\n    \"tamanho_estribo\": \"\", \"espacamento_fios\": \"\", \"tamanho\": \"\", \"altura\": \"\",\n    \"largura\": \"\", \"comprimento\": \"\", \"material\": \"\", \"codigo\": \"\",\n    \"referencia\": \"\", \"descricao\": \"\", \"tipo\": \"\", \"categoria\": \"\", \"tipo_uso\": \"\",\n    \"min\": null, \"max\": null, \"step\": null\n};\n\n// Mapeia os produtos encontrados para o formato de saída desejado\nconst saidaProdutosFormatados = produtosEncontrados.map(produto => {\n    let detalhesFinais = { ...defaultDetalhes, ...(produto.detalhes || {}) };\n\n    if (typeof produto.min !== 'undefined') detalhesFinais.min = produto.min;\n    if (typeof produto.max !== 'undefined') detalhesFinais.max = produto.max;\n    if (typeof produto.step !== 'undefined') detalhesFinais.step = produto.step;\n\n    return {\n        nome: produto.nome,\n        tipo_principal_produto: produto.tipo,\n        preco_base: parseFloat(produto.preco_base),\n        unidade: produto.unidade,\n        detalhes: detalhesFinais\n    };\n});\n\n\n// --- Retorno para o n8n ---\nreturn [\n    {\n        json: {\n            // Se você precisa dos detalhes do input original, pode adicioná-los aqui\n            // Por exemplo, NomeProduto buscado:\n            nome_produto_buscado: nomeParaBuscar,\n            // Retorna o array de produtos encontrados\n            produtos_correspondentes: saidaProdutosFormatados,\n            // Uma flag para saber se algum produto foi encontrado\n            algum_produto_encontrado: saidaProdutosFormatados.length > 0\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "fffb63c0-aaae-4b16-b289-c11ad1515c00",
+      "name": "Code3"
+    }
+  ],
+  "connections": {
+    "produtos_mais_cotados": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory SDR": {
+      "ai_memory": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_preco": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ultimos_orcamentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcular_laje": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcular_ferragem_personalizada": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "ReadPreco",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ReadOrc",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CalcTotal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "preco",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CalcTotal": {
+      "main": [
+        [
+          {
+            "node": "InsertOrc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IfModoCalc": {
+      "main": [
+        [
+          {
+            "node": "CalcLajeC*L",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CalcLajeA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SDR": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "IfModoCalc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "preco": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "SDR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReadPreco": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "operation": "preco_produto",
+          "tableName": "produtos_precos",
+          "especificacoes": null,
+          "ferragem": null,
+          "detalhes": {
+            "bitola": "",
+            "modelo": "",
+            "bitola_estribo": "",
+            "espacamento_estribo": "",
+            "tamanho_estribo": "",
+            "espacamento_fios": "",
+            "tamanho": "",
+            "altura": "",
+            "largura": "",
+            "comprimento": "",
+            "material": "",
+            "codigo": "",
+            "referencia": "",
+            "descricao": "",
+            "tipo": "",
+            "categoria": "",
+            "tipo_uso": ""
+          },
+          "NomeProduto": "brita",
+          "leadid": null,
+          "Produtos": null,
+          "Obs": null,
+          "Status": null
+        }
+      }
+    ]
+  },
+  "versionId": "e9d0d9a0-2d25-48f5-8998-82955a2faeb0",
+  "triggerCount": 0,
+  "tags": []
+}
