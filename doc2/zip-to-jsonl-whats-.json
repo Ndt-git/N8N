@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:51:50.828Z",
-  "updatedAt": "2025-07-11T01:14:59.662Z",
+  "updatedAt": "2025-07-11T19:47:55.260Z",
   "id": "2GUWbA9vo8uoHomd",
   "name": "zip to JSONL whats",
   "active": false,
@@ -12,20 +12,20 @@
       "typeVersion": 1,
       "position": [
         40,
-        0
+        650
       ],
       "id": "40dc8559-e583-4d1b-9998-ea0c56474ab3",
       "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
-        "command": "=unzip -o \"{{ $('Loop Over Items').item.json.path }}\" -d \"/mnt/externo/whatsapp_exports/extracted/{{ $('numero').item.json.numero }}\"\n"
+        "command": "=unzip -o \"{{ $('Loop Over Items').item.json.path }}\" -d \"/mnt/externo/whatsapp_exports/extracted/n{{ $('numero').item.json.numero }}\"\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1680,
-        -60
+        2020,
+        -245
       ],
       "id": "14391f93-74ab-4bcd-8f24-ca807b164c0b",
       "name": "Extrair zip"
@@ -38,7 +38,7 @@
       "typeVersion": 1,
       "position": [
         260,
-        0
+        650
       ],
       "id": "a7950f7f-c4fb-4e80-9b5f-818068d346cb",
       "name": "list .zip"
@@ -50,8 +50,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1260,
-        0
+        1140,
+        -95
       ],
       "id": "1773d076-ac6a-499a-b4cc-d572c94c0b8b",
       "name": "list past extraidos"
@@ -63,8 +63,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        440,
-        0
+        480,
+        650
       ],
       "id": "b424a8db-b4dc-4ab2-9c26-0aedc89c4f83",
       "name": "Code1"
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        720,
-        0
+        700,
+        660
       ],
       "id": "c6b32a67-f480-4f34-b943-7469df578afe",
       "name": "Loop Over Items"
@@ -88,8 +88,8 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        5000,
-        660
+        6380,
+        500
       ],
       "id": "678a4bc9-5f9c-4a71-87e5-db98de2b0876"
     },
@@ -105,7 +105,7 @@
           "conditions": [
             {
               "id": "4c50ea02-80b5-4a1f-a752-54a4d7a120d0",
-              "leftValue": "={{ $('list past extraidos').item.json.stdout }}",
+              "leftValue": "={{ $json.stdout }}",
               "rightValue": "={{ $('numero').item.json.numero }}",
               "operator": {
                 "type": "string",
@@ -120,22 +120,22 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1420,
-        0
+        1580,
+        -95
       ],
       "id": "434aa013-0197-403e-b51a-6231a6ac5bfe",
       "name": "If"
     },
     {
       "parameters": {
-        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('numero').item.json.numero }}/Conversa do WhatsApp com +55 {{ $('numero').item.json.numero }}.txt",
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/n{{ $('numero').item.json.numero }}/Conversa do WhatsApp com +55 {{ $('numero').item.json.numero }}.txt",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        1960,
-        20
+        2240,
+        -195
       ],
       "id": "b2eabda7-d23e-4fe4-9e5d-3061f3e1292d",
       "name": "Read/Write Files from Disk"
@@ -148,8 +148,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        2180,
-        20
+        2460,
+        -195
       ],
       "id": "02675593-ea49-48da-9d4b-f35c3fe3d2bf",
       "name": "Extract from File"
@@ -161,8 +161,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2360,
-        20
+        2680,
+        -195
       ],
       "id": "b685f0cb-fee9-4a83-af2e-499ff178015f",
       "name": "Code"
@@ -181,7 +181,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "=texto",
+                    "leftValue": "=imagem",
                     "rightValue": "={{ $json.tipo }}",
                     "operator": {
                       "type": "string",
@@ -193,32 +193,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "TEXTO"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "e7af592e-d78d-4b72-8019-82c38e002938",
-                    "leftValue": "audio",
-                    "rightValue": "={{ $json.tipo }}",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "AUDIO"
+              "outputKey": "IMAGEM"
             },
             {
               "conditions": {
@@ -255,8 +230,8 @@
                 },
                 "conditions": [
                   {
-                    "id": "045b4889-6dc7-4861-b5ae-07b9710d4467",
-                    "leftValue": "imagem",
+                    "id": "e7af592e-d78d-4b72-8019-82c38e002938",
+                    "leftValue": "audio",
                     "rightValue": "={{ $json.tipo }}",
                     "operator": {
                       "type": "string",
@@ -268,7 +243,32 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "IMAGEM"
+              "outputKey": "AUDIO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "045b4889-6dc7-4861-b5ae-07b9710d4467",
+                    "leftValue": "texto",
+                    "rightValue": "={{ $json.tipo }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXTO"
             },
             {
               "conditions": {
@@ -302,8 +302,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2580,
-        20
+        3540,
+        140
       ],
       "id": "cd1bf749-14c3-4fe9-91d6-38c5c78f6ab0",
       "name": "Switch"
@@ -331,8 +331,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3360,
-        -120
+        4420,
+        340
       ],
       "id": "8607d942-ceef-4533-8dd0-bda4c9d62838",
       "name": "Edit Fields"
@@ -375,8 +375,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3200,
-        20
+        4200,
+        140
       ],
       "id": "466d3382-6730-4dfa-926f-c46499df9384",
       "name": "HTTP Request",
@@ -389,14 +389,14 @@
     },
     {
       "parameters": {
-        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/n{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        2940,
-        20
+        3900,
+        140
       ],
       "id": "6877b4cb-5912-4d02-985f-7c642786474e",
       "name": "Read/Write Files from Disk1"
@@ -424,58 +424,36 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3500,
-        20
+        4700,
+        140
       ],
       "id": "d03dc096-7341-4c7f-92eb-6df3bdb37653",
       "name": "Edit Fields1"
     },
     {
       "parameters": {
-        "mode": "combine",
-        "mergeByFields": {
-          "values": [
-            {
-              "field1": "index",
-              "field2": "index"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "f15aa195-2008-4f9c-b8a0-2feb258da85b",
-      "name": "Merge By Index",
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 2,
-      "position": [
-        4220,
-        -300
-      ]
-    },
-    {
-      "parameters": {
-        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/n{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        2940,
-        200
+        3800,
+        -20
       ],
       "id": "14510ee4-7705-4d82-854b-406100a0dded",
       "name": "Read/Write Files from Disk2"
     },
     {
       "parameters": {
-        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/n{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        2940,
-        400
+        3740,
+        -220
       ],
       "id": "43d015df-f3d0-4654-911a-d9497633193c",
       "name": "Read/Write Files from Disk3"
@@ -488,8 +466,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        3160,
-        200
+        4020,
+        -20
       ],
       "id": "9b7b4f47-ac70-42bc-b629-e92fd6ba4e05",
       "name": "Extract from File1"
@@ -501,8 +479,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3380,
-        200
+        4500,
+        -20
       ],
       "id": "c3c8d20c-6e1a-419e-9832-7bfb06024ee3",
       "name": "Code2"
@@ -514,7 +492,7 @@
             {
               "id": "52dd6b8c-deaa-4371-8a34-581a02a64363",
               "name": "mensagem",
-              "value": "={{ $json.text }}",
+              "value": "={{ $json.tipo_pdf }}\n{{ $json.texto_pdf }}",
               "type": "string"
             },
             {
@@ -530,8 +508,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3580,
-        200
+        4740,
+        -80
       ],
       "id": "eff981e5-618d-44c4-9e95-91ec2f681ba9",
       "name": "Edit Fields2"
@@ -543,8 +521,8 @@
       "type": "n8n-nodes-tesseractjs.tesseractNode",
       "typeVersion": 1,
       "position": [
-        3160,
-        400
+        3960,
+        -220
       ],
       "id": "55f64a74-18c9-4c65-ba6c-55a9b6b6f1a4",
       "name": "Tesseract"
@@ -572,8 +550,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3700,
-        400
+        4760,
+        -220
       ],
       "id": "e67f00de-200b-46cd-89e3-9cda7e3379da",
       "name": "Edit Fields3"
@@ -594,8 +572,8 @@
       "type": "@n8n/n8n-nodes-langchain.informationExtractor",
       "typeVersion": 1.2,
       "position": [
-        3380,
-        400
+        4180,
+        -220
       ],
       "id": "cd8f9a56-cc0c-496b-97d1-40e88670d7f8",
       "name": "Information Extractor"
@@ -608,8 +586,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        3360,
-        620
+        4080,
+        -120
       ],
       "id": "8e833486-4a04-442f-a977-c6c277d5549a",
       "name": "Google Gemini Chat Model",
@@ -619,19 +597,6 @@
           "name": "Google Gemini(PaLM) Api account"
         }
       }
-    },
-    {
-      "parameters": {
-        "numberInputs": 5
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        4060,
-        80
-      ],
-      "id": "06356fad-16ff-4897-b74f-606ec6ed308a",
-      "name": "Merge"
     },
     {
       "parameters": {
@@ -647,15 +612,15 @@
       "type": "n8n-nodes-base.sort",
       "typeVersion": 1,
       "position": [
-        4440,
-        -300
+        5460,
+        -245
       ],
       "id": "bb01cfd6-dac7-469f-98ae-ebf0e5fd52af",
       "name": "Sort"
     },
     {
       "parameters": {
-        "fileName": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Code3').item.json.numero }}/{{ $('Code3').item.json.numero }}.jsonl",
+        "fileName": "=/mnt/externo/whatsapp_exports/extracted/n{{ $('Code3').item.json.numero }}/{{ $('Code3').item.json.numero }}.jsonl",
         "options": {}
       },
       "id": "debdaa61-bf3f-430d-ab76-2832dfa392ca",
@@ -663,8 +628,8 @@
       "type": "n8n-nodes-base.writeBinaryFile",
       "typeVersion": 1,
       "position": [
-        5140,
-        -300
+        6120,
+        -245
       ]
     },
     {
@@ -674,8 +639,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4660,
-        -300
+        5680,
+        -245
       ],
       "id": "04f24e52-4fa7-46a0-bcfd-fbcbdeb805be",
       "name": "Code3"
@@ -691,8 +656,8 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        4880,
-        -300
+        5900,
+        -245
       ],
       "id": "608c13ff-8463-48c5-ab03-2b471b56373b",
       "name": "Convert to File"
@@ -715,11 +680,129 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        960,
-        20
+        920,
+        -95
       ],
       "id": "8cd61bdb-6492-4c29-bd5e-15cd3be39d1a",
       "name": "numero"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1920424-aedc-4364-a708-dfdc88f17cc2",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2020,
+        420
+      ],
+      "id": "8d107deb-ac53-4c67-beb8-3477ed502fe0",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "command": "=find \"/mnt/externo/whatsapp_exports/extracted/n{{ $('numero').item.json.numero }}\" -name \"{{ $('numero').item.json.numero }}.jsonl\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        420
+      ],
+      "id": "d649bfaa-b57e-49ce-bbfe-c29dd1fcb0f3",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        500
+      ],
+      "id": "7ee30f13-43a9-4bd3-8680-7733792a0bb5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3100,
+        60
+      ],
+      "id": "ba978bfe-ff0e-47b0-b765-102a4d337907",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me2",
+      "typeVersion": 1,
+      "position": [
+        5480,
+        320
+      ],
+      "id": "db38aa0c-9333-4ed8-8333-884f1725d61c"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "index",
+              "field2": "index"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3f9db49c-9dcf-47df-989b-ff8f3a4c9c48",
+      "name": "Merge By Index",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        5180,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ (Math.floor(Math.random() * (1000 - 100 + 1)) + 100)/100 }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4420,
+        140
+      ],
+      "id": "026b0d65-d4b8-4f47-a710-4d0555d8224b",
+      "name": "Wait",
+      "webhookId": "f1705b02-fa2f-4a5c-8589-447cf5e7dd7b"
     }
   ],
   "connections": {
@@ -812,7 +895,7 @@
         ],
         [
           {
-            "node": "Read/Write Files from Disk",
+            "node": "Execute Command",
             "type": "main",
             "index": 0
           }
@@ -845,7 +928,7 @@
       "main": [
         [
           {
-            "node": "Switch",
+            "node": "Loop Over Items1",
             "type": "main",
             "index": 0
           },
@@ -861,14 +944,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Read/Write Files from Disk1",
+            "node": "Read/Write Files from Disk3",
             "type": "main",
             "index": 0
           }
@@ -882,11 +958,19 @@
         ],
         [
           {
-            "node": "Read/Write Files from Disk3",
+            "node": "Read/Write Files from Disk1",
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     },
     "Read/Write Files from Disk1": {
@@ -904,18 +988,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge By Index": {
-      "main": [
-        [
-          {
-            "node": "Sort",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -1003,7 +1076,7 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Replace Me2",
             "type": "main",
             "index": 0
           }
@@ -1014,9 +1087,9 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Replace Me2",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -1025,9 +1098,9 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Replace Me2",
             "type": "main",
-            "index": 2
+            "index": 0
           }
         ]
       ]
@@ -1036,20 +1109,9 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Replace Me2",
             "type": "main",
-            "index": 3
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        [
-          {
-            "node": "Merge By Index",
-            "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -1108,6 +1170,97 @@
           }
         ]
       ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Merge By Index",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge By Index": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1118,7 +1271,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8dfe360d-5aab-40da-a7ba-c804ca1cebf2",
+  "versionId": "d8f03fa7-5242-4391-8b41-b7115cabe3ef",
   "triggerCount": 0,
   "tags": []
 }
