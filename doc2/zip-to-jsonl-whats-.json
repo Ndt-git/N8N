@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:51:50.828Z",
-  "updatedAt": "2025-07-10T22:41:21.140Z",
+  "updatedAt": "2025-07-11T01:14:59.662Z",
   "id": "2GUWbA9vo8uoHomd",
   "name": "zip to JSONL whats",
   "active": false,
@@ -19,12 +19,12 @@
     },
     {
       "parameters": {
-        "command": "=unzip -o \"{{ $('Loop Over Items').item.json.path }}\" -d \"/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}\"\n"
+        "command": "=unzip -o \"{{ $('Loop Over Items').item.json.path }}\" -d \"/mnt/externo/whatsapp_exports/extracted/{{ $('numero').item.json.numero }}\"\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1460,
+        1680,
         -60
       ],
       "id": "14391f93-74ab-4bcd-8f24-ca807b164c0b",
@@ -50,7 +50,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1040,
+        1260,
         0
       ],
       "id": "1773d076-ac6a-499a-b4cc-d572c94c0b8b",
@@ -88,8 +88,8 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        2180,
-        280
+        5000,
+        660
       ],
       "id": "678a4bc9-5f9c-4a71-87e5-db98de2b0876"
     },
@@ -106,7 +106,7 @@
             {
               "id": "4c50ea02-80b5-4a1f-a752-54a4d7a120d0",
               "leftValue": "={{ $('list past extraidos').item.json.stdout }}",
-              "rightValue": "={{ $('Loop Over Items').item.json.path.replace(/\\/$/, '').split('/').pop().match(/\\+55 (\\d{2} \\d{4}-\\d{4})|(\\d{2} \\d{5}-\\d{4})|(\\d{2} \\d{4}-\\d{5})/)?.filter(match => match)[1] || '' }}",
+              "rightValue": "={{ $('numero').item.json.numero }}",
               "operator": {
                 "type": "string",
                 "operation": "notContains"
@@ -120,7 +120,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1200,
+        1420,
         0
       ],
       "id": "434aa013-0197-403e-b51a-6231a6ac5bfe",
@@ -128,13 +128,13 @@
     },
     {
       "parameters": {
-        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/Conversa do WhatsApp com +55 {{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}.txt",
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('numero').item.json.numero }}/Conversa do WhatsApp com +55 {{ $('numero').item.json.numero }}.txt",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        1740,
+        1960,
         20
       ],
       "id": "b2eabda7-d23e-4fe4-9e5d-3061f3e1292d",
@@ -148,7 +148,7 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        1960,
+        2180,
         20
       ],
       "id": "02675593-ea49-48da-9d4b-f35c3fe3d2bf",
@@ -156,12 +156,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const text = $input.first().json.data;\nconst lines = text.split('\\n');\n\nconst result = [];\nlet lastMessage = null;\n\nfor (const line of lines) {\n    const match = line.match(/^(\\d{2}\\/\\d{2}\\/\\d{4}) (\\d{2}:\\d{2}) - (.*?): (.*)$/);\n    if (match) {\n        const [_, data, hora, remetente1, mensagem] = match;\n        let tipo = \"texto\";\n        let arquivo = null;\n        let mensagem_final = mensagem;\n\n        // Determina se é vendedor ou cliente\n        let remetente = (remetente1.trim() === \"Guardião Lajes\") ? \"vendedor\" : \"cliente\";\n\n        if (mensagem.includes('(arquivo anexado)')) {\n            const fileMatch = mensagem.match(/([\\w\\s\\-\\.\\(\\)]+\\.(opus|mp3|pdf|jpg|jpeg|png))/i);\n            if (fileMatch) {\n                arquivo = fileMatch[1].trim();\n                if (arquivo.match(/\\.(opus|mp3)$/i)) {\n                    tipo = 'audio';\n                    mensagem_final = `#ANEXO_AUDIO:${arquivo}`;\n                } else if (arquivo.endsWith('.pdf')) {\n                    tipo = 'pdf';\n                    mensagem_final = `#ANEXO_PDF:${arquivo}`;\n                } else if (arquivo.match(/\\.(jpg|jpeg|png)$/i)) {\n                    tipo = 'imagem';\n                    mensagem_final = `#ANEXO_IMAGEM:${arquivo}`;\n                } else {\n                    tipo = 'arquivo';\n                    mensagem_final = `#ANEXO:${arquivo}`;\n                }\n            } else {\n                tipo = 'arquivo';\n                mensagem_final = `#ANEXO_INDEFINIDO`;\n            }\n        }\n\n        lastMessage = {\n            data,\n            hora,\n            remetente,   // campo adicional\n            mensagem: mensagem_final,\n            tipo,\n            arquivo\n        };\n\n        result.push({ json: lastMessage });\n    } else if (lastMessage && line.trim() !== '') {\n        // Adiciona linhas quebradas como continuação da última mensagem\n        lastMessage.mensagem += ' ' + line.trim();\n    }\n}\n\nreturn result;\n"
+        "jsCode": "const text = $input.first().json.data;\nconst lines = text.split('\\n');\nlet i = 0;\n\nconst result = [];\nlet lastMessage = null;\n\nfor (const line of lines) {\n    const match = line.match(/^(\\d{2}\\/\\d{2}\\/\\d{4}) (\\d{2}:\\d{2}) - (.*?): (.*)$/);\n    if (match) {\n        const [_, data, hora, remetente1, mensagem] = match;\n        let tipo = \"texto\";\n        let arquivo = null;\n        let mensagem_final = mensagem;\n\n        // Determina se é vendedor ou cliente\n        let remetente = (remetente1.trim() === \"Guardião Lajes\") ? \"vendedor\" : \"cliente\";\n\n        if (mensagem.includes('(arquivo anexado)')) {\n            const fileMatch = mensagem.match(/([\\w\\s\\-\\.\\(\\)]+\\.(opus|mp3|pdf|jpg|jpeg|png))/i);\n            if (fileMatch) {\n                arquivo = fileMatch[1].trim();\n                if (arquivo.match(/\\.(opus|mp3)$/i)) {\n                    tipo = 'audio';\n                    mensagem_final = `#ANEXO_AUDIO:${arquivo}`;\n                } else if (arquivo.endsWith('.pdf')) {\n                    tipo = 'pdf';\n                    mensagem_final = `#ANEXO_PDF:${arquivo}`;\n                } else if (arquivo.match(/\\.(jpg|jpeg|png)$/i)) {\n                    tipo = 'imagem';\n                    mensagem_final = `#ANEXO_IMAGEM:${arquivo}`;\n                } else {\n                    tipo = 'arquivo';\n                    mensagem_final = `#ANEXO:${arquivo}`;\n                }\n            } else {\n                tipo = 'arquivo';\n                mensagem_final = `#ANEXO_INDEFINIDO`;\n            }\n        }\n\n        lastMessage = {\n            data,\n            hora,\n            remetente,   // campo adicional\n            mensagem: mensagem_final,\n            tipo,\n            arquivo,\n            index: i\n        };\n        i++;\n          \n\n        result.push({ json: lastMessage });\n    } else if (lastMessage && line.trim() !== '') {\n        // Adiciona linhas quebradas como continuação da última mensagem\n        lastMessage.mensagem += ' ' + line.trim();\n    }\n}\n\nreturn result;\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2140,
+        2360,
         20
       ],
       "id": "b685f0cb-fee9-4a83-af2e-499ff178015f",
@@ -281,7 +281,7 @@
                 "conditions": [
                   {
                     "id": "63807e63-56dc-4472-b8df-3c079f8c1c0e",
-                    "leftValue": "indefinido",
+                    "leftValue": "arquivo",
                     "rightValue": "={{ $json.tipo }}",
                     "operator": {
                       "type": "string",
@@ -302,7 +302,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        2360,
+        2580,
         20
       ],
       "id": "cd1bf749-14c3-4fe9-91d6-38c5c78f6ab0",
@@ -317,6 +317,12 @@
               "name": "mensagem",
               "value": "={{ $json.mensagem }}",
               "type": "string"
+            },
+            {
+              "id": "f6bed8be-bb1b-4db0-a504-4d1b0c5116a7",
+              "name": "index",
+              "value": "={{ $('Switch').item.json.index }}",
+              "type": "number"
             }
           ]
         },
@@ -325,11 +331,395 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2880,
+        3360,
         -120
       ],
       "id": "8607d942-ceef-4533-8dd0-bda4c9d62838",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-large-v3-turbo"
+            },
+            {
+              "name": "temperature",
+              "value": "0"
+            },
+            {
+              "name": "response_format",
+              "value": "verbose_json"
+            },
+            {
+              "name": "language",
+              "value": "pt"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3200,
+        20
+      ],
+      "id": "466d3382-6730-4dfa-926f-c46499df9384",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KW0uLEkG9HB7moO8",
+          "name": "grok"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2940,
+        20
+      ],
+      "id": "6877b4cb-5912-4d02-985f-7c642786474e",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "52dd6b8c-deaa-4371-8a34-581a02a64363",
+              "name": "mensagem",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "68ace24c-7442-45e2-9647-d46f6533b99a",
+              "name": "index",
+              "value": "={{ $('Switch').item.json.index }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3500,
+        20
+      ],
+      "id": "d03dc096-7341-4c7f-92eb-6df3bdb37653",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "index",
+              "field2": "index"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f15aa195-2008-4f9c-b8a0-2feb258da85b",
+      "name": "Merge By Index",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        4220,
+        -300
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2940,
+        200
+      ],
+      "id": "14510ee4-7705-4d82-854b-406100a0dded",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}/{{ $json.arquivo }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2940,
+        400
+      ],
+      "id": "43d015df-f3d0-4654-911a-d9497633193c",
+      "name": "Read/Write Files from Disk3"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        200
+      ],
+      "id": "9b7b4f47-ac70-42bc-b629-e92fd6ba4e05",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.text || \"\";\n\nlet tipo_pdf = \"documento_generico\";\n\n// Verifica padrões\nif (text.match(/pix|comprovante|transfer[êe]ncia|banco/i)) {\n    tipo_pdf = \"comprovante_pagamento\";\n} else if (text.match(/orcamento|orçamento|val[oa]r total|pedido/i)) {\n    tipo_pdf = \"orcamento\";\n} else if (text.match(/nota fiscal|nf-e|chave de acesso/i)) {\n    tipo_pdf = \"nota_fiscal\";\n}\n\n// Retorna o tipo para roteamento\nreturn [\n    {\n        json: {\n            tipo_pdf,\n            texto_pdf: text // se quiser passar para o próximo passo\n        }\n    }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3380,
+        200
+      ],
+      "id": "c3c8d20c-6e1a-419e-9832-7bfb06024ee3",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "52dd6b8c-deaa-4371-8a34-581a02a64363",
+              "name": "mensagem",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "e22c7deb-05a3-4f45-9179-1f35118a5f80",
+              "name": "index",
+              "value": "={{ $('Switch').item.json.index }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3580,
+        200
+      ],
+      "id": "eff981e5-618d-44c4-9e95-91ec2f681ba9",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-tesseractjs.tesseractNode",
+      "typeVersion": 1,
+      "position": [
+        3160,
+        400
+      ],
+      "id": "55f64a74-18c9-4c65-ba6c-55a9b6b6f1a4",
+      "name": "Tesseract"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "343af6c9-4d48-43ce-b7fe-9e68033c4a06",
+              "name": "mensagem",
+              "value": "={{ $json.output.descricao_imagem }}",
+              "type": "string"
+            },
+            {
+              "id": "e607f7b1-508c-4aa7-a606-6955effcbe63",
+              "name": "index",
+              "value": "={{ $('Switch').item.json.index }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3700,
+        400
+      ],
+      "id": "e67f00de-200b-46cd-89e3-9cda7e3379da",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "descricao_imagem",
+              "description": "“Você é especialista em descrição de imagens para RAG. Receberá texto OCR extraído de imagens de WhatsApp ou documentos. Gere uma descrição curta e objetiva, cobrindo apenas:  O que há na imagem (ex: nota fiscal, tabela de preços, conversa).  Principais textos ou frases legíveis.  Layout geral (ex: tabela, parágrafos, colunas).  Evite detalhes desnecessários."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        3380,
+        400
+      ],
+      "id": "cd8f9a56-cc0c-496b-97d1-40e88670d7f8",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        620
+      ],
+      "id": "8e833486-4a04-442f-a977-c6c277d5549a",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOTIgGndJIkf9Pqy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4060,
+        80
+      ],
+      "id": "06356fad-16ff-4897-b74f-606ec6ed308a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "index"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        4440,
+        -300
+      ],
+      "id": "bb01cfd6-dac7-469f-98ae-ebf0e5fd52af",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "fileName": "=/mnt/externo/whatsapp_exports/extracted/{{ $('Code3').item.json.numero }}/{{ $('Code3').item.json.numero }}.jsonl",
+        "options": {}
+      },
+      "id": "debdaa61-bf3f-430d-ab76-2832dfa392ca",
+      "name": "Save JSONL File",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        5140,
+        -300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const jsonlLines = items.map(item => JSON.stringify(item.json));\nconst jsonlContent = jsonlLines.join('\\n');\nconst numero = $('numero').first().json.numero;\n\nreturn [{\n  json: {\n    data: jsonlContent,\n    fileName: `whatsapp_export_${Date.now()}`,\n    fileExtension: 'jsonl',\n  numero: numero\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4660,
+        -300
+      ],
+      "id": "04f24e52-4fa7-46a0-bcfd-fbcbdeb805be",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "data",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4880,
+        -300
+      ],
+      "id": "608c13ff-8463-48c5-ab03-2b471b56373b",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cb4863d5-dc62-4248-aeec-6be351113c55",
+              "name": "numero",
+              "value": "={{ $('Loop Over Items').item.json.path.split('/').pop().replace('.zip', '').match(/(\\d{2} \\d{4}-\\d{4})/)[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        960,
+        20
+      ],
+      "id": "8cd61bdb-6492-4c29-bd5e-15cd3be39d1a",
+      "name": "numero"
     }
   ],
   "connections": {
@@ -393,7 +783,7 @@
         [],
         [
           {
-            "node": "list past extraidos",
+            "node": "numero",
             "type": "main",
             "index": 0
           }
@@ -458,6 +848,11 @@
             "node": "Switch",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Merge By Index",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -470,6 +865,247 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read/Write Files from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge By Index": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk2": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk3": {
+      "main": [
+        [
+          {
+            "node": "Tesseract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tesseract": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge By Index",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Save JSONL File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "numero": {
+      "main": [
+        [
+          {
+            "node": "list past extraidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save JSONL File": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -478,9 +1114,11 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "e83a8ecf-c763-46e3-8a54-9850dbec035d",
+  "versionId": "8dfe360d-5aab-40da-a7ba-c804ca1cebf2",
   "triggerCount": 0,
   "tags": []
 }
