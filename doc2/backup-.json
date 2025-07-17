@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-10T22:51:46.724Z",
+  "updatedAt": "2025-07-11T19:48:49.870Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
   "active": true,
@@ -12,7 +12,7 @@
           "interval": [
             {
               "field": "hours",
-              "hoursInterval": 12
+              "hoursInterval": 6
             }
           ]
         }
@@ -914,14 +914,16 @@
   },
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        12
+      ]
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0f7d1174-3a4b-4b9a-b480-cb39b3abbb62",
+  "versionId": "af4e5122-ad44-418c-aefa-26d0c497a4db",
   "triggerCount": 1,
   "tags": []
 }
