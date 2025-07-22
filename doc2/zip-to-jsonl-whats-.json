@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:51:50.828Z",
-  "updatedAt": "2025-07-17T17:01:49.732Z",
+  "updatedAt": "2025-07-17T17:50:15.872Z",
   "id": "2GUWbA9vo8uoHomd",
   "name": "zip to JSONL whats",
   "active": false,
@@ -259,7 +259,7 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        5140,
+        5180,
         -280
       ],
       "id": "82116a23-04c7-4bae-8c9e-fa41f7b4b4df"
@@ -977,27 +977,6 @@
     },
     {
       "parameters": {
-        "operation": "push",
-        "list": "conversas extraidas",
-        "messageData": "={{ $json.fileName }}"
-      },
-      "type": "n8n-nodes-base.redis",
-      "typeVersion": 1,
-      "position": [
-        1000,
-        620
-      ],
-      "id": "43025c53-59f6-4f0f-9c9e-8707e8833866",
-      "name": "Redis",
-      "credentials": {
-        "redis": {
-          "id": "sA2U6PkBocrwko3a",
-          "name": "Redis account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
@@ -1067,6 +1046,27 @@
       ],
       "id": "636740cc-e7fd-480b-bd9f-e19c53c7b460",
       "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "conversas extraidas",
+        "messageData": "={{ $json.fileName }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5080,
+        -460
+      ],
+      "id": "ec8c7566-2655-457a-9ae2-abdc224add55",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1211,13 +1211,7 @@
     },
     "Loop Over Items": {
       "main": [
-        [
-          {
-            "node": "Redis",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [],
         [
           {
             "node": "numero",
@@ -1478,6 +1472,11 @@
             "node": "Replace Me",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1653,7 +1652,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2db19254-bdbb-4af7-932b-a5845ccd0baf",
+  "versionId": "4d451632-f249-4bcd-98b0-431c44b4a29c",
   "triggerCount": 0,
   "tags": []
 }
