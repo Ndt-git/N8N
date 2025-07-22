@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:57:34.653Z",
-  "updatedAt": "2025-07-10T20:22:02.014Z",
+  "updatedAt": "2025-07-22T16:51:04.756Z",
   "id": "4pdizWewQzdsLsGx",
   "name": "test_atentente",
   "active": false,
@@ -17,11 +17,17 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        -840,
-        1140
+        -1160,
+        1260
       ],
       "id": "494883fa-566a-4e2a-8b24-3ab5a5cc8492",
-      "name": "produtos_mais_cotados"
+      "name": "produtos_mais_cotados",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -34,8 +40,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        -1340,
-        860
+        -1660,
+        980
       ],
       "id": "3bcec1a6-a76f-4877-bf52-b4d8e8eae058",
       "name": "SDR",
@@ -52,11 +58,17 @@
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -1220,
-        1140
+        -1600,
+        1320
       ],
       "id": "a7a070fa-f83b-4a82-b514-ad68db876821",
-      "name": "Redis Chat Memory SDR"
+      "name": "Redis Chat Memory SDR",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -182,8 +194,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -1060,
-        1140
+        -1380,
+        1260
       ],
       "id": "f068cedf-ffa4-45a9-94bb-42c0da2f46fb",
       "name": "busca_preco"
@@ -315,8 +327,8 @@
       "name": "ultimos_orcamentos",
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "position": [
-        -960,
-        1160
+        -1280,
+        1280
       ],
       "typeVersion": 2.1
     },
@@ -449,8 +461,8 @@
       "name": "salvar_orcamento",
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "position": [
-        -720,
-        1160
+        -1040,
+        1280
       ],
       "typeVersion": 2.1
     },
@@ -459,8 +471,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        -620,
-        1140
+        -940,
+        1260
       ],
       "id": "74346f85-6ac9-46cd-b420-846af45b8c28",
       "name": "Calculator"
@@ -589,8 +601,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -520,
-        1160
+        -840,
+        1280
       ],
       "id": "24d43731-d2db-4586-84e2-062ab4c5f286",
       "name": "calcular_laje"
@@ -718,8 +730,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -400,
-        1140
+        -720,
+        1280
       ],
       "id": "83fa5f70-155e-41b6-a939-c954cd81af9e",
       "name": "calcular_ferragem_personalizada"
@@ -728,19 +740,26 @@
       "parameters": {
         "model": {
           "__rl": true,
+          "value": "gpt-4o",
           "mode": "list",
-          "value": "gpt-4o-mini"
+          "cachedResultName": "gpt-4o"
         },
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -1380,
-        1080
+        -1700,
+        1200
       ],
       "id": "a2e63d3a-1ce3-4156-b72f-9e411217e85a",
-      "name": "OpenAI Chat Model"
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3mNlZ20nDfXfgUl9",
+          "name": "OpenAi account"
+        }
+      }
     },
     {
       "parameters": {
@@ -778,6 +797,9 @@
             },
             {
               "name": "Status"
+            },
+            {
+              "name": "Query"
             }
           ]
         }
@@ -990,6 +1012,31 @@
               },
               "renameOutput": true,
               "outputKey": "CalcFer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "168e743c-1ce7-471e-b4bd-f4c37b543f6e",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "rag",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "RAG"
             }
           ]
         },
@@ -1018,7 +1065,13 @@
         0
       ],
       "typeVersion": 2.6,
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1034,7 +1087,13 @@
         160
       ],
       "typeVersion": 2.6,
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1076,7 +1135,13 @@
         340
       ],
       "id": "917c5ba7-3576-4dc9-b739-bd21f8f93cf3",
-      "name": "InsertOrc"
+      "name": "InsertOrc",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1145,8 +1210,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -220,
-        780
+        -280,
+        680
       ],
       "id": "a07cb8b6-a247-4845-8f3d-09e9f749c273",
       "name": "Code1"
@@ -1158,8 +1223,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -920,
-        860
+        -1240,
+        980
       ],
       "id": "5b951eae-dbb6-486a-bc63-d6cd105832f1",
       "name": "Code2"
@@ -1255,41 +1320,13 @@
         520
       ],
       "id": "2df612a0-543d-4f89-b08a-4635b81e44d6",
-      "name": "preco"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "a8d09a04-366c-4437-84ea-71af04d25142",
-              "leftValue": "={{ $json.supervisor }}",
-              "rightValue": "",
-              "operator": {
-                "type": "boolean",
-                "operation": "false",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -700,
-        860
-      ],
-      "id": "ffd484ba-6d94-4631-9e2b-268a9c98f632",
-      "name": "If"
+      "name": "preco",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1298,8 +1335,8 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1680,
-        860
+        -2000,
+        980
       ],
       "id": "312799e5-5be7-4644-9d39-e0aa24f3ea81",
       "name": "When chat message received",
@@ -1317,18 +1354,380 @@
       ],
       "id": "fffb63c0-aaae-4b16-b289-c11ad1515c00",
       "name": "Code3"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, title, content,\n       bm25_score_improved(advanced_tokenize('{{ $json.query }}'), tokens) AS bm25_score\nFROM documents\nWHERE tokens && advanced_tokenize('{{ $json.query }}')\nORDER BY bm25_score DESC\nLIMIT 10;\n",
+        "options": {}
+      },
+      "id": "353fc539-5abd-425d-b896-66579ce61b35",
+      "name": "BM25 Postgres",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        100,
+        760
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "\nSELECT\n    id,\n    title,\n    content,\n    1 - (embedding <=> '{{ $json[\"embeddings\"] ? '[' + $json[\"embeddings\"].join(\",\") + ']' : '[]' }}'::vector) AS similarity\nFROM\n    documents\nORDER BY\n    similarity DESC\nLIMIT 10;",
+        "options": {}
+      },
+      "id": "3d7960ab-23d4-49a4-8143-85ecf51e61bb",
+      "name": "Vector PGVector",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [
+        120,
+        1000
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cohere.com/v1/embed",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"embed-english-v3.0\",\n  \"input_type\": \"search_document\",\n  \"texts\": [\n    \"{{ $json.query }}\"\n  ]\n} ",
+        "options": {}
+      },
+      "id": "c7982fd9-6359-452d-9e84-191edb6e8b3b",
+      "name": "Gerar_Embedding_Cohere1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -100,
+        1000
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OyCraanHEQ1O0xVC",
+          "name": "cohere"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        600,
+        940
+      ],
+      "id": "96c30c4a-08a4-40c8-9a70-37dc0551915d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const bm25Items = items[0].json ? items.map(item => item.json) : [];\nconst vectorItems = items[1].json ? items.map(item => item.json) : [];\n\nconst merged = {};\n\n// Indexar BM25\nfor (const item of bm25Items) {\n    merged[item.id] = { ...item };\n}\n\n// Indexar Vector\nfor (const item of vectorItems) {\n    if (!merged[item.id]) {\n        merged[item.id] = { ...item };\n    } else {\n        Object.assign(merged[item.id], item);\n    }\n}\n\n// Calcular score combinado e normalizar\nconst bm25Max = 20; // ajuste conforme seu dataset\nconst weightBm25 = 0.3;\nconst weightVector = 0.7;\n\nconst result = Object.values(merged).map(item => {\n    const bm25Norm = item.bm25_score ? item.bm25_score / bm25Max : 0;\n    const vectorNorm = item.similarity ?? 0;\n    const scoreCombinado = weightBm25 * bm25Norm + weightVector * vectorNorm;\n\n    return {\n        json: {\n            ...item,\n            bm25Norm,\n            vectorNorm,\n            scoreCombinado\n        }\n    };\n});\n\n// Ordenar descrescente pelo score_combinado\nresult.sort((a, b) => b.json.scoreCombinado - a.json.scoreCombinado);\n\nreturn result.slice(0, 5);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        940
+      ],
+      "id": "51a7f80e-e1c5-4ee7-9e84-b46562428b08",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO produtos_precos (nome, tipo, preco_base, unidade, detalhes) VALUES\n  ('Treliça Concretada', 'metro', 13.00, 'metro', '{\"min\": 0.5, \"max\": 8.0, \"step\": 0.1, \"categoria\": \"laje\", \"tipo_uso\": \"estrutura\"}'),\n\n  ('Malha Leve 20x20 F3.4', 'unidade', 55.00, 'unidade', '{\"tamanho\": \"2.00x3.00m\", \"bitola\": \"3.4mm\", \"espacamento_fios\": \"20x20\", \"categoria\": \"laje\", \"tipo_uso\": \"reforço\"}'),\n  ('Malha Media 15x15 F3.4', 'unidade', 65.00, 'unidade', '{\"tamanho\": \"2.00x3.00m\", \"bitola\": \"3.4mm\", \"espacamento_fios\": \"15x15\", \"categoria\": \"laje\", \"tipo_uso\": \"reforço\"}'),\n  ('Malha Reforçada 15x15 F4.2', 'unidade', 90.00, 'unidade', '{\"tamanho\": \"2.00x3.00m\", \"bitola\": \"4.2mm\", \"espacamento_fios\": \"15x15\", \"categoria\": \"laje\", \"tipo_uso\": \"reforço\"}'),\n\n  ('Isopor H7/33', 'unidade', 8.00, 'unidade', '{\"codigo\": \"H7/33\", \"altura\": \"6.5cm\", \"largura\": \"33cm\", \"comprimento\": \"100cm\", \"categoria\": \"laje\", \"tipo_uso\": \"enchimento\"}'),\n  ('Isopor H8/33', 'unidade', 9.50, 'unidade', '{\"codigo\": \"H8/33\", \"altura\": \"8cm\", \"largura\": \"33cm\", \"comprimento\": \"100cm\", \"categoria\": \"laje\", \"tipo_uso\": \"enchimento\"}'),\n  ('Isopor H8/40', 'unidade', 12.50, 'unidade', '{\"codigo\": \"H8/40\", \"altura\": \"8cm\", \"largura\": \"40cm\", \"comprimento\": \"100cm\", \"categoria\": \"laje\", \"tipo_uso\": \"enchimento\"}'),\n\n  ('Lajota Cerâmica', 'unidade', 1.40, 'unidade', '{\"material\": \"ceramica\", \"categoria\": \"laje\", \"tipo_uso\": \"enchimento\"}'),\n\n  ('Estribo 4.2mm', 'unidade', 0.75, 'unidade', '{\"bitola\": \"4.2mm\", \"modelo\": \"7x17\", \"categoria\": \"armacao\", \"tipo_uso\": \"reforco\"}'),\n  ('Estribo', 'custom', 13.00, 'Kg', '{\"tipo\": \"custom\", \"categoria\": \"armacao\"}'),\n\n  ('Ferragem F10', 'metro', 25.00, 'metro', '{\"min\": 0.0, \"max\": 12.0, \"step\": 0.1, \"tamanho_estribo\": \"7x17\", \"bitola_estribo\": \"4.2mm\", \"espacamento_estribo\": \"24cm\", \"categoria\": \"coluna\", \"tipo_uso\": \"armação\"}'),\n  ('Ferragem F12.5', 'metro', 40.00, 'metro', '{\"min\": 0.0, \"max\": 12.0, \"step\": 0.1, \"tamanho_estribo\": \"7x17\", \"bitola_estribo\": \"4.2mm\", \"espacamento_estribo\": \"24cm\", \"categoria\": \"coluna\", \"tipo_uso\": \"armação\"}'),\n  ('Ferragem F8', 'metro', 20.00, 'metro', '{\"min\": 0.0, \"max\": 12.0, \"step\": 0.1, \"tamanho_estribo\": \"7x17\", \"bitola_estribo\": \"4.2mm\", \"espacamento_estribo\": \"24cm\", \"categoria\": \"coluna\", \"tipo_uso\": \"armação\"}'),\n  ('Ferragem F6.3', 'metro', 16.00, 'metro', '{\"min\": 0.0, \"max\": 12.0, \"step\": 0.1, \"tamanho_estribo\": \"7x17\", \"bitola_estribo\": \"4.2mm\", \"espacamento_estribo\": \"24cm\", \"categoria\": \"coluna\", \"tipo_uso\": \"armação\"}'),\n  ('Ferragem F5', 'metro', 15.00, 'metro', '{\"min\": 0.0, \"max\": 12.0, \"step\": 0.1, \"tamanho_estribo\": \"7x17\", \"bitola_estribo\": \"4.2mm\", \"espacamento_estribo\": \"24cm\", \"categoria\": \"coluna\", \"tipo_uso\": \"armação\"}'),\n\n  ('Arame Queimado', 'unidade', 19.00, 'Kg', '{\"categoria\": \"armacao\", \"tipo_uso\": \"amarracao\"}'),\n\n  ('Caixa de Gordura', 'unidade', 20.00, 'unidade', '{\"modelo\": \"Quadrada\", \"categoria\": \"esgoto\", \"tipo_uso\": \"instalacao\"}'),\n  ('Caixa de Passagem', 'unidade', 20.00, 'unidade', '{\"modelo\": \"Redonda\", \"categoria\": \"esgoto\", \"tipo_uso\": \"instalacao\"}'),\n\n  ('Canaleta 9', 'unidade', 2.50, 'unidade', '{\"altura\": \"9cm\", \"largura\": \"16cm\", \"comprimento\": \"35cm\", \"categoria\": \"vedação\"}'),\n  ('Canaleta 14', 'unidade', 4.00, 'unidade', '{\"altura\": \"14cm\", \"largura\": \"19cm\", \"comprimento\": \"39cm\", \"categoria\": \"vedação\"}'),\n  ('Canaleta 19', 'unidade', 5.00, 'unidade', '{\"altura\": \"19cm\", \"largura\": \"19cm\", \"comprimento\": \"39cm\", \"categoria\": \"vedação\"}'),\n\n  ('Cobogo 2 Furo', 'unidade', 2.50, 'unidade', '{\"modelo\": \"2 furo\", \"altura\": \"19cm\", \"largura\": \"19cm\", \"comprimento\": \"39cm\", \"material\": \"cimento\"}'),\n  ('Cobogo Cimento', 'unidade', 15.50, 'unidade', '{\"modelo\": \"Veneziano\", \"material\": \"cimento\"}'),\n  ('Cobogó de Concreto', 'unidade', 20.00, 'unidade', '{\"modelo\": \"anti-chuva\", \"tamanho\": \"40x40cm\", \"material\": \"concreto\"}'),\n  ('Cobogó de Concreto', 'unidade', 20.00, 'unidade', '{\"modelo\": \"Flor\", \"tamanho\": \"40x40cm\", \"material\": \"concreto\"}'),\n  ('Cobogó de Concreto', 'unidade', 20.00, 'unidade', '{\"modelo\": \"taco chines\", \"tamanho\": \"40x40cm\", \"material\": \"concreto\"}'),\n  ('Cobogó de Concreto', 'unidade', 20.00, 'unidade', '{\"modelo\": \"4 pontas\", \"tamanho\": \"40x40cm\", \"material\": \"concreto\"}'),\n  ('Cobogó de Concreto', 'unidade', 20.00, 'unidade', '{\"modelo\": \"Arabe\", \"tamanho\": \"40x40cm\", \"material\": \"concreto\"}'),\n\n  ('Vergalhao F4.2mm', 'unidade', 13.00, 'unidade', '{\"bitola\": \"4.2mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}'),\n  ('Vergalhao F5mm', 'unidade', 21.00, 'unidade', '{\"bitola\": \"5mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}'),\n  ('Vergalhao F6.3mm', 'unidade', 32.00, 'unidade', '{\"bitola\": \"6.3mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}'),\n  ('Vergalhao F8mm', 'unidade', 45.00, 'unidade', '{\"bitola\": \"8mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}'),\n  ('Vergalhao F10mm', 'unidade', 65.00, 'unidade', '{\"bitola\": \"10mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}'),\n  ('Vergalhao F12.5mm', 'unidade', 100.00, 'unidade', '{\"bitola\": \"12mm\", \"comprimento\": \"12m\", \"categoria\": \"armação\"}');",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -840,
+        660
+      ],
+      "id": "21035aa7-35cb-4ad9-b2b4-fea4f8f14863",
+      "name": "inserir produtos",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE produtos_precos (\n  id SERIAL PRIMARY KEY,\n  nome TEXT NOT NULL,                          -- Ex: \"Coluna F10\"\n  tipo TEXT CHECK (tipo IN ('metro', 'unidade', 'custom')) NOT NULL,\n  preco_base NUMERIC(10,2) NOT NULL,           -- Ex: 25.00\n  unidade TEXT NOT NULL,                       -- Ex: \"m\" ou \"un\"\n  detalhes JSONB DEFAULT '{}'                  -- Ex: {\"modelo\": \"7x17\", \"bitola\": \"4.2mm\"}\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1000,
+        660
+      ],
+      "id": "33084609-8899-4af9-a8fc-1a28628a5781",
+      "name": "criar_table_produtos",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE leads (\n  id SERIAL PRIMARY KEY,\n  nome TEXT,\n  whatsapp VARCHAR(20) UNIQUE NOT NULL,\n  status TEXT DEFAULT 'Novo',\n  setor_atual TEXT DEFAULT 'SDR_hb',\n  etapa_funil TEXT,\n  criado_em TIMESTAMP DEFAULT NOW(),\n  atualizado_em TIMESTAMP DEFAULT NOW(),\n  observacoes TEXT\n);\nCREATE TABLE orcamentos (\n  id SERIAL PRIMARY KEY,\n  lead_id INTEGER REFERENCES leads(id) ON DELETE CASCADE,\n  produtos JSONB,\n  total NUMERIC(12,2),\n  data TIMESTAMP DEFAULT NOW(),\n  status TEXT DEFAULT 'Aberto'\n);\nCREATE TABLE interacoes (\n  id SERIAL PRIMARY KEY,\n  lead_id INTEGER REFERENCES leads(id) ON DELETE CASCADE,\n  mensagem TEXT,\n  quem TEXT,\n  tipo TEXT,\n  timestamp TIMESTAMP DEFAULT NOW()\n);\n--Constraints e Índices\nALTER TABLE orcamentos ADD CONSTRAINT chk_orcamento_status CHECK (\n  status IN ('Aberto', 'Enviado', 'Fechado', 'Perdido', 'Pago', 'Entregue-Pago', 'Entregue')\n);\n--Trigger de atualização automática:\nCREATE INDEX idx_orcamentos_lead_id ON orcamentos (lead_id);\nCREATE INDEX idx_orcamentos_status ON orcamentos (status);\nCREATE INDEX idx_interacoes_lead_id ON interacoes (lead_id);\nCREATE INDEX idx_leads_status ON leads (status);\nCREATE INDEX idx_leads_setor_atual ON leads (setor_atual);\nCREATE INDEX idx_leads_etapa_funil ON leads (etapa_funil);\n\nCREATE OR REPLACE FUNCTION update_updated_at_column()\nRETURNS TRIGGER AS $$\nBEGIN\n  NEW.atualizado_em = NOW();\n  RETURN NEW;\nEND;\n$$ LANGUAGE plpgsql;\n\nCREATE TRIGGER trg_leads_updated_at\nBEFORE UPDATE ON leads\nFOR EACH ROW\nEXECUTE FUNCTION update_updated_at_column();",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -680,
+        660
+      ],
+      "id": "3eee2d82-cebb-4a01-b333-622008f8f404",
+      "name": "criar_tables",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Busca documentos relevantes na base de conhecimento a partir da conversa do cliente",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $workflow.id }}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "rag",
+            "Query": "={{ $fromAI('Query', `Gere uma consulta otimizada para RAG com base no que voce vai responder ao cliente`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -600,
+        1280
+      ],
+      "id": "fd85bdb4-288a-4326-a568-5a51595ebc95",
+      "name": "RAG"
+    },
+    {
+      "parameters": {
+        "description": "Busca documentos relevantes na base de conhecimento a partir da conversa do cliente",
+        "workflowId": {
+          "__rl": true,
+          "value": "=Z7opcPwNBBX1666e",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "produtos": "=  {\n\"lista_produtos\": \"{{ $fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente', 'string', ) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}"
+          },
+          "matchingColumns": [
+            "produtos"
+          ],
+          "schema": [
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -1480,
+        1280
+      ],
+      "id": "44d00196-6201-43d9-bba5-27e98e9a8ba8",
+      "name": "Orcamento"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3520362-3a83-47e5-9ba3-4d562991a090",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "818bba9e-5995-4e63-bd27-b0d2e302c1dd",
+              "name": "content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "edd1bca7-324a-4137-aa05-00ecc5246611",
+              "name": "scoreCombinado",
+              "value": "={{ $json.scoreCombinado }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1020,
+        940
+      ],
+      "id": "0301e785-434d-4cc8-a58a-2b3a306967a7",
+      "name": "Edit Fields2"
     }
   ],
   "connections": {
     "produtos_mais_cotados": {
       "ai_tool": [
-        [
-          {
-            "node": "SDR",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Redis Chat Memory SDR": {
@@ -1344,13 +1743,7 @@
     },
     "busca_preco": {
       "ai_tool": [
-        [
-          {
-            "node": "SDR",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "ultimos_orcamentos": {
@@ -1377,24 +1770,12 @@
     },
     "calcular_laje": {
       "ai_tool": [
-        [
-          {
-            "node": "SDR",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "calcular_ferragem_personalizada": {
       "ai_tool": [
-        [
-          {
-            "node": "SDR",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "OpenAI Chat Model": {
@@ -1463,6 +1844,18 @@
         [
           {
             "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "BM25 Postgres",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gerar_Embedding_Cohere1",
             "type": "main",
             "index": 0
           }
@@ -1544,13 +1937,7 @@
     },
     "Code2": {
       "main": [
-        [
-          {
-            "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "When chat message received": {
@@ -1574,50 +1961,1181 @@
           }
         ]
       ]
+    },
+    "BM25 Postgres": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector PGVector": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Gerar_Embedding_Cohere1": {
+      "main": [
+        [
+          {
+            "node": "Vector PGVector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "criar_table_produtos": {
+      "main": [
+        [
+          {
+            "node": "inserir produtos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inserir produtos": {
+      "main": [
+        [
+          {
+            "node": "criar_tables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orcamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {
     "When Executed by Another Workflow": [
       {
         "json": {
-          "operation": "preco_produto",
-          "tableName": "produtos_precos",
+          "operation": "rag",
+          "tableName": null,
           "especificacoes": null,
           "ferragem": null,
-          "detalhes": {
-            "bitola": "",
-            "modelo": "",
-            "bitola_estribo": "",
-            "espacamento_estribo": "",
-            "tamanho_estribo": "",
-            "espacamento_fios": "",
-            "tamanho": "",
-            "altura": "",
-            "largura": "",
-            "comprimento": "",
-            "material": "",
-            "codigo": "",
-            "referencia": "",
-            "descricao": "",
-            "tipo": "",
-            "categoria": "",
-            "tipo_uso": ""
-          },
-          "NomeProduto": "brita",
+          "detalhes": null,
+          "NomeProduto": null,
           "leadid": null,
           "Produtos": null,
           "Obs": null,
-          "Status": null
+          "Status": null,
+          "Query": "cálculo de preço para 03 treliças de 6 metros cheia, 100 lajotas cerâmicas (barro), 01 malha de 3x2, 1 kilo de arame queimado, 2 vergalhão de 5.16 e ferragem armada 7x15 ferro 3x8 com preço por metro"
+        }
+      }
+    ],
+    "Gerar_Embedding_Cohere1": [
+      {
+        "json": {
+          "id": "0152e447-e808-48c7-93a3-3c92aa978229",
+          "texts": [
+            ""
+          ],
+          "embeddings": [
+            [
+              -0.019134521,
+              0.009681702,
+              -0.032043457,
+              -0.052490234,
+              0.032196045,
+              -0.0068359375,
+              -0.032470703,
+              -0.042388916,
+              -0.023788452,
+              0.045928955,
+              -0.008384705,
+              -0.010215759,
+              -0.003358841,
+              0.00036239624,
+              -0.04623413,
+              0.01272583,
+              0.021240234,
+              -0.009284973,
+              -0.017288208,
+              -0.014892578,
+              -0.05038452,
+              -0.0066452026,
+              0.008384705,
+              0.0060768127,
+              0.046203613,
+              0.027511597,
+              -0.0030460358,
+              -0.04727173,
+              -0.047790527,
+              -0.10870361,
+              0.020477295,
+              0.064453125,
+              0.014511108,
+              0.028930664,
+              0.0011806488,
+              0.002796173,
+              -0.049621582,
+              0.003479004,
+              0.0023841858,
+              0.031555176,
+              0.034820557,
+              -0.010719299,
+              -0.08093262,
+              -0.034057617,
+              -0.106933594,
+              -0.0118255615,
+              -0.04034424,
+              0.025146484,
+              0.0019340515,
+              0.017822266,
+              0.014755249,
+              0.012359619,
+              -0.034820557,
+              0.08929443,
+              -0.013404846,
+              -0.02243042,
+              -0.05517578,
+              -0.023147583,
+              0.00919342,
+              0.05984497,
+              0.0017032623,
+              -0.014457703,
+              0.035003662,
+              0.006790161,
+              -0.035705566,
+              -0.023223877,
+              -0.032287598,
+              0.01966858,
+              0.07489014,
+              0.0009713173,
+              -0.020690918,
+              0.032043457,
+              0.018966675,
+              -0.020492554,
+              0.024139404,
+              -0.0070724487,
+              0.047668457,
+              -0.00047016144,
+              -0.007904053,
+              0.007896423,
+              -0.025650024,
+              -0.02293396,
+              0.019958496,
+              -0.009757996,
+              -0.021514893,
+              0.018371582,
+              -0.029815674,
+              -0.0385437,
+              -0.015426636,
+              -0.03866577,
+              0.0025463104,
+              0.010612488,
+              -0.0143585205,
+              0.031951904,
+              -0.004852295,
+              -0.00079488754,
+              -0.0065345764,
+              0.047973633,
+              -0.031829834,
+              -0.021652222,
+              0.0012025833,
+              -0.020370483,
+              -0.030044556,
+              -0.020050049,
+              -0.041992188,
+              0.017684937,
+              0.0154953,
+              -0.023025513,
+              0.010528564,
+              0.08642578,
+              0.039215088,
+              0.064208984,
+              -0.0026931763,
+              -0.020324707,
+              -0.023620605,
+              -0.006248474,
+              -0.019470215,
+              0.030059814,
+              0.03866577,
+              0.031234741,
+              -0.00051498413,
+              -0.014793396,
+              -0.009490967,
+              -0.027679443,
+              0.016448975,
+              -0.015525818,
+              -0.023147583,
+              -0.027709961,
+              0.011146545,
+              0.009277344,
+              -0.02229309,
+              0.039245605,
+              -0.11315918,
+              -0.07672119,
+              -0.046325684,
+              0.029083252,
+              -0.022460938,
+              -0.013137817,
+              -0.005836487,
+              0.035308838,
+              -0.03265381,
+              -0.038085938,
+              0.034332275,
+              -0.018707275,
+              -0.019454956,
+              -0.005306244,
+              0.031799316,
+              -0.01763916,
+              -0.055145264,
+              0.012435913,
+              -0.036865234,
+              -0.012817383,
+              0.03427124,
+              0.05203247,
+              -0.05331421,
+              0.051361084,
+              -0.07543945,
+              0.021240234,
+              -0.019927979,
+              0.030578613,
+              0.034362793,
+              0.015342712,
+              0.008468628,
+              0.011451721,
+              0.025848389,
+              0.009811401,
+              -0.022583008,
+              0.01889038,
+              0.002456665,
+              0.050933838,
+              -0.026611328,
+              -0.008270264,
+              -0.014587402,
+              0.008705139,
+              -0.0126953125,
+              0.027191162,
+              0.018463135,
+              -0.0042266846,
+              0.0725708,
+              -0.0030822754,
+              -0.027954102,
+              -0.019546509,
+              0.054626465,
+              0.008888245,
+              -0.0048179626,
+              -0.072753906,
+              -0.0020141602,
+              -0.013908386,
+              0.014053345,
+              0.03955078,
+              -0.025909424,
+              0.022888184,
+              -0.008255005,
+              -0.06109619,
+              -0.015312195,
+              -0.032470703,
+              -0.011962891,
+              0.006340027,
+              -0.022125244,
+              0.017211914,
+              -0.041137695,
+              0.012321472,
+              0.00762558,
+              0.025054932,
+              0.040039062,
+              0.020324707,
+              -0.0015058517,
+              0.007247925,
+              0.009552002,
+              0.054107666,
+              0.034606934,
+              0.038391113,
+              -0.03111267,
+              -0.03353882,
+              -0.030410767,
+              -0.017791748,
+              0.0018510818,
+              0.041046143,
+              0.005016327,
+              0.04321289,
+              0.008872986,
+              0.003370285,
+              0.020080566,
+              0.0680542,
+              0.014274597,
+              0.022537231,
+              -0.019622803,
+              -0.007030487,
+              0.020339966,
+              0.005466461,
+              0.025115967,
+              -0.040130615,
+              0.014381409,
+              -0.02482605,
+              -0.058135986,
+              -0.022506714,
+              -0.008834839,
+              0.083618164,
+              0.02178955,
+              0.0121536255,
+              0.012779236,
+              -0.02507019,
+              -0.013542175,
+              0.029266357,
+              0.047027588,
+              -0.009925842,
+              0.028778076,
+              0.007286072,
+              -0.036193848,
+              -0.004108429,
+              0.025863647,
+              0.027038574,
+              0.04043579,
+              -0.0062217712,
+              -0.024536133,
+              0.06329346,
+              0.02708435,
+              -0.0070114136,
+              0.013923645,
+              0.05697632,
+              -0.059448242,
+              0.0023727417,
+              -0.002380371,
+              0.01171875,
+              -0.033050537,
+              -0.006465912,
+              -0.025787354,
+              0.011169434,
+              -0.009483337,
+              -0.01133728,
+              0.03277588,
+              0.018539429,
+              -0.0009608269,
+              0.003742218,
+              0.012786865,
+              0.015380859,
+              -0.025878906,
+              0.0067481995,
+              -0.017288208,
+              -0.014167786,
+              0.0073127747,
+              0.01675415,
+              0.03555298,
+              0.004589081,
+              0.037109375,
+              0.0071144104,
+              0.0042037964,
+              0.0047836304,
+              -0.052856445,
+              -0.018539429,
+              0.029388428,
+              0.028671265,
+              -0.0061187744,
+              0.016540527,
+              0.014579773,
+              0.03286743,
+              0.09338379,
+              0.06561279,
+              -0.025146484,
+              0.0005888939,
+              -0.03869629,
+              0.035369873,
+              0.02810669,
+              0.000749588,
+              -0.014320374,
+              0.013473511,
+              0.014526367,
+              0.021270752,
+              -0.010604858,
+              -0.034362793,
+              -0.009346008,
+              0.02619934,
+              0.01335907,
+              -0.05319214,
+              0.024856567,
+              -0.05645752,
+              0.015899658,
+              -0.020935059,
+              -0.097839355,
+              0.009742737,
+              0.04272461,
+              -0.02067566,
+              -0.050231934,
+              -0.053253174,
+              0.023834229,
+              -0.023971558,
+              -0.05996704,
+              -0.050445557,
+              -0.042114258,
+              0.010734558,
+              0.04937744,
+              0.0121154785,
+              -0.007835388,
+              -0.020904541,
+              -0.015022278,
+              -0.0065307617,
+              0.009712219,
+              0.021057129,
+              -0.018859863,
+              -0.0008559227,
+              0.03656006,
+              0.004962921,
+              0.039245605,
+              -0.040039062,
+              -0.026535034,
+              -0.013175964,
+              -0.0128479,
+              0.01574707,
+              0.013618469,
+              0.013900757,
+              0.02078247,
+              -0.03656006,
+              -0.05206299,
+              0.042541504,
+              0.0647583,
+              -0.027496338,
+              -0.02420044,
+              0.0079956055,
+              0.049713135,
+              -0.057556152,
+              -0.023864746,
+              0.019882202,
+              -0.03237915,
+              -0.0038414001,
+              -0.0033683777,
+              -0.04019165,
+              0.006412506,
+              0.009674072,
+              -0.030776978,
+              -0.00028896332,
+              0.0073509216,
+              -0.07110596,
+              -0.029251099,
+              0.010406494,
+              -0.032836914,
+              0.0043945312,
+              -0.04574585,
+              -0.049560547,
+              -0.011711121,
+              -0.025985718,
+              0.008026123,
+              0.025039673,
+              -0.0016546249,
+              0.009864807,
+              0.08001709,
+              -0.0027427673,
+              -0.027297974,
+              0.023544312,
+              0.062683105,
+              0.025344849,
+              0.015281677,
+              0.0040740967,
+              -0.024658203,
+              0.0055732727,
+              -0.028793335,
+              -0.018310547,
+              -0.032348633,
+              -0.0013933182,
+              -0.095336914,
+              0.00025129318,
+              -0.010093689,
+              -0.0074005127,
+              -0.035614014,
+              0.0030822754,
+              -0.03692627,
+              -0.012237549,
+              0.004295349,
+              -0.026824951,
+              0.024475098,
+              0.06323242,
+              0.0012760162,
+              0.061676025,
+              0.01335144,
+              -0.017440796,
+              -0.002735138,
+              0.004398346,
+              -0.07763672,
+              0.039489746,
+              -0.016281128,
+              0.007484436,
+              0.004207611,
+              -0.026977539,
+              -0.038146973,
+              0.022140503,
+              0.0066375732,
+              -0.019943237,
+              0.006427765,
+              0.030288696,
+              0.009750366,
+              -0.0066337585,
+              -0.032409668,
+              -0.011192322,
+              -0.030395508,
+              -0.027313232,
+              -0.047302246,
+              0.010604858,
+              -0.028762817,
+              0.031036377,
+              -0.021392822,
+              -0.032073975,
+              -0.06329346,
+              -0.02418518,
+              -0.0012149811,
+              0.017929077,
+              -0.013015747,
+              0.0073280334,
+              -0.018722534,
+              -0.054351807,
+              -0.06451416,
+              0.0057029724,
+              -0.015991211,
+              0.025421143,
+              -0.052337646,
+              0.038330078,
+              -0.0014562607,
+              0.047027588,
+              0.031173706,
+              0.0027236938,
+              -0.009513855,
+              0.02154541,
+              0.031555176,
+              -0.004020691,
+              -0.04949951,
+              -0.007019043,
+              -0.02217102,
+              -0.023742676,
+              0.033691406,
+              0.018157959,
+              -0.029327393,
+              -0.025268555,
+              -0.024261475,
+              0.033111572,
+              0.040527344,
+              0.0029468536,
+              -0.002521515,
+              0.04034424,
+              -0.043121338,
+              0.025970459,
+              -0.043060303,
+              0.045166016,
+              0.03475952,
+              -0.020004272,
+              -0.0028305054,
+              -0.0012741089,
+              0.027496338,
+              0.014053345,
+              -0.07128906,
+              0.010597229,
+              -0.011123657,
+              -0.03338623,
+              -0.074035645,
+              -0.03753662,
+              0.013633728,
+              -0.05154419,
+              -0.024429321,
+              -0.014511108,
+              -0.023117065,
+              -0.05911255,
+              0.0017604828,
+              -0.020477295,
+              -0.050567627,
+              0.005367279,
+              -0.009017944,
+              -0.031829834,
+              0.029510498,
+              0.010635376,
+              -0.011230469,
+              -0.0030727386,
+              0.055358887,
+              0.0418396,
+              0.0056991577,
+              0.004825592,
+              -0.0017175674,
+              0.037628174,
+              -0.039398193,
+              0.03656006,
+              -0.0078048706,
+              0.0021820068,
+              -0.027877808,
+              0.01927185,
+              -0.014907837,
+              -0.036193848,
+              0.020584106,
+              0.011756897,
+              0.04067993,
+              0.004020691,
+              -0.01687622,
+              0.019561768,
+              -0.035888672,
+              -0.035308838,
+              0.009468079,
+              0.015319824,
+              0.03074646,
+              0.008110046,
+              0.00015544891,
+              0.059906006,
+              -0.0006942749,
+              -0.00023949146,
+              0.025482178,
+              -0.0024681091,
+              -0.017456055,
+              -0.019363403,
+              0.0015935898,
+              -0.046539307,
+              0.0037822723,
+              0.039642334,
+              0.025909424,
+              0.01802063,
+              -0.01625061,
+              -0.024658203,
+              0.008079529,
+              0.050079346,
+              0.0038013458,
+              0.0021247864,
+              -0.064697266,
+              -0.061462402,
+              0.002664566,
+              0.0016975403,
+              -0.048828125,
+              0.028366089,
+              0.01576233,
+              -0.03062439,
+              -0.0335083,
+              -0.019485474,
+              -0.012466431,
+              0.0007381439,
+              0.039093018,
+              -0.021362305,
+              0.030548096,
+              -0.023468018,
+              -0.054534912,
+              -0.031311035,
+              0.04812622,
+              0.008911133,
+              0.0072250366,
+              -0.004638672,
+              -0.015129089,
+              0.021835327,
+              -0.006580353,
+              0.03540039,
+              0.0113220215,
+              0.0055351257,
+              -0.016937256,
+              0.046905518,
+              -0.0107040405,
+              -0.014793396,
+              0.017578125,
+              -0.05731201,
+              -0.023635864,
+              -0.019851685,
+              0.006576538,
+              -0.018661499,
+              -0.00762558,
+              -0.053466797,
+              0.03878784,
+              -0.014801025,
+              0.06311035,
+              -0.023086548,
+              0.013343811,
+              0.00050354004,
+              -0.006462097,
+              -0.009277344,
+              -0.0033035278,
+              -0.030883789,
+              -0.04034424,
+              0.009346008,
+              0.022521973,
+              0.021255493,
+              0.017364502,
+              0.009559631,
+              -0.012535095,
+              -0.016525269,
+              0.01727295,
+              0.005268097,
+              0.026535034,
+              0.0017051697,
+              -0.0038051605,
+              0.033477783,
+              -0.039642334,
+              -0.031555176,
+              -0.021713257,
+              0.025253296,
+              0.038024902,
+              -0.06707764,
+              -0.00409317,
+              -0.025726318,
+              -0.013442993,
+              0.0023975372,
+              -0.04748535,
+              -0.03451538,
+              -0.010398865,
+              -0.015174866,
+              -0.023025513,
+              -0.03555298,
+              -0.00340271,
+              0.014541626,
+              -0.0115356445,
+              -0.04159546,
+              -0.027023315,
+              0.037841797,
+              0.007007599,
+              0.026382446,
+              0.0051345825,
+              -0.027923584,
+              0.033203125,
+              -0.022003174,
+              -0.0061531067,
+              -0.0058403015,
+              -0.047424316,
+              0.007949829,
+              0.015899658,
+              0.027053833,
+              -0.028213501,
+              0.015586853,
+              -0.052825928,
+              0.011604309,
+              0.009819031,
+              0.0501709,
+              -0.019989014,
+              -0.06304932,
+              0.012336731,
+              0.048828125,
+              0.013168335,
+              0.016677856,
+              -0.015403748,
+              0.0032958984,
+              0.056396484,
+              0.053710938,
+              0.014831543,
+              0.020996094,
+              -0.000007748604,
+              0.0014209747,
+              -0.020599365,
+              0.017059326,
+              0.016921997,
+              0.009483337,
+              0.047210693,
+              0.0057868958,
+              -0.014305115,
+              -0.0259552,
+              0.011421204,
+              -0.031677246,
+              -0.000011622906,
+              0.052642822,
+              -0.048187256,
+              0.02015686,
+              -0.02545166,
+              -0.03125,
+              -0.008148193,
+              -0.007980347,
+              -0.057647705,
+              -0.0039901733,
+              -0.032806396,
+              -0.006965637,
+              0.03353882,
+              -0.025131226,
+              -0.033569336,
+              -0.029769897,
+              0.06137085,
+              -0.017166138,
+              -0.006713867,
+              0.0034675598,
+              -0.00078582764,
+              -0.0519104,
+              0.025527954,
+              -0.011108398,
+              -0.044952393,
+              0.01398468,
+              -0.0011730194,
+              0.008926392,
+              0.041778564,
+              0.02029419,
+              -0.014602661,
+              0.01210022,
+              0.0044555664,
+              -0.028549194,
+              -0.012794495,
+              0.0066108704,
+              0.005542755,
+              -0.009063721,
+              -0.03781128,
+              -0.03111267,
+              -0.016204834,
+              -0.023498535,
+              0.046966553,
+              -0.021194458,
+              -0.06329346,
+              0.035461426,
+              0.033111572,
+              0.00881958,
+              -0.005455017,
+              0.02166748,
+              0.00076007843,
+              -0.011276245,
+              -0.0020046234,
+              -0.020629883,
+              0.022979736,
+              -0.03289795,
+              -0.025527954,
+              -0.0017795563,
+              -0.048950195,
+              0.016326904,
+              0.027954102,
+              0.031188965,
+              -0.006088257,
+              0.027297974,
+              0.020187378,
+              0.018035889,
+              0.009666443,
+              0.03100586,
+              0.025863647,
+              -0.022964478,
+              -0.01979065,
+              0.021392822,
+              -0.0012340546,
+              -0.0287323,
+              -0.0060424805,
+              0.0025138855,
+              0.008674622,
+              -0.020507812,
+              -0.054016113,
+              -0.03677368,
+              -0.06329346,
+              0.018493652,
+              0.02003479,
+              0.015792847,
+              -0.025436401,
+              0.0011854172,
+              -0.0049591064,
+              -0.022567749,
+              0.070373535,
+              0.025787354,
+              0.017501831,
+              -0.048614502,
+              -0.0067214966,
+              0.015991211,
+              -0.021209717,
+              -0.020095825,
+              -0.036071777,
+              0.013885498,
+              0.026855469,
+              0.02696228,
+              -0.031021118,
+              0.010093689,
+              -0.02053833,
+              -0.04547119,
+              0.047576904,
+              -0.0025749207,
+              -0.00365448,
+              0.0037612915,
+              -0.0040664673,
+              0.04083252,
+              0.053833008,
+              -0.0003323555,
+              0.03475952,
+              0.0006070137,
+              0.0017004013,
+              -0.00043416023,
+              0.063964844,
+              -0.0051193237,
+              0.029510498,
+              0.018295288,
+              0.032562256,
+              -0.0027103424,
+              -0.02017212,
+              -0.03643799,
+              -0.0028629303,
+              0.08905029,
+              0.031219482,
+              -0.024307251,
+              0.022781372,
+              -0.021697998,
+              -0.084350586,
+              -0.012359619,
+              -0.04333496,
+              0.051483154,
+              0.012268066,
+              0.0028877258,
+              0.023620605,
+              -0.017913818,
+              -0.048339844,
+              0.03375244,
+              0.024398804,
+              -0.018798828,
+              -0.03451538,
+              0.027542114,
+              -0.005054474,
+              0.010307312,
+              0.011711121,
+              -0.015670776,
+              0.034576416,
+              -0.021865845,
+              0.007381439,
+              -0.023223877,
+              0.04876709,
+              0.06964111,
+              -0.00090026855,
+              -0.055419922,
+              -0.014701843,
+              0.031555176,
+              -0.018539429,
+              -0.022827148,
+              0.03643799,
+              0.016159058,
+              -0.088134766,
+              0.020568848,
+              0.025283813,
+              -0.012786865,
+              -0.0053596497,
+              -0.0026779175,
+              0.015594482,
+              -0.031341553,
+              -0.034454346,
+              -0.06463623,
+              0.04446411,
+              0.03451538,
+              -0.0051727295,
+              -0.0368042,
+              0.0009646416,
+              0.008010864,
+              0.019699097,
+              0.02961731,
+              0.03540039,
+              0.008865356,
+              0.041992188,
+              -0.025726318,
+              -0.023468018,
+              0.01146698,
+              -0.0073509216,
+              -0.0042266846,
+              0.02279663,
+              -0.03302002,
+              0.06011963,
+              -0.001868248,
+              -0.048431396,
+              0.066589355,
+              -0.001830101,
+              -0.07543945,
+              0.0063056946,
+              -0.018173218,
+              0.017471313,
+              -0.019134521,
+              0.031036377,
+              0.022918701,
+              -0.061309814,
+              -0.050354004,
+              -0.043762207,
+              0.032318115,
+              0.03817749,
+              -0.031982422,
+              0.06878662,
+              -0.05783081,
+              -0.007499695,
+              0.03652954,
+              -0.042816162,
+              0.026382446,
+              -0.03213501,
+              0.04736328,
+              0.015525818,
+              -0.02279663,
+              0.038879395,
+              -0.019134521,
+              -0.013641357,
+              0.020111084,
+              0.06604004,
+              -0.05291748,
+              -0.007331848,
+              -0.023208618,
+              -0.0129776,
+              -0.011184692,
+              0.0592041,
+              0.015304565,
+              -0.013450623,
+              -0.027832031,
+              -0.02633667,
+              -0.055725098,
+              -0.03717041,
+              -0.008865356,
+              -0.017822266,
+              -0.039520264,
+              -0.020233154,
+              -0.008560181,
+              -0.010475159,
+              -0.026290894,
+              -0.019210815,
+              0.001411438,
+              -0.0013046265,
+              -0.078186035,
+              -0.00012731552,
+              -0.017532349,
+              -0.003982544,
+              -0.026016235,
+              -0.008331299,
+              -0.02015686,
+              0.02885437,
+              -0.026306152,
+              -0.014762878,
+              -0.013549805,
+              -0.016967773,
+              -0.02583313,
+              0.009918213,
+              -0.037628174,
+              0.0044555664,
+              0.039245605,
+              -0.031982422,
+              0.037261963,
+              0.006214142,
+              -0.028808594,
+              -0.016464233,
+              -0.008544922,
+              0.033721924,
+              -0.030349731,
+              0.008270264,
+              -0.0112838745,
+              0.05303955,
+              0.025726318,
+              -0.08355713,
+              -0.016540527,
+              -0.012191772,
+              0.0118637085,
+              0.006793976,
+              0.034210205,
+              0.012535095,
+              0.021438599,
+              -0.031143188,
+              0.03048706,
+              -0.020446777,
+              -0.045043945,
+              0.012016296,
+              -0.051239014,
+              0.014801025,
+              -0.0128479,
+              -0.01448822,
+              -0.0418396,
+              0.017959595,
+              0.0034885406,
+              -0.012397766,
+              0.01864624,
+              -0.010353088,
+              0.015563965,
+              -0.0021591187,
+              0.024780273,
+              -0.03338623,
+              0.030975342,
+              0.0076675415,
+              0.017028809,
+              -0.032806396,
+              0.018188477,
+              -0.022705078,
+              -0.013343811,
+              -0.014221191,
+              0.017501831,
+              -0.022842407,
+              -0.07104492,
+              0.034088135,
+              0.033996582,
+              0.016448975,
+              0.02468872,
+              -0.027008057,
+              -0.025817871,
+              -0.008384705,
+              -0.022537231,
+              0.0155181885,
+              -0.0015172958,
+              0.0007390976,
+              -0.06567383,
+              -0.03829956,
+              0.024963379,
+              -0.08282471,
+              -0.044830322,
+              -0.08630371,
+              0.058532715,
+              -0.055419922,
+              0.0115356445,
+              -0.0046806335,
+              -0.04144287,
+              -0.015510559,
+              -0.033599854,
+              0.0033473969,
+              -0.030014038,
+              -0.04232788,
+              -0.03677368,
+              -0.015617371,
+              0.018539429
+            ]
+          ],
+          "meta": {
+            "api_version": {
+              "version": "1"
+            },
+            "billed_units": {
+              "input_tokens": 1
+            }
+          },
+          "response_type": "embeddings_floats"
         }
       }
     ]
   },
-  "versionId": "e9d0d9a0-2d25-48f5-8998-82955a2faeb0",
+  "versionId": "a4e8b093-a74d-4f56-bae6-2f8c11605862",
   "triggerCount": 0,
   "tags": []
 }
