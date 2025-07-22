@@ -1,0 +1,846 @@
+{
+  "createdAt": "2025-07-18T21:43:39.302Z",
+  "updatedAt": "2025-07-22T16:44:51.200Z",
+  "id": "Z7opcPwNBBX1666e",
+  "name": "ORÇAMENTOS",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "produtos",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "id": "36ffc726-d65d-483a-9b91-f472daadd0e6",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -20,
+        40
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\"lista_produtos\": {{ $json.produtos.lista_produtos }},\n\"tipo_projeto\": {{ $json.produtos.tipo_projeto }},\n\"dimensoes_laje\": {{ $json.produtos.dimensoes_laje }}",
+        "options": {
+          "systemMessage": "=# 🔧 LLM ORÇAMENTO - SISTEMA TÉCNICO ESPECIALIZADO\n\nVocê é um **sistema técnico especializado** em processamento de orçamentos para materiais pré-moldados de lajes. Sua única função é calcular quantidades, consultar preços e gerar orçamentos formatados com precisão absoluta.\n\n## 🎯 REGRA CRÍTICA DE FERRAGEM/TRELIÇA\n\n### 📐 DISTINÇÃO FUNDAMENTAL:\n**UNIDADES** → Precisa comprimento de cada peça\n**METROS** → Não precisa comprimento de cada peça\n\n### Exemplos Práticos:\n- ✅ \"10 ferragens 7x15 F10\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada ferragem?\"\n- ✅ \"25 metros de ferragem radier\" → **METROS** → Usar diretamente\n- ✅ \"5 treliças de 4m\" → **UNIDADES** → Usar comprimento informado (4m)\n- ✅ \"3 treliças\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada treliça?\"\n- ✅ \"80 metros de treliça\" → **METROS** → Usar diretamente\n\n## 📋 FORMATO DE SAÍDA OBRIGATÓRIO\n\n**SEMPRE** retorne suas respostas no seguinte formato JSON:\n\n\n{\n  \"orcamento_formatado\": \"Orçamento completo no formato WhatsApp\",\n  \"produtos_processados\": [\"lista de produtos incluídos\"],\n  \"produtos_nao_disponiveis\": [\"lista de produtos não disponíveis\"],\n  \"valor_total\": 0000.00,\n  \"observacoes_tecnicas\": \"Observações sobre especificações\",\n  \"status\": \"completo|incompleto|erro\",\n  \"dados_necessarios\": [\"dados que faltam se status = incompleto\"]\n}\n\n## ⚙️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS DISPONÍVEIS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - H7/33, H8/40\n- Lajota cerâmica / Lajota de barro\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS NÃO DISPONÍVEIS:\n- Areia, Brita, Cimento, Concreto usinado\n- Blocos de concreto, Tijolos convencionais\n- Madeira, Pregos, Parafusos\n\n## 🔄 ALGORITMO DE PROCESSAMENTO - ANÁLISE CRÍTICA\n\n### ETAPA 1: IDENTIFICAÇÃO UNIDADE vs METRO\n```\nSE produto contém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" OU \"viga\":\n  ├── ANALISAR unidade de medida no input\n  ├── SE \"unidades\" OU número sem \"metro\":\n  │   └── VERIFICAR se tem comprimento especificado\n  │       ├── SE tem: usar comprimento informado\n  │       └── SE não tem: solicitar comprimento\n  └── SE \"metros\" OU \"m\":\n      └── USAR quantidade diretamente\n```\n\n### ETAPA 2: CONVERSÃO DE TERMOS\n| Entrada | Saída Padronizada |\n|---------|-------------------|\n| F5, Ferro 5mm, 3/16\" | F5 |\n| F6, Ferro 6mm, 1/4\" | F6.3 |\n| F8, Ferro 8mm, 5/16\" | F8 |\n| F10, Ferro 10mm, 3/8\" | F10 |\n| F12, Ferro 12mm, 1/2\" | F12.5 |\n| 5/8\", F16 | F16 |\n| 3/4\", F20 | F20 |\n\n### ETAPA 3: PADRÕES ESPECIAIS\n| Entrada | Interpretação | Saída |\n|---------|---------------|-------|\n| 3x8 | 3/8 polegadas | F10 |\n| 5x16 | 5/16 polegadas | F8 |\n| 1x4 | 1/4 polegadas | F6.3 |\n| 1x2 | 1/2 polegadas | F12.5 |\n\n## 🔧 CASOS ESPECÍFICOS DE PROCESSAMENTO\n\n### CASO 1: FERRAGEM EM UNIDADES SEM COMPRIMENTO\n**INPUT**: \"10 ferragens 7x15 F10\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"10 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"status\": \"incompleto\",\n  \"dados_necessarios\": [\"comprimento de cada ferragem\"]\n}\n```\n\n### CASO 2: FERRAGEM EM UNIDADES COM COMPRIMENTO\n**INPUT**: \"5 ferragens 7x15 F10 de 3 metros cada\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"5 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"comprimento_cada\": 3.0,\n  \"status\": \"completo\"\n}\n```\n\n### CASO 3: FERRAGEM EM METROS\n**INPUT**: \"25 metros de ferragem radier armado\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"25 metros de ferragem radier\",\n  \"metragem_total\": 25.0,\n  \"status\": \"completo\"\n}\n```\n\n### CASO 4: TRELIÇA EM UNIDADES SEM COMPRIMENTO\n**INPUT**: \"8 treliças\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"8 unidades de treliça\",\n  \"status\": \"incompleto\",\n  \"dados_necessarios\": [\"comprimento de cada treliça\"]\n}\n```\n\n### CASO 5: TRELIÇA EM UNIDADES COM COMPRIMENTO\n**INPUT**: \"12 treliças de 4,5m\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"12 unidades de treliça\",\n  \"comprimento_cada\": 4.5,\n  \"status\": \"completo\"\n}\n```\n\n### CASO 6: TRELIÇA EM METROS\n**INPUT**: \"45 metros de treliça\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"45 metros de treliça\",\n  \"metragem_total\": 45.0,\n  \"status\": \"completo\"\n}\n```\n\n## 📊 COMPOSIÇÃO PADRÃO DE FERRAGEM\n\n### ANATOMIA DE UMA FERRAGEM PERSONALIZADA:\n```\nFerragem [COMPRIMENTO] 6x15 F10: [QUANTIDADE] unidade\n├── Dimensões: 7x15 cm (largura x altura)\n├── Bitola longitudinal: F10\n├── Composição PADRÃO:\n│   ├── 4 ferros longitudinais F10\n│   └── Estribos F4.2 nas dimensões 7x15\n├── Quantidade: 1 ferragem completa\n└── Comprimento: [COMPRIMENTO]\n```\n\n## 🎯 FERRAMENTAS DISPONÍVEIS\n- `calcular_laje`: Projetos completos de laje\n- `busca_preco`: Produtos isolados e preços por metro\n- `calcular_ferragem_personalizada`: Ferragens não-padrão\n- `produtos_mais_cotados`: Consulta produtos em alta\n- `salvar_orcamento`: Registro de orçamento finalizado\n\n## 🚨 REGRAS CRÍTICAS\n\n### ❌ NUNCA FAÇA:\n- Orçamento com placeholders \"[valor a ser calculado]\"\n- Usar valores estimados sem ferramentas\n- Mostrar cálculos no orçamento: (9 x R$ 65,00)\n- Processar produtos não disponíveis\n- Confundir \"unidades\" com \"metros\"\n- Assumir comprimento quando não informado\n\n### ✅ SEMPRE FAÇA:\n- Distinguir claramente UNIDADES vs METROS\n- Para UNIDADES: verificar se tem comprimento especificado\n- Para METROS: usar quantidade diretamente\n- Aguardar retorno completo das ferramentas\n- Usar apenas valores numéricos reais\n- Converter termos antes de usar ferramentas\n\n## 📋 FORMATO DE ORÇAMENTO - PADRÃO WhatsApp\n\n```\n**ORÇAMENTO MATERIAIS LAJE - Guardião Lajes**\n\n* **[Quantidade] [Item]:** R$ [Valor_Total]\n* **[Quantidade] [Item]:** R$ [Valor_Total]\n* **[Quantidade] [Item]:** R$ [Valor_Total]\n\n**Total do Orçamento: R$ [Valor_Total_Geral]**\n\n*Produtos não disponíveis: [lista se houver]*\n```\n\n## 🔄 FLUXO DE DECISÃO SIMPLIFICADO\n\n```\nINPUT recebido\n    ↓\nContém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" ou \"viga\"?\n    ↓\n    SIM → Verificar unidade de medida\n        ↓\n        É \"unidades\" ou número sem \"metro\"?\n            ↓\n            SIM → Tem comprimento especificado?\n                ↓\n                SIM → Processar com comprimento\n                NÃO → Solicitar comprimento\n            ↓\n            NÃO → É \"metros\"?\n                ↓\n                SIM → Processar metragem diretamente\n```\n\n## 🎯 EXEMPLOS DE PERGUNTAS PARA DADOS INCOMPLETOS\n\n### Para Ferragens:\n- \"Qual o comprimento de cada ferragem?\"\n- \"Quantos metros tem cada ferragem 7x15?\"\n- \"Preciso do comprimento das ferragens para calcular o orçamento\"\n\n### Para Treliças:\n- \"Qual o comprimento de cada treliça?\"\n- \"Quantos metros tem cada treliça?\"\n- \"Preciso do comprimento das treliças para calcular o orçamento\"\n\n## 🔧 MANTRA TÉCNICO\n**\"UNIDADES precisam comprimento, METROS usam direto\"**\n\n**PROCESSO**: Identifico → Classifico → Verifico → Solicito/Calculo → Formato → Retorno\n\n---\n\n**FOCO EXCLUSIVO**: Processamento técnico de orçamentos com distinção precisa entre unidades e metros, garantindo coleta correta de dados antes do cálculo."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        640,
+        40
+      ],
+      "id": "f08a55e7-dc51-418b-bf92-11227a4ca55b",
+      "name": "orçamentos",
+      "retryOnFail": true,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff85f63a-9eea-4eb6-aaa3-e9616c791c00",
+              "name": "id.workflowferramentas",
+              "value": "4pdizWewQzdsLsGx",
+              "type": "string"
+            },
+            {
+              "id": "6286a1d1-2d33-4dab-9dc7-2059ff195ae3",
+              "name": "produtos",
+              "value": "={{ $json.produtos }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        180,
+        40
+      ],
+      "id": "db678a86-5c30-402a-8482-219a2510ac61",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "description": "Busca o preço de um produto a partir do nome e especificações técnicas. Use sempre que o cliente quiser saber preço de um item específico.",
+        "source": "=database",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "=preco_produto",
+            "tableName": "produtos_precos",
+            "NomeProduto": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('NomeProduto', `Nome do produto que o cliente mencionou. Deve ser uma palavra-chave presente no nome cadastrado, como \"Ferragem F10\", \"Isopor H8\", \"Lajota\", \"Estribo\", etc.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        540,
+        340
+      ],
+      "id": "a0298779-53cb-46f9-9162-5c89ec69da93",
+      "name": "busca_preco"
+    },
+    {
+      "parameters": {
+        "name": "salvar_orcamento",
+        "description": "=Salva um orçamento para um cliente com a lista de produtos cotados, preços, total e vínculo com o lead correspondente.\nPara cada produto:\n- Identifique o nome exato (conforme a tabela de produtos).\n- Use o tool 'busca_produto' para consultar o preço na tabela 'produtos_precos'.\n- Calcule o subtotal: preco_unitario × quantidade.\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "salvar_orcamento",
+            "tableName": "orcamentos",
+            "leadid": "1",
+            "Produtos": "={{ JSON.stringify($fromAI('produtos', `Gere a lista de produtos que o cliente deseja orçar. Para cada produto:\n- Identifique o nome exato (conforme a tabela de produtos).\n- Use o tool 'busca_produto' para consultar o preço na tabela 'produtos_precos'.\n- Calcule o subtotal: preco_unitario × quantidade.\n- Retorne os campos:\n\n[\n  {\n    \\\"nome\\\": \\\"Ferragem F10\\\",\n    \\\"quantidade\\\": 12,\n    \\\"unidade\\\": \\\"metro\\\",\n    \\\"detalhes\\\": {\n      \\\"bitola_estribo\\\": \\\"4.2mm\\\",\n      \\\"tamanho_estribo\\\": \\\"7x17\\\",\n    \\\"preco_unitario\\\": 25.00,\n    \\\"subtotal\\\": 300.00\n    }\n  },\n  ...\n]\n\nSe não souber alguma especificação, deixe o campo 'detalhes' vazio ou omita.\nNunca estime valores manualmente. Sempre consulte o preço com 'busca_produto'.`, 'json')) }}",
+            "Obs": "={{ $fromAI('observacoes', `Observações gerais sobre o orçamento solicitado. Inclua instruções extras dadas pelo cliente, comentários adicionais, condições especiais (como forma de pagamento ou prazo), ou qualquer informação que ajude o setor comercial ou logística. Se o cliente não disser nada relevante, retorne string vazia.`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "192e8725-220c-421d-ab77-eb5d490591fe",
+      "name": "salvar_orcamento",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        640,
+        360
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "description": "Calcula a quantidade estimada de materiais para montagem de uma laje, com base nas dimensões informadas\n  (largura e comprimento, ou apenas área) e no tipo de enchimento escolhido (isopor ou lajota cerâmica).\n  Retorna a quantidade aproximada de vigotas, peças de enchimento (isopor ou lajota) e malhas de aço necessárias.\n  Sempre que houver largura e comprimento, o cálculo será feito com base no espaçamento real entre as vigotas.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "calcLaje",
+            "especificacoes": "={\n\"largura\": \"{{ $fromAI('largura', 'largura da laje em metros. Ex: 5', 'string') }}\",\n\"comprimento\": \"{{ $fromAI('comprimento', 'comprimento da laje em metros. Ex: 8', 'string') }}\",\n\"area\": \"{{ $fromAI('area', 'área total da laje em metros quadrados. Ex: 40. Use apenas se não houver largura e comprimento.', 'string') }}\",\n\"enchimento\": \"{{ $fromAI('enchimento', 'tipo de enchimento da laje: \\\"isopor\\\" ou \\\"lajota\\\". Se o cliente não disser, use \\\"isopor\\\" como padrão.', 'string', { default: 'isopor' }) }}\",\n\"malha\": \"{{ $fromAI('malha'), 'qual é o modelo de malha ex:\"Leve 20x20 F3.4\", \"Media 15x15 F3.4\" ou \"Reforçada 15x15 F4.2\"', 'string', { default: 'Media' } }}\"\n}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        360
+      ],
+      "id": "ef152a0c-3811-4a0e-afd1-de55b103892d",
+      "name": "calcular_laje"
+    },
+    {
+      "parameters": {
+        "description": "=Calcula o custo e o preço estimado de uma ferragem sob medida com base em comprimento, \n  ferros longitudinais (bitola e quantidade), tamanho e bitola dos estribos, espaçamento entre estribos,\n  custos de material e mão de obra. Caso a bitola dos estribos não seja informada, usa-se \"F4.2\" como padrão, e se o espaço entre os estribos não for informada, usa-se \"0.20\", se o a quantidade de ferros não for informada considere como padrão 4",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "CalcFer",
+            "ferragem": "={\n  \"comprimento\": {{ $fromAI(\"comprimento\", \"Comprimento total da ferragem em metros. Ex: para 'Ferragem 5,00', o valor é 5.\", \"number\") }},\n  \"ferros_longitudinais\": {{ $fromAI(\"ferros_longitudinais\", \"Lista de ferros longitudinais utilizados na ferragem. Cada item deve conter: - bitola (ex: 'F10', 'F12', 'F8', etc) - quantidade de varões dessa bitola. Formato: [ { \\\"bitola\\\": \\\"F10\\\", \\\"quantidade\\\": 4 }, { \\\"bitola\\\": \\\"F12\\\", \\\"quantidade\\\": 2 } ] Extraia mesmo que o cliente envie como '4F10+2F12', converta para este array e envie como string JSON.\", \"string\") }},\n  \"tamanho_estribo\": \"{{ $fromAI(\"tamanho_estribo\", \"Tamanho do estribo no formato 'largura x altura' em cm. Ex: '7x20'.\", \"string\") }}\",\n  \"espacamento_estribo\": \"{{ $fromAI(\"espacamento_estribo\", \"Espaçamento entre estribos em metros. Ex: para 'a cd 0,15', o valor é 0.15. Se não for informado, use o padrão '0.20'.\", \"number\") }}\",\n  \"bitola_estribo\": \"{{ $fromAI(\"bitola_estribo\", \"Bitola do ferro do estribo (ex: 'F5'). Se não for informado, use o padrão 'F4.2'.\", \"string\") }}\"\n}\n"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        340
+      ],
+      "id": "c13462d1-a5ce-4458-8198-3e435229fbe7",
+      "name": "calcular_ferragem_personalizada"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Mostra os produtos mais cotados em orçamentos recentes dos últimos 30 dias.",
+        "operation": "executeQuery",
+        "query": "SELECT\n  produto ->> 'nome' AS produto,\n  COUNT(*) AS total\nFROM\n  orcamentos,\n  jsonb_array_elements(produtos) AS produto\nWHERE\n  data > NOW() - INTERVAL '30 days'\nGROUP BY\n  produto\nORDER BY\n  total DESC\nLIMIT 5;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        740,
+        340
+      ],
+      "id": "0b86182a-b2c1-493f-872a-f01728cc52b7",
+      "name": "produtos_mais_cotados",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        440,
+        280
+      ],
+      "id": "a3e2731a-9262-4e97-8463-67be9e83b25e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOTIgGndJIkf9Pqy",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        340
+      ],
+      "id": "f2dd64d0-4d30-4769-8159-ca0aad82acca",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        340,
+        260
+      ],
+      "id": "b5a84fb8-3a54-415b-a68c-55750a322f24",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3mNlZ20nDfXfgUl9",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcular_ferragem_personalizada": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcular_laje": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "salvar_orcamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "busca_preco": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "produtos_mais_cotados": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "produtos": "  {\n\"lista_produtos\": \"03 treliças de 6 metros cheia, 100 lajotas cerâmica, 01 malha 3x2, 1 kilos de arame queimado, 01 ferragem armada 7x15 ferro 3/8, 2 vergalhão F8\",\n  \"tipo_projeto\": \"produtos_isolados\",\n  \"dimensoes_laje\": \"6x6\"\n}"
+        }
+      }
+    ]
+  },
+  "versionId": "73796bcc-b6d1-4de3-936f-dc94edaf70f8",
+  "triggerCount": 0,
+  "tags": []
+}
