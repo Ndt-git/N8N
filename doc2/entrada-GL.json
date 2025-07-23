@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:05:13.566Z",
-  "updatedAt": "2025-07-10T20:21:46.737Z",
+  "updatedAt": "2025-07-23T18:55:49.853Z",
   "id": "oEgGaOjRHITpdzbf",
   "name": "entrada",
   "active": false,
@@ -15,8 +15,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -1560,
-        240
+        -2460,
+        430
       ],
       "id": "e071b03a-ca56-4045-9492-f416e7b1f995",
       "name": "Webhook",
@@ -50,8 +50,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1000,
-        240
+        -2020,
+        430
       ],
       "id": "281efed4-3a25-42b6-9c4e-146555eaeabd",
       "name": "If"
@@ -133,6 +133,29 @@
               },
               "renameOutput": true,
               "outputKey": "Documento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8baff51c-c345-4de3-b438-262867fdf4c2",
+                    "leftValue": "={{ $('Edit Fields6').item.json.message.tipo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
             }
           ]
         },
@@ -143,8 +166,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -780,
-        240
+        -1800,
+        265
       ],
       "id": "54401070-8769-40b3-9ec2-8418b1f4734e",
       "name": "Switch",
@@ -185,8 +208,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        0,
-        0
+        -1620,
+        40
       ],
       "id": "f4363f67-702b-49b0-b39d-1722e322f3ce",
       "name": "Edit Fields1"
@@ -232,7 +255,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -560,
+        -1420,
         240
       ],
       "id": "f48c15ae-5cce-407c-ab56-bc4c2ed9d9c4",
@@ -250,7 +273,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        140,
+        -190,
         220
       ],
       "id": "e57af72c-35c1-461f-8892-14ab38796b9d",
@@ -294,8 +317,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        520,
-        200
+        100,
+        220
       ],
       "id": "89ceb018-747d-4c7e-8b49-339dd712267e",
       "name": "HTTP Request",
@@ -365,8 +388,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -940,
-        560
+        -1580,
+        520
       ],
       "id": "d5c705c4-a5ed-4d8b-9797-ff60eaeae717",
       "name": "Edit Fields3"
@@ -383,8 +406,8 @@
       "type": "n8n-nodes-base.writeBinaryFile",
       "typeVersion": 1,
       "position": [
-        -240,
-        500
+        -920,
+        520
       ]
     },
     {
@@ -395,8 +418,8 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        -20,
-        500
+        -700,
+        520
       ],
       "id": "c2e1f27a-363a-44d2-9340-1928bc724f1d",
       "name": "Extract from File"
@@ -412,8 +435,8 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        -460,
-        500
+        -1140,
+        520
       ],
       "id": "f3386a28-372c-4d15-bc6b-0fdcf02f959a",
       "name": "Convert to File1"
@@ -425,8 +448,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.1,
       "position": [
-        1480,
-        260
+        540,
+        175
       ],
       "id": "9f1d0b47-1c81-4de6-8b4c-dd536b54da8e",
       "name": "Merge",
@@ -460,7 +483,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -340,
+        -1200,
         240
       ],
       "id": "1ddf832b-2779-493f-8314-5eab3fdfc0c4",
@@ -476,10 +499,16 @@
       "name": "Consultar PGVector",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        20,
-        740
+        -2240,
+        1140
       ],
-      "typeVersion": 2.6
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -509,8 +538,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -780,
-        560
+        -1420,
+        520
       ],
       "id": "2a00a1e7-e08c-4ce6-a594-635f36145173",
       "name": "If2"
@@ -543,8 +572,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        180,
-        740
+        -2020,
+        1140
       ],
       "id": "aff8f907-9ffb-49b1-aa78-165157ac8d89",
       "name": "If3"
@@ -561,8 +590,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        320,
-        800
+        -260,
+        520
       ],
       "id": "f642b5c2-142f-4b6f-adcf-d6c934220e11",
       "name": "AI Agent2",
@@ -575,8 +604,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        200,
-        500
+        -480,
+        520
       ],
       "id": "024a60d2-544f-40fd-b5f8-5861975efed5",
       "name": "Cod_text_limp"
@@ -596,8 +625,8 @@
       "name": "Gerar_Embedding_Cohere",
       "type": "n8n-nodes-base.httpRequest",
       "position": [
-        -140,
-        740
+        -2460,
+        1140
       ],
       "typeVersion": 4.2,
       "credentials": {
@@ -619,10 +648,16 @@
       "name": "Salvar Novo Embedding2",
       "type": "n8n-nodes-base.postgres",
       "position": [
-        660,
-        1020
+        -2240,
+        1340
       ],
-      "typeVersion": 2.6
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -635,27 +670,17 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        800,
-        1020
+        -2020,
+        1340
       ],
       "id": "3ff6c1ba-f296-4f5f-a130-fc83b02237fe",
-      "name": "Postgres1"
-    },
-    {
-      "parameters": {
-        "modelName": "models/gemini-1.5-flash",
-        "options": {
-          "temperature": 0
+      "name": "Postgres1",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
         }
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        320,
-        960
-      ],
-      "id": "b002dfd8-0b19-4d7f-988b-b5fdf1974c5c",
-      "name": "Google Gemini Chat Model"
+      }
     },
     {
       "parameters": {
@@ -668,11 +693,17 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1160,
-        640
+        -1580,
+        1240
       ],
       "id": "b327244c-8e65-4947-a42b-196d58d9d216",
-      "name": "Postgres"
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -691,8 +722,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        980,
-        660
+        -1800,
+        1240
       ],
       "id": "81d10ca7-3755-4996-8d71-c4fe3f00b769",
       "name": "Edit Fields5"
@@ -704,8 +735,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        1280
+        -2460,
+        1600
       ],
       "id": "255ec68d-fefc-4941-966e-551f8ed68eb3",
       "name": "Cod_output_limp1"
@@ -717,8 +748,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
-        1020
+        100,
+        520
       ],
       "id": "2874a476-ae4d-4a97-914d-ceef0b63a7d9",
       "name": "Code"
@@ -730,8 +761,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1380,
-        640
+        320,
+        520
       ],
       "id": "6bab6ff6-325a-4933-a1aa-bf8903347c1e",
       "name": "Code1"
@@ -783,8 +814,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1380,
-        240
+        -2240,
+        430
       ],
       "id": "47da943d-cfb2-4016-9ad4-3695933c5072",
       "name": "Edit Fields6"
@@ -794,8 +825,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -1280,
-        480
+        -1820,
+        720
       ],
       "id": "35d559bd-9afa-414b-aee5-823da8215bdb",
       "name": "No Operation, do nothing"
@@ -847,8 +878,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1720,
-        740
+        -2460,
+        880
       ],
       "id": "736a0832-430b-46f4-84b5-67de7fc84f70",
       "name": "Edit Fields7",
@@ -884,8 +915,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        900,
-        240
+        320,
+        220
       ],
       "id": "02ce87e0-5884-421d-a4b8-18ec8387278d",
       "name": "Edit Fields8",
@@ -911,11 +942,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2120,
+        2080,
         380
       ],
       "id": "4da2f631-91af-42fa-950a-259a44087f80",
-      "name": "Consulta_CRM"
+      "name": "Consulta_CRM",
+      "disabled": true
     },
     {
       "parameters": {
@@ -945,8 +977,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2280,
-        380
+        2300,
+        370
       ],
       "id": "c145fdbe-65c5-4acf-ba30-223831ee2fa5",
       "name": "If_CRM"
@@ -999,11 +1031,12 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2500,
-        480
+        2520,
+        470
       ],
       "id": "d2a09dc3-34b3-4303-9495-6cb36244e16c",
-      "name": "cadastro_CRM"
+      "name": "cadastro_CRM",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1017,11 +1050,12 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        2660,
-        480
+        2740,
+        470
       ],
       "id": "0c32f7db-4409-4cfc-b5b7-ae313c04ee3c",
-      "name": "new_atend"
+      "name": "new_atend",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1035,11 +1069,12 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        2660,
-        360
+        2740,
+        270
       ],
       "id": "056baa5d-6f47-41a6-b0d2-28a91f3de5fb",
-      "name": "new_atend2"
+      "name": "new_atend2",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1051,11 +1086,12 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        2900,
-        400
+        2960,
+        370
       ],
       "id": "8238e2d2-dbee-4754-9da0-96a336227c81",
-      "name": "Consulta_new_atend"
+      "name": "Consulta_new_atend",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1142,8 +1178,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        3500,
-        280
+        3620,
+        270
       ],
       "id": "6dcf738c-2a0e-4f2f-b146-2a0dc5062955",
       "name": "Switch1"
@@ -1177,8 +1213,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        900,
-        0
+        320,
+        20
       ],
       "id": "8421c23f-8f79-4766-bfda-efdb352c1fd0",
       "name": "Edit Fields9",
@@ -1208,8 +1244,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        3740,
-        120
+        3840,
+        70
       ],
       "id": "745a0d3d-e07e-4345-b660-4f4a0d82b213",
       "name": "Workflow_SDR"
@@ -1221,8 +1257,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        3740,
-        280
+        3840,
+        270
       ],
       "id": "fd2fea45-8341-4904-9c77-ecc19d133d0b",
       "name": "Workflow_Closer",
@@ -1235,8 +1271,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        3740,
-        460
+        3840,
+        470
       ],
       "id": "8cbbe14f-8d87-420a-9ea0-d9a6234f3446",
       "name": "Workflow_pos",
@@ -1252,11 +1288,12 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        1700,
-        280
+        1640,
+        270
       ],
       "id": "57336f79-344f-4d95-8274-f1d3d7bbb804",
-      "name": "andamento_atendimento1"
+      "name": "andamento_atendimento1",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1286,8 +1323,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1880,
-        280
+        1860,
+        270
       ],
       "id": "3db64c49-50ac-4d08-8688-fb2e403b62ca",
       "name": "If5"
@@ -1297,8 +1334,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3320,
-        280
+        3400,
+        270
       ],
       "id": "51dc13f3-5461-423a-9bd9-5849a7739066",
       "name": "Merge1"
@@ -1312,11 +1349,12 @@
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
       "position": [
-        2400,
-        260
+        3180,
+        95
       ],
       "id": "4772d379-eaa0-4834-bf3b-06d287539d83",
-      "name": "Redis"
+      "name": "Redis",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1325,8 +1363,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2120,
-        260
+        2960,
+        95
       ],
       "id": "e1bf0dc1-ef95-4157-b001-237ef0a535cd",
       "name": "Code3"
@@ -1338,11 +1376,206 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3100,
-        400
+        3180,
+        370
       ],
       "id": "9fa53909-cc40-44c5-845f-d443b711d9f9",
       "name": "Code4"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "menssage",
+        "key": "=buffer{{ $('Edit Fields3').item.json.message.sessionId }}",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        980,
+        195
+      ],
+      "id": "2c6d0624-b84f-41ec-9a6c-91a98216fa03",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        470
+      ],
+      "id": "c557bbc5-980a-4792-8e83-f42b233ba38d",
+      "name": "Wait",
+      "webhookId": "bca5b95b-558f-461f-ad20-906a3777cedf"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=buffer{{ $('Edit Fields3').item.json.message.sessionId }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        270
+      ],
+      "id": "cd64afdf-2907-41e2-81a3-712869c0b2a1",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "=buffer{{$json.message.sessionId}}",
+        "messageData": "={{ JSON.stringify($json.message) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        760,
+        195
+      ],
+      "id": "4a8fb949-4811-4567-aa45-8c60df4d19c7",
+      "name": "Redis3",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.menssage.first()).id }}",
+                    "rightValue": "={{ JSON.parse($json.menssage.last()).id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "636a9a4b-7605-4e68-a685-f1118331ce62"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NADA a FAZER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "391c83b1-c3ea-4d75-965b-9efdef60efbf",
+                    "leftValue": "={{ JSON.parse($json.menssage.last()).time }}",
+                    "rightValue": "={{ $now.minus(15, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PROSSEGUIR"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "ESPERA"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1200,
+        195
+      ],
+      "id": "8dcc5fb7-5c46-41ca-b004-9a4802bce5e2",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        70
+      ],
+      "id": "939e6ee0-0055-440e-89ce-c7f4f2988f79",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "={{ $('Webhook').item.json.body.instance }}",
+        "messageId": "={{ $('Webhook').item.json.body.data.key.id }}"
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        780
+      ],
+      "id": "75f778e8-c230-43c8-8811-7c3509ddea86",
+      "name": "Obter m dia em base64",
+      "credentials": {
+        "evolutionApi": {
+          "id": "R2j8KIOLhEjdWQUa",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {
+          "fileName": "={{ $('Webhook').item.json.body.data.message.documentMessage.fileName }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -900,
+        780
+      ],
+      "id": "b3ce9d2e-0b04-49ce-a024-2bd1a8159725",
+      "name": "Convert to File2"
     }
   ],
   "connections": {
@@ -1397,7 +1630,8 @@
             "type": "main",
             "index": 0
           }
-        ]
+        ],
+        []
       ]
     },
     "Edit Fields1": {
@@ -1492,7 +1726,7 @@
       "main": [
         [
           {
-            "node": "andamento_atendimento1",
+            "node": "Redis3",
             "type": "main",
             "index": 0
           }
@@ -1529,6 +1763,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Obter m dia em base64",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1541,13 +1782,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "AI Agent2",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "AI Agent2": {
@@ -1565,7 +1800,7 @@
       "main": [
         [
           {
-            "node": "Gerar_Embedding_Cohere",
+            "node": "AI Agent2",
             "type": "main",
             "index": 0
           }
@@ -1594,17 +1829,6 @@
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent2",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Postgres1": {
       "main": [
         [
@@ -1618,13 +1842,7 @@
     },
     "Postgres": {
       "main": [
-        [
-          {
-            "node": "Code1",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Edit Fields5": {
@@ -1642,7 +1860,7 @@
       "main": [
         [
           {
-            "node": "Salvar Novo Embedding2",
+            "node": "Code1",
             "type": "main",
             "index": 0
           }
@@ -1863,6 +2081,97 @@
           }
         ]
       ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis3": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "andamento_atendimento1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter m dia em base64": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Salvar PDF em Disco",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1909,47 +2218,80 @@
           "headers": {
             "content-type": "application/json",
             "user-agent": "axios/1.7.9",
-            "content-length": "905",
+            "content-length": "3783",
             "accept-encoding": "gzip, compress, deflate, br",
-            "host": "192.168.1.26:5678",
+            "host": "host.docker.internal:5678",
             "connection": "keep-alive"
           },
           "params": {},
           "query": {},
           "body": {
             "event": "messages.upsert",
-            "instance": "teste",
+            "instance": "meu cell",
             "data": {
               "key": {
-                "remoteJid": "558281036911@s.whatsapp.net",
+                "remoteJid": "558288841235@s.whatsapp.net",
                 "fromMe": false,
-                "id": "E6B545008FE136D7A20E03C0313C8747"
+                "id": "3EB0710117E2FD23D5D2CE"
               },
-              "pushName": "Guardião Lajes",
+              "pushName": "JG loja",
               "status": "DELIVERY_ACK",
               "message": {
-                "conversation": "Oi",
+                "documentMessage": {
+                  "url": "https://mmg.whatsapp.net/v/t62.7119-24/13847255_701828469524577_2775928857514629976_n.enc?ccb=11-4&oh=01_Q5Aa2AESePOpu1uMTXDB2Nj2CYZlpIrkZkdA6P8-cBNIU8pBRA&oe=68A89EA4&_nc_sid=5e03e0&mms3=true",
+                  "mimetype": "application/pdf",
+                  "title": "img20250723_15341494.pdf",
+                  "fileSha256": "Na2ChxR/M+KI63HDg8ycWDlp38gOFy2UyI5ES5Sqdsk=",
+                  "fileLength": "4988373",
+                  "pageCount": 1,
+                  "mediaKey": "LleXCq4Ni9weKJw7w5dfAQWPaTb/VeeXMYqrN+TgVDc=",
+                  "fileName": "img20250723_15341494.pdf",
+                  "fileEncSha256": "52R7osNf0txB+GG/1W3w3ZfJFIDhy5w2t0U0iE9Y0ok=",
+                  "directPath": "/v/t62.7119-24/13847255_701828469524577_2775928857514629976_n.enc?ccb=11-4&oh=01_Q5Aa2AESePOpu1uMTXDB2Nj2CYZlpIrkZkdA6P8-cBNIU8pBRA&oe=68A89EA4&_nc_sid=5e03e0",
+                  "mediaKeyTimestamp": "1753295989",
+                  "contactVcard": false,
+                  "thumbnailDirectPath": "/v/t62.36145-24/20119603_746455564408112_8455283737806918710_n.enc?ccb=11-4&oh=01_Q5Aa2AHGXUU43HXnRb8I6P0Nu1qitgQzoSPmyfnkuhovmCmQ8A&oe=68A89A90&_nc_sid=5e03e0",
+                  "thumbnailSha256": "n0aYiP21r+15UehVUL9lNv1cR3PdFnggklgO+q4gjwg=",
+                  "thumbnailEncSha256": "IMMNSNxI2oIsK+hh2Ya9HBjPjyTiG7YoIaQqGOAP4dM=",
+                  "jpegThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/2wBDAQMDAwQDBAgEBAgQCwkLEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBD/wAARCAAaABIDASIAAhEBAxEB/8QAHAAAAQMFAAAAAAAAAAAAAAAAAAMEBQECBgcJ/8QAJxAAAgIBAwMEAgMAAAAAAAAAAQIDBBEABRIGITETQVFhByMikeH/xAAWAQEBAQAAAAAAAAAAAAAAAAACAQP/xAAYEQADAQEAAAAAAAAAAAAAAAAAARECIf/aAAwDAQACEQMRAD8A6Utd3TYrM1Oj0vctxyy/qeO2io3aMfxSSTKAKSTgDk0cjYy45SDblvkKxqOmbEgLqh4WIiUHbLEs4yPPjJ+vnBesNv6Dh6nN7qHqexU3O08MtOsnUL0lMkYIXhEbCK2SxGCoBYgnPYhb8Ybvt7JNRp9Wz7wm4357MFmxu1a6w5L6voqy2JTxCFSqoFAVQcDJJbkAumyI7EUsayKJAHAYBomU9/kEZB+jo0ovEqCCCCOx+dGjwRFQB5Lk08DhEcopX0DyyB3DN7fX+jTmvNBYkexWs1pYwzQM8YBPNHKlC2fKsGBHkNkdjqtOtXMcNk14zMYk/ZwHLx8+fc/3q3btq2vbVs19u22rVisTyTypDCqLJLJgu7ADBZiSST3JPfT0qTKg7glhsQx2K0yywyqHjdGDKykZBBHkEe+jSDswdgGPk++jWdFD/9k=",
+                  "contextInfo": {
+                    "ephemeralSettingTimestamp": "1741714468",
+                    "disappearingMode": {
+                      "initiator": "CHANGED_IN_CHAT"
+                    }
+                  },
+                  "thumbnailHeight": 26,
+                  "thumbnailWidth": 18
+                },
                 "messageContextInfo": {
                   "deviceListMetadata": {
-                    "senderKeyHash": "FzBu4LD9MVVgrQ==",
-                    "senderTimestamp": "1749504925",
-                    "recipientKeyHash": "1jLvfWOwaHNxSw==",
-                    "recipientTimestamp": "1749589492"
+                    "senderKeyHash": "cSROUPpqYadqeA==",
+                    "senderTimestamp": "1752601866",
+                    "senderAccountType": "E2EE",
+                    "receiverAccountType": "E2EE",
+                    "recipientKeyHash": "PNAKdvlNOWS77A==",
+                    "recipientTimestamp": "1752837693"
                   },
                   "deviceListMetadataVersion": 2,
-                  "messageSecret": "RAPBDqS69zqQDk8u1OrI/R8Z1TJ46kWdYlyRqY5MnPo="
+                  "messageSecret": "97TS+6Md/67cmUrYmQRzOI/k1+tqeIvMPCyVMVqMJLU="
                 }
               },
-              "messageType": "conversation",
-              "messageTimestamp": 1749676813,
-              "instanceId": "e187095c-1b66-4e1c-baee-0cbdceb7ed81",
-              "source": "android"
+              "contextInfo": {
+                "ephemeralSettingTimestamp": "1741714468",
+                "disappearingMode": {
+                  "initiator": "CHANGED_IN_CHAT"
+                }
+              },
+              "messageType": "documentMessage",
+              "messageTimestamp": 1753295992,
+              "instanceId": "53b4f8d8-92ba-4830-8363-2b31690f03bc",
+              "source": "web"
             },
-            "destination": "http://192.168.1.26:5678/webhook-test/c74a111e-4f99-4cba-b913-ee63a320cd0b",
-            "date_time": "2025-06-11T18:20:13.535Z",
-            "sender": "558294077885@s.whatsapp.net",
+            "destination": "http://host.docker.internal:5678/webhook-test/c74a111e-4f99-4cba-b913-ee63a320cd0b",
+            "date_time": "2025-07-23T15:39:53.775Z",
+            "sender": "558281036911@s.whatsapp.net",
             "server_url": "http://localhost:8080",
-            "apikey": "652DFE4F35FC-4B03-ACB2-2D03476440A8"
+            "apikey": "A45ACCDF0A06-4675-9D48-37543E73A7A2"
           },
           "webhookUrl": "http://localhost:5678/webhook-test/c74a111e-4f99-4cba-b913-ee63a320cd0b",
           "executionMode": "test"
@@ -1957,7 +2299,7 @@
       }
     ]
   },
-  "versionId": "aa188225-a5f6-4d4d-ad30-ae67c6140528",
+  "versionId": "c3f13648-bfe6-4cfe-8f2e-de5ac99c145d",
   "triggerCount": 0,
   "tags": [
     {
