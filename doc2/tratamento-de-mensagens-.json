@@ -1,0 +1,19 @@
+{
+  "createdAt": "2025-07-23T18:33:46.421Z",
+  "updatedAt": "2025-07-23T18:33:46.421Z",
+  "id": "5nzwk4oAnWQnp9Ig",
+  "name": "tratamento de mensagens",
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "03189b1a-1b94-4149-814e-febd1b1f1db9",
+  "triggerCount": 0,
+  "tags": []
+}
