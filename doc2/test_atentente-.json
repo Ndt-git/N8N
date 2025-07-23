@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:57:34.653Z",
-  "updatedAt": "2025-07-22T16:51:04.756Z",
+  "updatedAt": "2025-07-23T12:05:11.302Z",
   "id": "4pdizWewQzdsLsGx",
   "name": "test_atentente",
   "active": false,
@@ -1335,8 +1335,8 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2000,
-        980
+        -3140,
+        960
       ],
       "id": "312799e5-5be7-4644-9d39-e0aa24f3ea81",
       "name": "When chat message received",
@@ -1722,6 +1722,209 @@
       ],
       "id": "0301e785-434d-4cc8-a58a-2b3a306967a7",
       "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "=buffer{{$json.message.sessionId}}",
+        "messageData": "={{ JSON.stringify($json.message) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2720,
+        960
+      ],
+      "id": "a0d95f8c-8121-4785-bdce-17c7dae30ce8",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "menssage",
+        "key": "=buffer{{ $('Edit Fields3').item.json.message.sessionId }}",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2500,
+        960
+      ],
+      "id": "9f4baa50-fa2f-4a27-8c50-619cb9af75c6",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b697ce82-f74b-4ed7-9abc-8007c5534c4b",
+              "name": "message.sessionId",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "d6133520-3891-4cc0-aef8-962b37e1ecd7",
+              "name": "message.action",
+              "value": "={{ $json.action }}",
+              "type": "string"
+            },
+            {
+              "id": "a463e727-39ed-42d1-805c-c6301739389b",
+              "name": "message.chatInput",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "8ba8e7e3-0fd8-40f1-a1e2-b749498d7279",
+              "name": "message.time",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "0c650b06-382d-447b-a660-7ba8b99a12ee",
+              "name": "message.id",
+              "value": "asas54654",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2920,
+        960
+      ],
+      "id": "1500e36e-fe69-4af5-8c0a-eb11e025677b",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.menssage.first()).id }}",
+                    "rightValue": "={{ JSON.parse($json.menssage.last()).id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "636a9a4b-7605-4e68-a685-f1118331ce62"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NADA a FAZER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "391c83b1-c3ea-4d75-965b-9efdef60efbf",
+                    "leftValue": "={{ JSON.parse($json.menssage.last()).time }}",
+                    "rightValue": "={{ $now.minus(15, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PROSSEGUIR"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "ESPERA"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -2280,
+        960
+      ],
+      "id": "4a1fe753-615d-4ec5-8434-e1ccdacda219",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1940,
+        1160
+      ],
+      "id": "a3741451-c0d3-47b4-87e3-561fd63c5b30",
+      "name": "Wait",
+      "webhookId": "bca5b95b-558f-461f-ad20-906a3777cedf"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1940,
+        800
+      ],
+      "id": "ee6e3ffb-a189-48f9-8d39-c4df97881b34",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=buffer{{ $('Edit Fields3').item.json.message.sessionId }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1940,
+        960
+      ],
+      "id": "aba14ddc-b1e2-47d4-b418-69d827974912",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1944,7 +2147,7 @@
       "main": [
         [
           {
-            "node": "SDR",
+            "node": "Edit Fields3",
             "type": "main",
             "index": 0
           }
@@ -2060,6 +2263,75 @@
           }
         ]
       ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2070,23 +2342,6 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {
-    "When Executed by Another Workflow": [
-      {
-        "json": {
-          "operation": "rag",
-          "tableName": null,
-          "especificacoes": null,
-          "ferragem": null,
-          "detalhes": null,
-          "NomeProduto": null,
-          "leadid": null,
-          "Produtos": null,
-          "Obs": null,
-          "Status": null,
-          "Query": "cálculo de preço para 03 treliças de 6 metros cheia, 100 lajotas cerâmicas (barro), 01 malha de 3x2, 1 kilo de arame queimado, 2 vergalhão de 5.16 e ferragem armada 7x15 ferro 3x8 com preço por metro"
-        }
-      }
-    ],
     "Gerar_Embedding_Cohere1": [
       {
         "json": {
@@ -3135,7 +3390,7 @@
       }
     ]
   },
-  "versionId": "a4e8b093-a74d-4f56-bae6-2f8c11605862",
+  "versionId": "9df5be48-3371-45b4-a0d3-1e9450ad8584",
   "triggerCount": 0,
   "tags": []
 }
