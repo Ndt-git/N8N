@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T16:46:30.107Z",
-  "updatedAt": "2025-07-11T19:48:49.870Z",
+  "updatedAt": "2025-07-24T20:32:02.867Z",
   "id": "fqtni2Z15HvjXtEq",
   "name": "Backup",
   "active": true,
@@ -662,13 +662,13 @@
     },
     {
       "parameters": {
-        "jsCode": "// Este código pode ser usado em um nó \"Code\" (ou \"Function\") no n8n.\n// Ele simplesmente retorna um array vazio, o que faz com que o nó\n// não passe nenhum item para o próximo nó no workflow.\nreturn [];"
+        "jsCode": "// Este código retorna um array contendo um único item.\n// Esse item é um objeto JSON vazio.\n// Isso é o suficiente para o n8n considerar que há dados para o próximo nó.\nreturn [{ json: {} }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2440,
-        1440
+        2520,
+        1420
       ],
       "id": "886e707b-868c-4fb8-a918-fa13acb76650",
       "name": "Code"
@@ -923,7 +923,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "af4e5122-ad44-418c-aefa-26d0c497a4db",
+  "versionId": "e00a085f-bbfd-40e6-97f6-fce32495daf0",
   "triggerCount": 1,
   "tags": []
 }
