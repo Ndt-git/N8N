@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:05:13.566Z",
-  "updatedAt": "2025-07-24T20:29:04.327Z",
+  "updatedAt": "2025-07-24T23:38:46.005Z",
   "id": "oEgGaOjRHITpdzbf",
   "name": "entrada",
   "active": true,
@@ -1151,7 +1151,7 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}242252252",
+        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}242a252252",
         "sessionTTL": 86400,
         "contextWindowLength": 7
       },
@@ -1500,7 +1500,7 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "produtos": "=  {\n\"lista_produtos\": \"{{ $fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente', 'string', ) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}"
+            "produtos": "=  {\n\"lista_produtos\": \"{{ JSON.stringify($fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente', 'string', )).slice(1,-1) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}"
           },
           "matchingColumns": [
             "produtos"
@@ -1597,17 +1597,6 @@
           "name": "Evolution account"
         }
       }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -1380,
-        1240
-      ],
-      "id": "5dadc8e7-19da-4db3-9cac-2e1d166842dd",
-      "name": "Merge2"
     }
   ],
   "connections": {
@@ -1703,13 +1692,7 @@
     },
     "Postgres": {
       "main": [
-        [
-          {
-            "node": "Merge2",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Edit Fields5": {
@@ -2183,7 +2166,7 @@
       }
     ]
   },
-  "versionId": "6529a4f1-eba9-4070-ace0-17dc3a757c4a",
+  "versionId": "3d0ea8e5-66cb-4a9f-b7ce-71b485f94687",
   "triggerCount": 1,
   "tags": [
     {
