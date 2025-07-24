@@ -1,0 +1,2202 @@
+{
+  "createdAt": "2025-07-10T20:05:13.566Z",
+  "updatedAt": "2025-07-24T20:29:04.327Z",
+  "id": "oEgGaOjRHITpdzbf",
+  "name": "entrada",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c74a111e-4f99-4cba-b913-ee63a320cd0b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2480,
+        520
+      ],
+      "id": "e071b03a-ca56-4045-9492-f416e7b1f995",
+      "name": "Webhook",
+      "webhookId": "b1eba78e-4d42-4d37-b97a-fb3d96edd6e0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7c9248e5-26e0-45a7-aec2-9c3cb8437695",
+              "leftValue": "={{ $('Webhook').item.json.body.event }}",
+              "rightValue": "messages.upsert",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "36dbafab-d007-40ee-8268-588c2759cc8e",
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "81036911",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2040,
+        520
+      ],
+      "id": "281efed4-3a25-42b6-9c4e-146555eaeabd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH FoundRecord AS (\n    SELECT\n        id,\n        referencia,\n        texto_original,\n        1 - (embedding <=> '[{{ $json.embeddings[0].join(',') }}]') AS cosine_similarity\n    FROM\n        pagamentos_embeddings\n    WHERE\n        (embedding <=> '[{{ $json.embeddings[0].join(',') }}]') < 0.05\n    ORDER BY\n        embedding <=> '[{{ $json.embeddings[0].join(',') }}]'\n    LIMIT 1\n)\nSELECT\n    COALESCE(fr.id, NULL) AS id, -- Retorna o ID se achado, senão NULL\n    COALESCE(fr.referencia, NULL) AS referencia, -- Retorna referencia se achado, senão NULL\n    COALESCE(fr.texto_original, NULL) AS texto_original, -- Retorna texto_original se achado, senão NULL\n    COALESCE(fr.cosine_similarity, NULL) AS cosine_similarity, -- Retorna similaridade se achado, senão NULL\n    (fr.id IS NOT NULL) AS existe -- Retorna TRUE se achado (id não é NULL), senão FALSE\nFROM\n    (SELECT 1 AS dummy_key) AS dummy -- Tabela dummy para garantir sempre 1 linha\nLEFT JOIN\n    FoundRecord fr ON 1 = 1; -- LEFT JOIN sempre trará a linha da dummy",
+        "options": {}
+      },
+      "id": "136dcb64-90e0-4ed3-b615-685f29dc28ae",
+      "name": "Consultar PGVector",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -2260,
+        1140
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "28145bb4-2ff0-40f9-a3ef-611246189cc1",
+              "leftValue": "={{ $json.existe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2040,
+        1140
+      ],
+      "id": "aff8f907-9ffb-49b1-aa78-165157ac8d89",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cohere.com/v1/embed",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"embed-english-v3.0\",\n  \"input_type\": \"search_document\",\n  \"texts\": [\n    \"{{ $json.texto_limpo }}\"\n  ]\n} ",
+        "options": {}
+      },
+      "id": "0dc858cd-da49-4d6b-a378-fd219bee90b1",
+      "name": "Gerar_Embedding_Cohere",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -2480,
+        1140
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "OyCraanHEQ1O0xVC",
+          "name": "cohere"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO pagamentos_embeddings (\n  origem, referencia, embedding\n) VALUES (\n  $1, $2, $3::vector\n)\nRETURNING id;",
+        "options": {
+          "queryReplacement": "=[\n  \"{{ $item(0).$node['contAudio'].json.contacinfo.id }}\",\n  \"{{ $('Webhook').item.json.body.data.message.documentMessage.fileName }}\",\n  {{ $item(0).$node['Gerar_Embedding_Cohere'].json.embeddings[0] }}\n]\n"
+        }
+      },
+      "id": "ece48d44-fb2a-4b81-91a0-bdba3d822ea8",
+      "name": "Salvar Novo Embedding2",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        -2260,
+        1340
+      ],
+      "typeVersion": 2.6,
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE pagamentos_embeddings\nSET saida_ia = $1,\n  texto_original = $3\nWHERE\n    id = $2; \n",
+        "options": {
+          "queryReplacement": "=[  \n\"{{ $('Code').item.json.output }}\",  \n\"{{ $json.id }}\"\n\"{{ $('Cod_text_limp').item.json.texto_limpo }}\"\n]"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2040,
+        1340
+      ],
+      "id": "3ff6c1ba-f296-4f5f-a130-fc83b02237fe",
+      "name": "Postgres1",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT saida_ia\nFROM pagamentos_embeddings\nWHERE\n  id = $1;",
+        "options": {
+          "queryReplacement": "={{ $json.id }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1600,
+        1240
+      ],
+      "id": "b327244c-8e65-4947-a42b-196d58d9d216",
+      "name": "Postgres",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9259334a-c721-497e-ae7c-a77e73cdc3fc",
+              "name": "id",
+              "value": "={{ $json.id || ($item(0).$node[\"Salvar Novo Embedding2\"] && $item(0).$node[\"Salvar Novo Embedding2\"].json.id) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1820,
+        1240
+      ],
+      "id": "81d10ca7-3755-4996-8d71-c4fe3f00b769",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "jsCode": "let texto = $json.output || '';\ntexto = texto.replace(/<think>[\\\\s\\\\S]*?<\\\\/think>/gi, '').trim();\nreturn [{ json: { output_limpo: texto } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2480,
+        1860
+      ],
+      "id": "255ec68d-fefc-4941-966e-551f8ed68eb3",
+      "name": "Cod_output_limp1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "862b0f99-966d-40e2-8624-ae74e23ea715",
+              "name": "norm.contacinfo.id",
+              "value": "={{ $json.body.data.key.remoteJid?.split(\"@\")?.[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "265936b5-f5f4-4258-b02e-a52b3857571b",
+              "name": "norm.contacinfo.nome",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "85a6fad8-5d54-4017-8bcf-9b847d14788d",
+              "name": "norm.message.tipo",
+              "value": "={{ (\n  (!!$json.body.data.message.audioMessage && 'audio' || \n   !!$json.body.data.message.conversation && 'text' || \n   !!$json.body.data.message.imageMessage && 'imagem' || \n   !!$json.body.data.message.sticlerMessage && 'sticker' || \n   !!$json.body.data.message.documentMessage && 'document')\n).replace(/\\s+/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "0cd1bdf7-4362-4aa7-b125-ac472f232443",
+              "name": "norm.message.data_hora",
+              "value": "={{ DateTime.fromSeconds($json.body.data.messageTimestamp).toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "4cc90948-c202-4817-91f0-36d5b1707f9d",
+              "name": "norm.message.fileName",
+              "value": "={{ $json.body.data.message.documentMessage.fileName?.split(\".\")?.[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "5863ba85-91b8-4243-81a0-349fde49fcfc",
+              "name": "norm.contacinfo.participantID",
+              "value": "={{ $json.body.data.key.participant?.split(\"@\")?.[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "7c6276f0-b1f7-4c20-81fe-606f78b87e10",
+              "name": "norm.message.id",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2260,
+        520
+      ],
+      "id": "47da943d-cfb2-4016-9ad4-3695933c5072",
+      "name": "Edit Fields6"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1820,
+        620
+      ],
+      "id": "35d559bd-9afa-414b-aee5-823da8215bdb",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4ba7f5ab-fa4a-46cb-93c2-3002bd998584",
+              "name": "audio",
+              "value": "=audio \"{{ $json.segments[0].text }}\"",
+              "type": "string"
+            },
+            {
+              "id": "5a1763db-caa1-4828-ac2c-63efffcbf4d5",
+              "name": "user",
+              "value": "={{ $('Code2').item.json.participante }}",
+              "type": "string"
+            },
+            {
+              "id": "1e6923f3-e5ff-4ec6-90f3-40c9822c173b",
+              "name": "pdf",
+              "value": "=PDF \"{{ $json.nota_compactada }}\"",
+              "type": "string"
+            },
+            {
+              "id": "16f35020-4cc1-43df-9dfb-b16ccb92ac50",
+              "name": "texto_pdf",
+              "value": "=text_pdf \"{{ $('Webhook').item.json.body.data.message.documentMessage.caption }}\"",
+              "type": "string"
+            },
+            {
+              "id": "0149a057-5dc2-4ab7-9f26-1ad9f6883101",
+              "name": "texto",
+              "value": "=text \"{{ $json.message.conteudo }}\"",
+              "type": "string"
+            },
+            {
+              "id": "093d0dc5-01fe-45e5-8e4f-aadfc3b94981",
+              "name": "tipo",
+              "value": "={{ $('Code2').item.json.tipo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2480,
+        880
+      ],
+      "id": "736a0832-430b-46f4-84b5-67de7fc84f70",
+      "name": "Edit Fields7",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "url": "=http://192.168.1.26:8090/api/resource/Lead?filters=[[\"whatsapp_no\", \"=\", \"{{ $('Merge').item.json.whats }}\"]]&fields=[\"lead_name\", \"name\"]",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "erpNextApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filters",
+              "value": "="
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2040,
+        2420
+      ],
+      "id": "4da2f631-91af-42fa-950a-259a44087f80",
+      "name": "Consulta_CRM",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "28fab5ad-2903-4c62-981e-9e9f1d62304b",
+              "leftValue": "={{ $json.data[0].name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1820,
+        2420
+      ],
+      "id": "c145fdbe-65c5-4acf-ba30-223831ee2fa5",
+      "name": "If_CRM"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.26:8090/api/resource/Lead",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "erpNextApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "doctype",
+              "value": "Lead"
+            },
+            {
+              "name": "subject",
+              "value": "=Lead de WhatsApp - {{ $('Merge').item.json.whats }}"
+            },
+            {
+              "name": "whatsapp_no",
+              "value": "={{ $('Merge').item.json.whats }}"
+            },
+            {
+              "name": "status",
+              "value": "Open"
+            },
+            {
+              "name": "custom_status_automacao",
+              "value": "Novo"
+            },
+            {
+              "name": "custom_última_etapa_funil",
+              "value": "Recepção de Mensagem"
+            },
+            {
+              "name": "custom_log_atendimento",
+              "value": "=Primeira mensagem recebida via WhatsApp em {{ new Date().toLocaleString('pt-BR', { timeZone: 'America/Maceio' }) }}"
+            },
+            {
+              "name": "lead_name",
+              "value": "=unknown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1600,
+        2520
+      ],
+      "id": "d2a09dc3-34b3-4303-9495-6cb36244e16c",
+      "name": "cadastro_CRM",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $json.data.whatsapp_no }}",
+        "value": "={\n  \"lead_erpnext_name\": \"{{ $json.data.name }}\", \"whatsapp_number\": \"{{ $json.data.whatsapp_no }}\",   \"current_status\": \"Em Atendimento\",   \"last_message_received\": \"{{ $('Merge').item.json.conteudo}}\",   \"last_interaction_timestamp\": \"{{ new Date().toISOString() }}\",   \"etapa_funil\": \"Recepção de Mensagem\",   \"sev_responsavel\": \"SDR_hb\", \"obs\": null, \"nome\": \"{{ $json.data.lead_name }}\", \"logs\":\"\" }",
+        "keyType": "string",
+        "expire": true,
+        "ttl": 1840
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        2520
+      ],
+      "id": "0c32f7db-4409-4cfc-b5b7-ae313c04ee3c",
+      "name": "new_atend",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Merge').item.json.whats }}",
+        "value": "={\n  \"lead_erpnext_name\": \"{{ $('Consulta_CRM').item.json.data[0].name }}\",\n  \"whatsapp_number\": \"{{ $('Merge').item.json.whats }}\",\n  \"current_status\": \"Em Atendimento\",\n  \"last_message_received\": \"{{ $('Merge').item.json.conteudo }}\",\n  \"last_interaction_timestamp\": \"{{ new Date().toISOString() }}\",\n  \"etapa_funil\": \"Recepção de Mensagem\",\n  \"sev_responsavel\": \"SDR_hb\",\n  \"obs\": null,\n  \"nome\": \"{{ $('Consulta_CRM').item.json.data[0].lead_name }}\",\n  \"logs\": \"\"\n}\n",
+        "keyType": "string",
+        "expire": true,
+        "ttl": 1840
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        2320
+      ],
+      "id": "056baa5d-6f47-41a6-b0d2-28a91f3de5fb",
+      "name": "new_atend2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('Merge').item.json.whats}}",
+        "keyType": "string",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        2420
+      ],
+      "id": "8238e2d2-dbee-4754-9da0-96a336227c81",
+      "name": "Consulta_new_atend",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.sev_responsavel }}",
+                    "rightValue": "SDR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "id": "eb891abb-7f42-4f0e-8d98-8b0367014143"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SDR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "df8fff76-4583-477b-ae9d-b0e07f49479f",
+                    "leftValue": "={{ $json.sev_responsavel }}",
+                    "rightValue": "closer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CLOSER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "39f4b4ed-685f-436f-82bf-889274af183b",
+                    "leftValue": "={{ $json.sev_responsavel }}",
+                    "rightValue": "pos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "POS-VENDA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -500,
+        2320
+      ],
+      "id": "6dcf738c-2a0e-4f2f-b146-2a0dc5062955",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "9quZTbKik4EG8Y1m",
+          "mode": "list",
+          "cachedResultName": "SDR"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        2120
+      ],
+      "id": "745a0d3d-e07e-4345-b660-4f4a0d82b213",
+      "name": "Workflow_SDR"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        2320
+      ],
+      "id": "fd2fea45-8341-4904-9c77-ecc19d133d0b",
+      "name": "Workflow_Closer",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        2520
+      ],
+      "id": "8cbbe14f-8d87-420a-9ea0-d9a6234f3446",
+      "name": "Workflow_pos",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.whats }}1",
+        "keyType": "string",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2480,
+        2320
+      ],
+      "id": "57336f79-344f-4d95-8274-f1d3d7bbb804",
+      "name": "andamento_atendimento1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "439e3f72-397e-41b1-a7ce-9905afa8d060",
+              "leftValue": "={{ $json.propertyName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2260,
+        2320
+      ],
+      "id": "3db64c49-50ac-4d08-8688-fb2e403b62ca",
+      "name": "If5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -720,
+        2320
+      ],
+      "id": "51dc13f3-5461-423a-9bd9-5849a7739066",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Merge').item.json.whats}}",
+        "value": "={\n  \"lead_erpnext_name\": \"{{ $json.lead_erpnext_name }}\",\n  \"whatsapp_number\": \"{{ $json.whatsapp_number }}\",\n  \"current_status\": \"Em Atendimento\",\n  \"last_message_received\": \"{{ $('Merge').item.json.conteudo }}\",\n  \"last_interaction_timestamp\": \"{{ new Date().toISOString() }}\",\n  \"etapa_funil\": \"Recepção de Mensagem\",\n  \"sev_responsavel\": \"SDR\",\n  \"obs\": null,\n  \"nome\": \"{{ $json.nome }}\",\n  \"logs\": [\n    {\n      \"quem\": \"{{ $json.logs[0].quem }}\",\n      \"mensagem\": \"{{ $json.logs[0].mensagem }}\",\n      \"timestamp\": \"{{ $json.logs[0].timestamp }}\"\n    }\n  ]\n}\n"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -940,
+        2145
+      ],
+      "id": "4772d379-eaa0-4834-bf3b-06d287539d83",
+      "name": "Redis",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0].json.propertyName;\n\n// Tenta remover aspas duplas externas inválidas no início/fim\nlet cleaned = raw.trim().replace(/^\"+|\"+$/g, '');\n\n// Corrige campo \"logs\" malformado: tira aspas duplicadas externas da string do array\ncleaned = cleaned.replace(/\"logs\":\"\\\"/, '\"logs\":');\ncleaned = cleaned.replace(/}\\\"\\s*}$/, '}]}');\n\n// Agora tentamos parsear\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  throw new Error('Erro ao converter para JSON. Verifique a entrada. Detalhes: ' + error.message);\n}\n\n// Se ainda estiver com logs como string, tentamos parsear também\nif (typeof parsed.logs === \"string\") {\n  try {\n    parsed.logs = JSON.parse(parsed.logs);\n  } catch (e) {\n    parsed.logs = [];\n  }\n}\n\nreturn [{ json: parsed }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1160,
+        2145
+      ],
+      "id": "e1bf0dc1-ef95-4157-b001-237ef0a535cd",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = items[0].json.propertyName;\n\n// Tenta remover aspas duplas externas do JSON principal\nlet cleaned = raw.trim().replace(/^\"+|\"+$/g, '');\n\n// Corrige o campo logs com regex\ncleaned = cleaned\n  .replace(/\"logs\":\"\\\\*\"?\\[{/, '\"logs\":[{')   // início do array JSON\n  .replace(/\\\\*\"?}(\"?)}$/, '}]}');           // fim do array JSON\n\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (error) {\n  throw new Error('Erro ao converter para JSON. Verifique a entrada. Detalhes: ' + error.message + \"\\nJSON final:\\n\" + cleaned);\n}\n\nreturn [{ json: parsed }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -940,
+        2420
+      ],
+      "id": "9fa53909-cc40-44c5-845f-d443b711d9f9",
+      "name": "Code4"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        520
+      ],
+      "id": "c557bbc5-980a-4792-8e83-f42b233ba38d",
+      "name": "Wait",
+      "webhookId": "bca5b95b-558f-461f-ad20-906a3777cedf"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ JSON.parse($json.menssage.first()).id }}",
+                    "rightValue": "={{ $('buffer').item.json.message.id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "636a9a4b-7605-4e68-a685-f1118331ce62"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "NADA a FAZER"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "391c83b1-c3ea-4d75-965b-9efdef60efbf",
+                    "leftValue": "={{ JSON.parse($json.menssage.last()).data_hora }}",
+                    "rightValue": "={{ $now.minus(30, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PROSSEGUIR"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "ESPERA"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -940,
+        300
+      ],
+      "id": "8dcc5fb7-5c46-41ca-b004-9a4802bce5e2",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        120
+      ],
+      "id": "939e6ee0-0055-440e-89ce-c7f4f2988f79",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "01a7ea8d-faec-4aa5-82ee-2f136db1d776",
+              "name": "contacinfo.id",
+              "value": "={{ $('Webhook').item.json.body.data.key.remoteJid?.split(\"@\")?.first() }}",
+              "type": "number"
+            },
+            {
+              "id": "2ad1b6dc-98b1-4f10-81b4-2ae6b0cae31b",
+              "name": "contacinfo.nome",
+              "value": "={{ $('Webhook').item.json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "fbe520db-5656-4b12-a742-d836c03f37d2",
+              "name": "message.conteudo.base64",
+              "value": "={{ $('Webhook').item.json.body.data.message.base64 }}",
+              "type": "string"
+            },
+            {
+              "id": "bb1b700c-9cc8-4e11-aa02-6d1272a6e6da",
+              "name": "message.data_hora",
+              "value": "={{ DateTime.fromSeconds($('Webhook').item.json.body.data.messageTimestamp).toISO()}}",
+              "type": "string"
+            },
+            {
+              "id": "3ec8e2d0-8b07-43e2-985e-dbc48cbe8ea9",
+              "name": "message.conteudo.url",
+              "value": "={{ $('Webhook').item.json.body.data.message.audioMessage.url }}",
+              "type": "string"
+            },
+            {
+              "id": "a05c6d3b-190b-4e33-8958-11d53c7e7391",
+              "name": "message.texto",
+              "value": "={{ $('Webhook').item.json.body.data.message.documentMessage.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "2c13f33c-7fdb-4bdb-a81a-55f2bc469520",
+              "name": "body.instance",
+              "value": "={{ $('Webhook').item.json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "5447c9bd-e1e6-4e83-9640-6b5b1391054b",
+              "name": "body.data.key.id",
+              "value": "={{ $('Webhook').item.json.body.data.key.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2480,
+        1600
+      ],
+      "id": "92f94ccd-e26a-4e50-a148-8829d560b526",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "5nzwk4oAnWQnp9Ig",
+          "mode": "list",
+          "cachedResultName": "tratamento de mensagens"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -1920,
+        320
+      ],
+      "id": "559334e1-c6ce-4721-bd84-8b8dac601874",
+      "name": "Execute Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "040b2609-b583-4509-b7d1-8ed89b7792a1",
+              "name": "message.id",
+              "value": "={{ $('Edit Fields6').item.json.norm.message.id }}",
+              "type": "string"
+            },
+            {
+              "id": "49336f52-c75d-4733-b4af-a8dbbd8a2218",
+              "name": "=message.chat_id",
+              "value": "={{ $('Edit Fields6').item.json.norm.contacinfo.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2e28835-feb1-45c0-bb38-bd03a87795dc",
+              "name": "message.tipo",
+              "value": "={{ $('Edit Fields6').item.json.norm.message.tipo }}",
+              "type": "string"
+            },
+            {
+              "id": "b297f15b-7034-47ca-b772-326392c4855f",
+              "name": "message.data_hora",
+              "value": "={{ $('Edit Fields6').item.json.norm.message.data_hora }}",
+              "type": "string"
+            },
+            {
+              "id": "fffc3470-c304-4a29-b0c0-ee1569a9198a",
+              "name": "message.fileName",
+              "value": "={{ $('Edit Fields6').item.json.norm.message.fileName }}",
+              "type": "string"
+            },
+            {
+              "id": "79b473c5-bea7-469e-b71a-8f5e1e79200f",
+              "name": "message.conteudo",
+              "value": "={{ $json.conteudo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1600,
+        420
+      ],
+      "id": "97351352-c0aa-4d0a-8373-f98a8a05f4d7",
+      "name": "buffer"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "=buffer{{ $('buffer').item.json.message.chat_id }}",
+        "messageData": "={{ JSON.stringify($json.message) }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        420
+      ],
+      "id": "4a8fb949-4811-4567-aa45-8c60df4d19c7",
+      "name": "redis_bufferInsert",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "menssage",
+        "key": "=buffer{{ $('buffer').item.json.message.chat_id }}",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        420
+      ],
+      "id": "2c6d0624-b84f-41ec-9a6c-91a98216fa03",
+      "name": "redis_bufferCons",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=buffer{{ $('buffer').item.json.message.chat_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        300
+      ],
+      "id": "cd64afdf-2907-41e2-81a3-712869c0b2a1",
+      "name": "redis_bufferDel",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Mostra os produtos mais cotados em orçamentos recentes dos últimos 30 dias.",
+        "operation": "executeQuery",
+        "query": "SELECT\n  produto ->> 'nome' AS produto,\n  COUNT(*) AS total\nFROM\n  orcamentos,\n  jsonb_array_elements(produtos) AS produto\nWHERE\n  data > NOW() - INTERVAL '30 days'\nGROUP BY\n  produto\nORDER BY\n  total DESC\nLIMIT 5;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgresTool",
+      "typeVersion": 2.6,
+      "position": [
+        420,
+        560
+      ],
+      "id": "4be4d9b0-e641-48a3-8a3d-b8a20670f808",
+      "name": "produtos_mais_cotados",
+      "credentials": {
+        "postgres": {
+          "id": "z2oHR8Hcbud4cXb6",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.menssage }}",
+        "options": {
+          "systemMessage": "=# 🔧 PROMPT OTIMIZADO PARA SAÍDA JSON CONSISTENTE\n\n## 🚨 REGRA CRÍTICA DE FORMATAÇÃO (PRIMEIRA INSTRUÇÃO)\n\n**VOCÊ DEVE INICIAR E TERMINAR TODA RESPOSTA COM ESTA ESTRUTURA JSON OBRIGATÓRIA:**\n\n```json\n{\n  \"resposta\": \"Sua resposta completa ao cliente aqui - SEMPRE em texto natural e humano\",\n  \"nome_cliente\": \"Nome identificado ou 'unknown'\",\n  \"nome_identificado\": true,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Próxima ação a ser tomada\",\n  \"obs\": \"Observações internas relevantes\",\n  \"supervisor\": false\n}\n```\n\n**⚠️ NUNCA RESPONDA SEM ESTE FORMATO JSON**\n**⚠️ TODA RESPOSTA DEVE SER JSON VÁLIDO**\n**⚠️ NÃO ADICIONE TEXTO ANTES OU DEPOIS DO JSON**\n\n---\n\n## 📋 IDENTIFICAÇÃO DO SISTEMA\nVocê é **Henrique**, vendedor especializado em materiais pré-moldados para lajes. Sua missão é conduzir conversas naturais focando no fechamento de vendas.\n\n## ⚠️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS QUE TRABALHAMOS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - todos os tipos\n- Lajota de barro / Lajota cerâmica / Tijotas de laje → **Lajota Cerâmica**\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado / Arame de amarrar\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS QUE NÃO TRABALHAMOS:\n- AREIA (qualquer tipo)\n- BRITA (qualquer graduação)\n- CIMENTO (qualquer marca)\n- CONCRETO USINADO\n- BLOCOS DE CONCRETO\n- TIJOLOS CONVENCIONAIS\n\n## 🚨 CAMPO \"SUPERVISOR\" - ATIVAÇÃO OBRIGATÓRIA\n\nAtive `\"supervisor\": true` **OBRIGATORIAMENTE** quando:\n1. **Agendamento/Prazos**: Cliente perguntar sobre entregas, datas, horários\n2. **Produtos fora do escopo**: Areia, brita, cimento ou produtos duvidosos\n3. **Dúvidas sobre disponibilidade**: Produtos em estoque\n4. **Questões logísticas**: Fretes, áreas de atendimento\n5. **Situações complexas**: Quando não souber responder com certeza\n\n**FRASES PARA SUPERVISOR:**\n- \"Deixa eu verificar com nossa equipe sobre [questão específica]\"\n- \"Vou consultar nosso responsável sobre esse prazo\"\n- \"Preciso confirmar se temos disponível\"\n\n## 🔧 INTERPRETAÇÃO DE FERRAGENS - QUANTIDADE vs METRAGEM\n\n### PADRÃO OBRIGATÓRIO:\n**\"[número] ferragem[s] [especificação]\" = [número] UNIDADES (peças)**\n\n**EXEMPLOS:**\n- \"10 ferragens armada para coluna 17x7 3x8\" = 10 UNIDADES\n- \"5 ferragens de viga 20x15 ferro 1/2\" = 5 UNIDADES\n\n**DIFERENCIAÇÃO:**\n- **UNIDADES**: \"10 ferragens\" / \"5 ferragem\"\n- **METRAGEM**: \"10 metros de ferragem\"\n\n**PROCESSO:**\n1. Identifique se é quantidade ou metragem\n2. SE quantidade: Pergunte comprimento de cada peça\n3. SE metragem: Use diretamente na ferramenta\n\n## 🧠 CONVERSÃO DE TERMOS (INTERNO)\n\nSempre converta termos populares para padronizados **INTERNAMENTE**:\n\n### Bitolas/Vergalhões:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| F6, Ferro 6mm | **F6.3** |\n| F12, Ferro 12 | **F12.5** |\n| **3/16** | **F5** |\n| **1/4** | **F6.3** |\n| **5/16** | **F8** |\n| **3/8** | **F10** |\n| **1/2** | **F12.5** |\n| **5x16** | **F8** (5/16\") |\n| **3x8** | **F10** (3/8\") |\n| **1x4** | **F6.3** (1/4\") |\n\n### Produtos:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Lajota de barro | Lajota Cerâmica |\n| Malha pop | Malha Leve 20x20 F3.4 |\n| Treliça cheia | Treliça Concretada |\n| Ferragem armada | Ferragem |\n\n## 💬 PERSONALIDADE\n- Acolhedor, natural e consultivo\n- Vendedor experiente, não robô\n- NUNCA mencione sistema automatizado\n- Use termos do cliente na conversa\n- Converta internamente para ferramentas\n\n## 🎯 FLUXO PRINCIPAL\n\n### 1. RECEPÇÃO E ORÇAMENTO AUTOMÁTICO\n- Nome \"unknown\"? Pergunte: \"Pra te atender melhor, posso saber seu nome?\"\n- Cliente menciona nossos produtos? **ORCE IMEDIATAMENTE**\n- Pergunte apenas mínimo necessário: \"Qual a metragem da sua laje?\"\n\n### 2. PRODUTOS ISOLADOS vs PROJETOS\n**ISOLADOS**: Use `busca_preco`\n- \"3 treliças de 6 metros\" → busca_preco(\"Treliça Concretada\")\n\n**PROJETOS**: Use `calcular_laje`  \n- \"Materiais para laje 5x8\" → calcular_laje(5, 8, \"isopor\")\n\n### 3. CÁLCULO OBRIGATÓRIO - REGRA CRÍTICA\n**🚨 PROIBIDO RESPONDER SEM VALORES REAIS**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o produto solicitado\n2. **EXECUTE** ferramenta correspondente ANTES de qualquer resposta\n3. **AGUARDE** retorno numérico da ferramenta\n4. **VERIFIQUE** se recebeu valores reais (números, não texto)\n5. **SÓ ENTÃO** monte a resposta com valores\n\n**SE A FERRAMENTA NÃO RETORNAR VALOR NUMÉRICO:**\n- **TENTE NOVAMENTE** com parâmetros diferentes\n- **ATIVE SUPERVISOR**: `\"supervisor\": true`\n- **RESPONDA**: \"Estou consultando o preço atualizado e já retorno\"\n- **NUNCA** use placeholder ou invente valor\n\n**PLACEHOLDERS TOTALMENTE PROIBIDOS:**\n- ❌ \"[valor a ser calculado]\"\n- ❌ \"[preço]\" \n- ❌ \"R$ X,XX\"\n- ❌ \"valor a definir\"\n- ❌ Qualquer texto que não seja número real\n\n**ONLY USE REAL NUMBERS FROM TOOLS:**\n- ✅ R$ 234,00 (número real da ferramenta)\n- ✅ R$ 1.250,50 (valor calculado real)\n- ❌ R$ [valor] (placeholder proibido)\n\n## 🔄 REGRAS CRÍTICAS PARA MODIFICAÇÕES DE ORÇAMENTO\n\n### QUANDO CLIENTE PEDIR ALTERAÇÕES:\n**NUNCA** peça para esperar - **CALCULE IMEDIATAMENTE**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o que cliente quer alterar\n2. **EXECUTE** ferramenta na hora com novos parâmetros  \n3. **APRESENTE** novo orçamento completo com valores reais\n4. **COMPARE** com anterior se necessário\n\n**EXEMPLOS DE ALTERAÇÕES:**\n- \"Quero com lajota ao invés de isopor\" → calcular_laje(mesmas_medidas, \"lajota\")\n- \"Muda pra 15 treliças de 4m\" → busca_preco + cálculo manual\n- \"Adiciona 5kg de arame\" → busca_preco(\"Arame Queimado\") + somar ao total\n\n**FRASES PROIBIDAS:**\n- ❌ \"Deixa eu calcular e já te mando\"\n- ❌ \"Aguarda que vou refazer\"\n- ❌ \"Vou recalcular pra você\"\n\n**FRASES CORRETAS:**\n- ✅ \"Perfeito! Recalculando com lajota:\" [APRESENTA ORÇAMENTO]\n- ✅ \"Alteração feita! Novo orçamento:\" [APRESENTA VALORES]\n- ✅ \"Com as mudanças fica assim:\" [APRESENTA ORÇAMENTO COMPLETO]\n\n## 📋 REGRAS CRÍTICAS PARA LISTAS MISTAS DE MATERIAIS\n\n### QUANDO CLIENTE ENVIAR LISTA COM PRODUTOS QUE NÃO TRABALHAMOS:\n\n**PROCESSO OBRIGATÓRIO EM 3 ETAPAS:**\n\n#### **ETAPA 1 - SEPARAÇÃO IMEDIATA:**\n- ✅ **Identifique produtos que VENDEMOS**\n- ❌ **Identifique produtos que NÃO VENDEMOS**\n\n#### **ETAPA 2 - ORÇAMENTO COMPLETO DOS DISPONÍVEIS:**\n- **CALCULE IMEDIATAMENTE** todos os produtos disponíveis\n- **USE AS FERRAMENTAS** para obter valores reais\n- **MONTE ORÇAMENTO FORMATADO** com preços\n\n#### **ETAPA 3 - INFORMAÇÃO SOBRE INDISPONÍVEIS:**\n- **INFORME** quais produtos não trabalhamos\n- **CONTINUE** focando nos produtos orçados\n- **CONDUZA** ao fechamento\n\n### EXEMPLO PRÁTICO DE LISTA MISTA:\n\n**CLIENTE ENVIA:**\n\"Preciso de: 10 treliças de 6m, 5 sacos de cimento, 20 lajotas cerâmicas, 3m³ de areia\"\n\n**PROCESSO:**\n1. **VENDEMOS**: 10 treliças 6m, 20 lajotas cerâmicas\n2. **NÃO VENDEMOS**: Cimento, areia\n3. **CALCULAR**: busca_preco para treliças e lajotas\n4. **ORÇAR**: Valores completos dos disponíveis\n5. **INFORMAR**: Sobre cimento e areia\n\n**RESPOSTA MODELO:**\n```json\n{\n  \"resposta\": \"Dos materiais que você mencionou, trabalhamos com treliças e lajotas. Cimento e areia não fazem parte do nosso portfólio.\\n\\nSegue orçamento dos materiais disponíveis:\\n\\n**ORÇAMENTO MATERIAIS DISPONÍVEIS - Guardião Lajes**\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **20 Lajotas Cerâmicas:** R$ 24,00\\n\\n**Total do Orçamento: R$ 804,00**\\n\\nPara o cimento e areia você precisará buscar em outro fornecedor. Fechamos os materiais que temos disponíveis?\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento dos materiais disponíveis\",\n  \"obs\": \"Cliente solicitou lista mista - orçado treliças e lajotas, informado que não temos cimento e areia\",\n  \"supervisor\": false\n}\n```\n\n### REGRAS ESPECÍFICAS PARA LISTAS:\n\n**SEMPRE FAÇA:**\n- ✅ Processe IMEDIATAMENTE todos os produtos disponíveis\n- ✅ Calcule valores ANTES de montar resposta  \n- ✅ Apresente orçamento COMPLETO com valores reais\n- ✅ Seja específico sobre quais produtos não tem\n- ✅ Mantenha foco no fechamento dos disponíveis\n\n**NUNCA FAÇA:**\n- ❌ Só informar que não tem alguns produtos sem orçar os outros\n- ❌ Pedir pra esperar o orçamento dos disponíveis\n- ❌ Responder apenas \"trabalhamos com X, não trabalhamos com Y\"\n- ❌ Deixar de apresentar valores dos produtos disponíveis\n- ❌ Usar placeholders nos orçamentos\n\n### FRASES MODELO PARA LISTAS MISTAS:\n- \"Dos materiais listados, trabalhamos com [listar]. [Produtos indisponíveis] não temos. Segue orçamento:\"\n- \"Posso orçar [produtos disponíveis] da sua lista. [Produtos indisponíveis] você precisará buscar em outro fornecedor:\"  \n- \"Da sua lista, temos disponível [produtos]. Para [indisponíveis] não trabalhamos. Orçamento:\"\n\n## 📋 FORMATO ORÇAMENTO - CRÍTICO\n\n**🚨 NUNCA ENVIE ORÇAMENTO COM PLACEHOLDER**\n\n**REGRA ABSOLUTA:**\n- **SE não tem valor da ferramenta = NÃO MONTE ORÇAMENTO**\n- **SE ferramenta falhou = ATIVE SUPERVISOR**\n- **SE valor não é número = TENTE NOVAMENTE**\n\n**PROCESSO 100% OBRIGATÓRIO:**\n1. **EXECUTE** ferramenta específica (calcular_laje, busca_preco, etc.)\n2. **VERIFIQUE** se retornou números reais (ex: 234.50, 1250.00)  \n3. **CONFIRME** que não há texto/placeholder no retorno\n4. **SÓ ENTÃO** monte orçamento com valores reais\n5. **SE falhou**: Supervisor + \"consultando preço atualizado\"\n\n**TESTE ANTES DE MONTAR ORÇAMENTO:**\n```\nSE retorno_ferramenta contém números reais:\n   ENTÃO monte orçamento\nSE retorno_ferramenta é texto/erro:\n   ENTÃO ative supervisor + \"consultando preço\"\n```\n\n**FORMATO EXATO (SÓ COM VALORES REAIS):**\n```\n**ORÇAMENTO**\n\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n\n**Total do Orçamento: R$ [SOMA_DOS_NÚMEROS_REAIS]**\n\nPodemos fechar seu pedido ou ficou alguma dúvida?\n\nAbraço, Henrique - Guardião Lajes 😉\n```\n\n**EXEMPLO REAL:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ 780,00\n* **5kg Arame Queimado:** R$ 60,00\n\n**Total do Orçamento: R$ 840,00**\n```\n\n**❌ EXEMPLO PROIBIDO:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ [valor a ser calculado]  ← NUNCA FAÇA\n* **5kg Arame Queimado:** R$ (preço)                ← PROIBIDO\n```\n\n**REGRAS CRÍTICAS:**\n- ❌ **ZERO TOLERÂNCIA** para placeholders\n- ❌ **NUNCA** monte orçamento sem números das ferramentas\n- ✅ **SEMPRE** teste se valor é número real antes de orçar\n- ✅ **SUPERVISOR** quando ferramenta não retornar valor\n- ✅ **TENTE NOVAMENTE** antes de desistir\n\n## 🎯 CAMPOS JSON - GUIA DETALHADO\n\n### Valores dos Campos:\n\n**intencao:** \"cotacao\" | \"consultoria\" | \"duvida\" | \"fechamento\" | \"outro\"\n\n**proxima_etapa:** Seja específico\n- \"Calcular orçamento laje 5x10m\"\n- \"Confirmar tipo de enchimento\"\n- \"Consultar supervisor sobre prazo\"\n\n**obs:** Informações relevantes\n- Preferências do cliente\n- Produtos mencionados que não vendemos\n- Status da negociação\n\n**supervisor:** true | false\n- true: Prazos, entregas, produtos duvidosos\n- false: Consegue atender completamente\n\n## ❌ ERROS CRÍTICOS A EVITAR\n- ❌ Responder sem formato JSON\n- ❌ Adicionar texto fora do JSON\n- ❌ Usar placeholders em orçamentos\n- ❌ Orçar sem usar ferramentas\n- ❌ Enviar JSON inválido\n- ❌ Esquecer campos obrigatórios\n- ❌ **Pedir para cliente esperar quando alterar orçamento**\n- ❌ **Só informar produtos sem orçar em listas mistas**\n- ❌ **Responder \"vou calcular\" em modificações**\n- ❌ **Não apresentar valores em listas com produtos disponíveis**\n- ❌ **USAR QUALQUER PLACEHOLDER EM ORÇAMENTOS**\n- ❌ **MONTAR ORÇAMENTO SEM EXECUTAR FERRAMENTAS ANTES**\n- ❌ **ENVIAR ORÇAMENTO COM TEXTO AO INVÉS DE NÚMEROS**\n\n## ✅ SEMPRE FAÇA\n- ✅ Inicie resposta com JSON\n- ✅ Termine resposta com JSON\n- ✅ Use valores reais das ferramentas\n- ✅ Valide JSON antes de enviar\n- ✅ Inclua TODOS os campos obrigatórios\n- ✅ Ative supervisor quando necessário\n- ✅ **Calcule IMEDIATAMENTE em modificações de orçamento**\n- ✅ **Processe TODA lista e orce produtos disponíveis NA HORA**\n- ✅ **Apresente orçamento COMPLETO mesmo com produtos indisponíveis na lista**\n- ✅ **Execute ferramentas ANTES de responder sobre preços**\n- ✅ **TESTE SE FERRAMENTA RETORNOU NÚMERO REAL ANTES DE ORÇAR**\n- ✅ **ATIVE SUPERVISOR SE FERRAMENTA NÃO RETORNAR VALOR**\n- ✅ **SÓ MONTE ORÇAMENTO COM VALORES NUMÉRICOS REAIS**\n\n## 🚨 LEMBRETE FINAL - REGRAS DE OURO\n**TODA RESPOSTA DEVE SER EXCLUSIVAMENTE NO FORMATO JSON ESPECIFICADO**\n**NÃO ADICIONE TEXTO ANTES, DEPOIS OU FORA DO JSON**\n**VALIDE O JSON ANTES DE ENVIAR**\n\n### 🔄 **MODIFICAÇÕES = CÁLCULO IMEDIATO**\n- Cliente pede alteração → Execute ferramenta → Apresente novo orçamento\n- NUNCA: \"vou calcular\" ou \"aguarda\"\n- SEMPRE: Valores na resposta\n\n### 📋 **LISTAS MISTAS = ORÇAMENTO + INFORMAÇÃO**\n- Separe produtos → Calcule disponíveis → Orce completo → Informe indisponíveis\n- NUNCA: Só informar sem orçar\n- SEMPRE: Orçamento dos produtos que tem\n\n---\n\n**RESPOSTA QUANDO FERRAMENTA FALHA:**\n```json\n{\n  \"resposta\": \"Estou consultando o preço atualizado desse material e já retorno com seu orçamento completo!\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\", \n  \"proxima_etapa\": \"Aguardar supervisor para preços atualizados\",\n  \"obs\": \"Ferramenta não retornou valor - aguardando supervisor\",\n  \"supervisor\": true\n}\n```\n\n**RESPOSTA QUANDO TEM VALORES REAIS:**\n```json\n{\n  \"resposta\": \"Perfeito! Segue seu orçamento:\\n\\n**ORÇAMENTO**\\n\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **5kg Arame Queimado:** R$ 60,00\\n\\n**Total do Orçamento: R$ 840,00**\\n\\nPodemos fechar seu pedido ou ficou alguma dúvida?\\n\\nAbraço, Henrique - Guardião Lajes 😉\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento\",\n  \"obs\": \"Orçamento apresentado com valores reais das ferramentas\",\n  \"supervisor\": false\n}\n```"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        320
+      ],
+      "id": "25a1a0d3-ace5-4085-9db7-c047ad422e7c",
+      "name": "SDR",
+      "retryOnFail": true,
+      "waitBetweenTries": 1500
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}242252252",
+        "sessionTTL": 86400,
+        "contextWindowLength": 7
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        -200,
+        580
+      ],
+      "id": "ed107ff6-ebd4-41eb-b9e9-4169f757e701",
+      "name": "Redis Chat Memory SDR",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "ultimos_orcamentos",
+        "description": " Lista os últimos orçamentos realizados pelo lead.",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $workflow.id }}"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "cons_orc",
+            "tableName": "orcamentos",
+            "leadid": "1"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "id": "9319e874-5437-4273-863d-f1d6ce00cb71",
+      "name": "ultimos_orcamentos",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "position": [
+        -60,
+        600
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        40,
+        560
+      ],
+      "id": "517e5fe4-a9a1-4c15-afa6-0e581a551339",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -320,
+        560
+      ],
+      "id": "9eff5c87-356f-4520-bfc6-7be5ac5c2b5b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3mNlZ20nDfXfgUl9",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of items) {\n  const outputString = item.json.output;\n  let jsonString = outputString.replace(/```json\\n|```/g, '').trim();\n\n  // Tenta parsear a string JSON\n  try {\n    item.json = JSON.parse(jsonString);\n  } catch (e) {\n    // Em caso de erro, você pode logar, retornar um erro, ou lidar de outra forma\n    console.error(\"Erro ao parsear JSON:\", e, \"String original:\", jsonString);\n    // Opcional: Se quiser que o workflow falhe neste item\n    // throw new Error(\"Falha ao parsear JSON\");\n  }\n}\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        320
+      ],
+      "id": "cdb883c9-0739-42e6-9bd4-6b59e5dc362c",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "description": "Busca documentos relevantes na base de conhecimento a partir da conversa do cliente.",
+        "workflowId": {
+          "__rl": true,
+          "value": "=4pdizWewQzdsLsGx",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "rag",
+            "Query": "={{ $fromAI('Query', `Gere uma consulta otimizada para RAG com base no que voce vai responder ao cliente`, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        560
+      ],
+      "id": "3df9920c-2e47-4653-b31b-7a246cbefc95",
+      "name": "RAG"
+    },
+    {
+      "parameters": {
+        "description": "Busca documentos relevantes na base de conhecimento a partir da conversa do cliente. \nsó manda o \"dimensoes_laje\" quando o cliente quiser calcular a laje por meio da medida(\"[lagura]x[comprimento]\" ou \"[area em m²]m²\".\nsó use informações que o cliente falou, nunca invente dados.\nMande com o maximo de detalhes os produtos",
+        "workflowId": {
+          "__rl": true,
+          "value": "=Z7opcPwNBBX1666e",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "produtos": "=  {\n\"lista_produtos\": \"{{ $fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente', 'string', ) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}"
+          },
+          "matchingColumns": [
+            "produtos"
+          ],
+          "schema": [
+            {
+              "id": "produtos",
+              "displayName": "produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        280,
+        560
+      ],
+      "id": "a4de747b-1bc8-4a36-ad4c-c01bcc9836ab",
+      "name": "Orcamento"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a92de67-5404-43ee-a6bc-72589e7625fe",
+              "name": "menssage",
+              "value": "={{ $json.menssage.map(value => JSON.parse(value).conteudo).join('/n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        320
+      ],
+      "id": "b7104337-a12e-40f4-ac20-3a68f706634f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "id",
+              "field2": "body.data.key.id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1740,
+        320
+      ],
+      "id": "56349a96-4f4e-4d06-91ec-e46f0d36dc6b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Edit Fields6').item.json.body.instance }}",
+        "remoteJid": "={{ $('Edit Fields6').item.json.norm.contacinfo.id }}",
+        "messageText": "={{ $json.resposta }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        380,
+        320
+      ],
+      "id": "fa348301-861e-41b8-8832-db7cc0fca79b",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "R2j8KIOLhEjdWQUa",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1380,
+        1240
+      ],
+      "id": "5dadc8e7-19da-4db3-9cac-2e1d166842dd",
+      "name": "Merge2"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar PGVector": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Gerar_Embedding_Cohere": {
+      "main": [
+        [
+          {
+            "node": "Consultar PGVector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Salvar Novo Embedding2": {
+      "main": [
+        [
+          {
+            "node": "Postgres1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Postgres",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields6": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta_CRM": {
+      "main": [
+        [
+          {
+            "node": "If_CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If_CRM": {
+      "main": [
+        [
+          {
+            "node": "new_atend2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "cadastro_CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cadastro_CRM": {
+      "main": [
+        [
+          {
+            "node": "new_atend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "new_atend2": {
+      "main": [
+        [
+          {
+            "node": "Consulta_new_atend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "new_atend": {
+      "main": [
+        [
+          {
+            "node": "Consulta_new_atend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consulta_new_atend": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Workflow_SDR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Workflow_Closer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Workflow_pos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "andamento_atendimento1": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consulta_CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "redis_bufferCons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "redis_bufferDel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buffer": {
+      "main": [
+        [
+          {
+            "node": "redis_bufferInsert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redis_bufferInsert": {
+      "main": [
+        [
+          {
+            "node": "redis_bufferCons",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redis_bufferCons": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "redis_bufferDel": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SDR": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory SDR": {
+      "ai_memory": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ultimos_orcamentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RAG": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orcamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "produtos_mais_cotados": {
+      "ai_tool": [
+        [
+          {
+            "node": "SDR",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "SDR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "buffer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "content-type": "application/json",
+            "user-agent": "axios/1.7.9",
+            "content-length": "871",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "messages.upsert",
+            "instance": "meu cell",
+            "data": {
+              "key": {
+                "remoteJid": "558281036911@s.whatsapp.net",
+                "fromMe": true,
+                "id": "188E8F1FDEF09DA545D31CDB57B48810"
+              },
+              "pushName": "Guardião Lajes",
+              "status": "SERVER_ACK",
+              "message": {
+                "conversation": "2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm de um para o outro\n\n1 viga de 3.20 com ferro de meia, com 28 cm de altura e os estribos de 7x28 com 15 cm de um para o outro"
+              },
+              "contextInfo": {
+                "forwardingScore": 1,
+                "isForwarded": true
+              },
+              "messageType": "conversation",
+              "messageTimestamp": 1753383736,
+              "instanceId": "53b4f8d8-92ba-4830-8363-2b31690f03bc",
+              "source": "android"
+            },
+            "destination": "http://host.docker.internal:5678/webhook/c74a111e-4f99-4cba-b913-ee63a320cd0b",
+            "date_time": "2025-07-24T16:02:17.322Z",
+            "sender": "558281036911@s.whatsapp.net",
+            "server_url": "http://localhost:8080",
+            "apikey": "A45ACCDF0A06-4675-9D48-37543E73A7A2"
+          },
+          "webhookUrl": "http://localhost:5678/webhook/c74a111e-4f99-4cba-b913-ee63a320cd0b",
+          "executionMode": "production"
+        }
+      }
+    ],
+    "redis_bufferCons": [
+      {
+        "json": {
+          "menssage": [
+            "{\"id\":\"8B0DF94C23FD4962B6F98E816081DB0B\",\"chat_id\":\"558281036911\",\"tipo\":\"text\",\"data_hora\":\"2025-07-24T14:57:14.000-04:00\",\"fileName\":null,\"conteudo\":\"texto: 2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm de um para o outro\\n\\n1 viga de 3.20 com ferro de meia, com 28 cm de altura e os estribos de 7x28 com 15 cm de um para o outro\"}",
+            "{\"id\":\"B3782170E54B72FD817AA5D0027D4411\",\"chat_id\":\"558281036911\",\"tipo\":\"text\",\"data_hora\":\"2025-07-24T14:57:15.000-04:00\",\"fileName\":null,\"conteudo\":\"texto: 2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm de um para o outro\\n\\n1 viga de 3.20 com ferro de meia, com 28 cm de altura e os estribos de 7x28 com 15 cm de um para o outro\"}",
+            "{\"id\":\"6218A4E86E8E5237DCD684D7E1E3960E\",\"chat_id\":\"558281036911\",\"tipo\":\"text\",\"data_hora\":\"2025-07-24T14:57:14.000-04:00\",\"fileName\":null,\"conteudo\":\"texto: Bom dia, poderia por favor, me dizer qual o valor - é porque estou pesquisando preço - faça o melhor preço, ok?\"}"
+          ]
+        }
+      }
+    ]
+  },
+  "versionId": "6529a4f1-eba9-4070-ace0-17dc3a757c4a",
+  "triggerCount": 1,
+  "tags": [
+    {
+      "createdAt": "2025-07-10T20:19:24.664Z",
+      "updatedAt": "2025-07-10T20:19:24.664Z",
+      "id": "cYovOiLISxXgMtoe",
+      "name": "vendas"
+    },
+    {
+      "createdAt": "2025-07-10T20:19:24.702Z",
+      "updatedAt": "2025-07-10T20:19:24.702Z",
+      "id": "VRmSdtFbSN3BkiqH",
+      "name": "GL"
+    }
+  ]
+}
