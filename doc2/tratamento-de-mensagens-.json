@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-23T18:33:46.421Z",
-  "updatedAt": "2025-07-24T00:17:48.076Z",
+  "updatedAt": "2025-07-24T16:54:20.961Z",
   "id": "5nzwk4oAnWQnp9Ig",
   "name": "tratamento de mensagens",
   "active": false,
@@ -20,7 +20,7 @@
                 },
                 "conditions": [
                   {
-                    "leftValue": "={{ $('input').item.json.message.tipo }}",
+                    "leftValue": "={{ $('input').item.json.norm.message.tipo }}",
                     "rightValue": "text",
                     "operator": {
                       "type": "string",
@@ -45,7 +45,7 @@
                 "conditions": [
                   {
                     "id": "1cf7c86f-98d1-4f57-8091-2bb0efc62e44",
-                    "leftValue": "={{ $('input').item.json.message.tipo }}",
+                    "leftValue": "={{ $('input').item.json.norm.message.tipo }}",
                     "rightValue": "audio",
                     "operator": {
                       "type": "string",
@@ -70,7 +70,7 @@
                 "conditions": [
                   {
                     "id": "a51d9435-fabf-482a-b9a0-fbf185e7f412",
-                    "leftValue": "={{ $('input').item.json.message.tipo }}",
+                    "leftValue": "={{ $('input').item.json.norm.message.tipo }}",
                     "rightValue": "document",
                     "operator": {
                       "type": "string",
@@ -95,7 +95,7 @@
                 "conditions": [
                   {
                     "id": "8baff51c-c345-4de3-b438-262867fdf4c2",
-                    "leftValue": "={{ $('input').item.json.message.tipo }}",
+                    "leftValue": "={{ $('input').item.json.norm.message.tipo }}",
                     "rightValue": "imagem",
                     "operator": {
                       "type": "string",
@@ -155,6 +155,7 @@
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -202,6 +203,7 @@
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -335,6 +337,7 @@
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -707,9 +710,16 @@
               "name": "nome",
               "value": "={{ $json.contacinfo.nome }}",
               "type": "string"
+            },
+            {
+              "id": "c67cf052-061a-4e3a-ad83-f2eacc0453e2",
+              "name": "id",
+              "value": "={{ $('input').item.json.body.data.key.id }}",
+              "type": "string"
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -744,9 +754,16 @@
               "name": "nome",
               "value": "={{ $('Edit Fields2').item.json.contacinfo.nome }}",
               "type": "string"
+            },
+            {
+              "id": "4f982e6b-a0a4-4a02-97f9-9d6ea0ddb745",
+              "name": "id",
+              "value": "={{ $('input').item.json.body.data.key.id }}",
+              "type": "string"
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -781,9 +798,16 @@
               "name": "nome",
               "value": "={{ $('Edit Fields3').item.json.contacinfo.nome }}",
               "type": "string"
+            },
+            {
+              "id": "2d41cc85-f07b-43ce-b839-1e52e0b7d57f",
+              "name": "id",
+              "value": "={{ $('input').item.json.body.data.key.id }}",
+              "type": "string"
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -908,9 +932,16 @@
               "name": "nome",
               "value": "={{ $('input').item.json.body.data.pushName }}",
               "type": "string"
+            },
+            {
+              "id": "c6730188-7eb2-42b3-9cbc-6f48d87f5039",
+              "name": "id",
+              "value": "={{ $('input').item.json.body.data.key.id }}",
+              "type": "string"
             }
           ]
         },
+        "includeOtherFields": true,
         "options": {}
       },
       "type": "n8n-nodes-base.set",
@@ -947,7 +978,7 @@
           "mode": "list",
           "cachedResultName": "GPT-4O"
         },
-        "text": "Descreva a imagem de forma clara e objetiva e com todas as informações dela, pois sua descrição vai ser usada por outra llm ",
+        "text": "=Você é um analisador de imagens para atendimento de materiais de construção.\n\nAnalise a imagem enviada e:\n\n1️⃣ Verifique se a imagem contém uma lista de materiais de construção (quantidades, tipos, tamanhos, medidas ou valores).\n\nSe contiver, extraia em JSON estruturado neste formato:\n\n{\n  \"materiais\": [\n    {\"quantidade\": 38, \"descricao\": \"treliça\", \"comprimento\": \"2.50\"},\n    {\"quantidade\": 20, \"descricao\": \"ferragem\", \"comprimento\": \"3.80\"}\n  ]\n\nnão Ignore texto ou fundo irrelevante.\n\n2️⃣ Se a imagem NÃO contiver uma lista de materiais, apenas descreva o que está visível na imagem em linguagem natural (ex: “Imagem de um comprovante do Banco do Brasil de 17 de julho no valor de R$ 120,00” ou “Foto de vigotas empilhadas em um caminhão”).\n\nRetorne sempre em JSON neste formato:\n\n{\n  \"tipo\": \"lista_materiais\" ou \"descricao_imagem\",\n  \"conteudo\": {...} ou \"Descrição em texto\"\n}\n\nCaso identifique um item e os demais tenham características similares (quantidade + comprimento em metros), assuma que também são [descrição do 1 item] caso não haja indicação clara do contrário.",
         "inputType": "base64",
         "options": {}
       },
@@ -1396,8 +1427,7 @@
               "key": {
                 "remoteJid": "558281036911@s.whatsapp.net",
                 "fromMe": true,
-                "id": "60D4156D9DA243CB7DCDEA2C63A22127",
-                "participant": null
+                "id": "60D4156D9DA243CB7DCDEA2C63A22127"
               },
               "pushName": "Guardião Lajes",
               "status": "SERVER_ACK",
@@ -1432,20 +1462,24 @@
           },
           "webhookUrl": "http://localhost:5678/webhook-test/c74a111e-4f99-4cba-b913-ee63a320cd0b",
           "executionMode": "test",
-          "contacinfo": {
-            "id": "558281036911",
-            "nome": "Guardião Lajes"
-          },
-          "message": {
-            "tipo": "imagem",
-            "data_hora": "2025-07-23T19:34:06.000-04:00",
-            "fileName": null
+          "norm": {
+            "contacinfo": {
+              "id": "558281036911",
+              "nome": "Guardião Lajes",
+              "participantID": null
+            },
+            "message": {
+              "tipo": "imagem",
+              "data_hora": "2025-07-23T19:34:06.000-04:00",
+              "fileName": null,
+              "id": "60D4156D9DA243CB7DCDEA2C63A22127"
+            }
           }
         }
       }
     ]
   },
-  "versionId": "42c2dcbb-5e1a-40e8-90f5-ae864b343e43",
+  "versionId": "36b7a1e1-70b5-4b98-9238-52c76f9a333f",
   "triggerCount": 0,
   "tags": []
 }
