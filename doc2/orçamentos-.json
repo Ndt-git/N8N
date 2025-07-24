@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-18T21:43:39.302Z",
-  "updatedAt": "2025-07-24T20:28:49.119Z",
+  "updatedAt": "2025-07-24T23:44:01.990Z",
   "id": "Z7opcPwNBBX1666e",
   "name": "ORÇAMENTOS",
   "active": false,
@@ -37,7 +37,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        640,
+        1080,
         0
       ],
       "id": "f08a55e7-dc51-418b-bf92-11227a4ca55b",
@@ -56,7 +56,7 @@
               "type": "string"
             },
             {
-              "id": "6286a1d1-2d33-4dab-9dc7-2059ff195ae3",
+              "id": "6a06262d-deb7-4493-bdc0-045c05773560",
               "name": "produtos",
               "value": "={{ $json.produtos }}",
               "type": "object"
@@ -69,7 +69,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        180,
+        620,
         40
       ],
       "id": "db678a86-5c30-402a-8482-219a2510ac61",
@@ -209,7 +209,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        540,
+        980,
         340
       ],
       "id": "a0298779-53cb-46f9-9162-5c89ec69da93",
@@ -354,7 +354,7 @@
       "name": "salvar_orcamento",
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "position": [
-        640,
+        1080,
         360
       ],
       "typeVersion": 2.1
@@ -493,7 +493,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        840,
+        1280,
         360
       ],
       "id": "ef152a0c-3811-4a0e-afd1-de55b103892d",
@@ -632,7 +632,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        960,
+        1400,
         340
       ],
       "id": "c13462d1-a5ce-4458-8198-3e435229fbe7",
@@ -649,7 +649,7 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        740,
+        1180,
         340
       ],
       "id": "0b86182a-b2c1-493f-872a-f01728cc52b7",
@@ -669,7 +669,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        440,
+        880,
         280
       ],
       "id": "a3e2731a-9262-4e97-8463-67be9e83b25e",
@@ -686,7 +686,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        1100,
+        1540,
         340
       ],
       "id": "f2dd64d0-4d30-4769-8159-ca0aad82acca",
@@ -835,12 +835,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "produtos": "  {\n\"lista_produtos\": \"38 treliças de 2.50m, 20 treliças de 3.80m, 20 treliças de 4.70m, 20 treliças de 4.60m, 39 treliças de 5.30m, 18 treliças de 2.56m, 5 treliças de 2.50m\",\n  \"tipo_projeto\": \"produtos_isolados\",\n  \"dimensoes_laje\": \"0x0\"\n}"
+          "produtos": "  {\n\"lista_produtos\": \"03 treliças de 6 metros cheia, 100 lajotas de barro, 01 malha de 3x2, 1 kg de arame queimado, 01 ferragem armada 7x15 ferro 3/8\", 2 vergalhão de 5/16\"\",\n  \"tipo_projeto\": \"misto\",\n  \"dimensoes_laje\": \"\"\n}"
         }
       }
     ]
   },
-  "versionId": "9a51bfbc-2ccd-46b4-9905-4f42eef7862a",
+  "versionId": "27d08c88-d244-41de-8111-6b550cb32743",
   "triggerCount": 0,
   "tags": []
 }
