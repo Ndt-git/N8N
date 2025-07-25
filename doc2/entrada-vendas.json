@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:05:13.566Z",
-  "updatedAt": "2025-07-24T23:38:46.005Z",
+  "updatedAt": "2025-07-25T00:02:59.540Z",
   "id": "oEgGaOjRHITpdzbf",
   "name": "entrada",
   "active": true,
@@ -1146,12 +1146,12 @@
       "id": "25a1a0d3-ace5-4085-9db7-c047ad422e7c",
       "name": "SDR",
       "retryOnFail": true,
-      "waitBetweenTries": 1500
+      "waitBetweenTries": 2500
     },
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}242a252252",
+        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}",
         "sessionTTL": 86400,
         "contextWindowLength": 7
       },
@@ -2166,7 +2166,7 @@
       }
     ]
   },
-  "versionId": "3d0ea8e5-66cb-4a9f-b7ce-71b485f94687",
+  "versionId": "3e95bc68-a04a-4325-aed1-82797f6689c8",
   "triggerCount": 1,
   "tags": [
     {
