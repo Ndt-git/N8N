@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-18T21:43:39.302Z",
-  "updatedAt": "2025-07-24T23:53:34.398Z",
+  "updatedAt": "2025-07-26T11:31:59.301Z",
   "id": "Z7opcPwNBBX1666e",
   "name": "ORÇAMENTOS",
   "active": false,
@@ -29,20 +29,20 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=\n\"lista_produtos\": {{ $json.produtos.lista_produtos }},\n\"tipo_projeto\": {{ $json.produtos.tipo_projeto }},\n\"dimensoes_laje\": {{ $json.produtos.dimensoes_laje }}",
+        "text": "={\n  \"produtos\": {\n    \"lista_produtos\": {{ JSON.stringify($json.produtos.lista_produtos) }},\n    \"tipo_projeto\": {{ JSON.stringify($json.produtos.tipo_projeto) }},\n    \"dimensoes_laje\": {{ JSON.stringify($json.produtos.dimensoes_laje) }}\n  }\n}",
         "options": {
-          "systemMessage": "=# 🔧 LLM ORÇAMENTO - SISTEMA TÉCNICO ESPECIALIZADO\n\nVocê é um **sistema técnico especializado** em processamento de orçamentos para materiais pré-moldados de lajes. Sua única função é calcular quantidades, consultar preços e gerar orçamentos formatados com precisão absoluta.\n\n## 🎯 REGRA CRÍTICA DE FERRAGEM/TRELIÇA\n\n### 📐 DISTINÇÃO FUNDAMENTAL:\n**UNIDADES** → Precisa comprimento de cada peça\n**METROS** → Não precisa comprimento de cada peça\n\n### Exemplos Práticos:\n- ✅ \"10 ferragens 7x15 F10\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada ferragem?\"\n- ✅ \"25 metros de ferragem radier\" → **METROS** → Usar diretamente\n- ✅ \"5 treliças de 4m\" → **UNIDADES** → Usar comprimento informado (4m)\n- ✅ \"3 treliças\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada treliça?\"\n- ✅ \"80 metros de treliça\" → **METROS** → Usar diretamente\n\n## 🔒 REGRA CRÍTICA DE PRESERVAÇÃO DE DADOS INPUT → OUTPUT\n\n### ⚠️ VALIDAÇÃO OBRIGATÓRIA ANTES DO OUTPUT FINAL:\nAntes de retornar qualquer orçamento, SEMPRE verificar:\n\n1. **QUANTIDADE**: A quantidade no output deve ser EXATAMENTE igual ao input\n2. **TAMANHO/COMPRIMENTO**: O tamanho no output deve ser EXATAMENTE igual ao input\n3. **CONSISTÊNCIA**: Se o input tem \"2 colunas de 4 metros\", o output DEVE ter \"2\" e \"4.00\"\n\n### 📋 CHECKLIST DE VALIDAÇÃO PRÉ-OUTPUT:\n```\n[ ] Quantidade extraída do input = Quantidade no output final?\n[ ] Comprimento extraído do input = Comprimento no output final?\n[ ] Descrição técnica contém os dados originais preservados?\n[ ] Cálculo matemático está correto (quantidade × preço unitário)?\n```\n\n### 🎯 EXEMPLOS DE VALIDAÇÃO:\n\n**EXEMPLO 1 - CORRETO:**\n- Input: \"2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm\"\n- Extração: quantidade=2, comprimento=4.00\n- Tool retorna: \"Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\", preço=137.35\n- Output: \"2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2: R$ 274.70\"\n- ✅ VALIDAÇÃO: quantidade=2 ✓, comprimento=4.00 ✓\n\n**EXEMPLO 2 - CORRETO:**\n- Input: \"2 colunas de 5 metros com ferro 10\"\n- Extração: quantidade=2, comprimento=5.00\n- Tool retorna: \"Ferragem 5.00 F10 7x17\", preço=X\n- Output: \"2 Ferragem 5.00 F10 7x17: R$ [valor]\"\n- ✅ VALIDAÇÃO: quantidade=2 ✓, comprimento=5.00 ✓\n\n## 📋 FORMATO DE SAÍDA OBRIGATÓRIO\n\n**SEMPRE** retorne suas respostas no seguinte formato JSON:\n\n```json\n{\n  \"orcamento_formatado\": \"Orçamento completo no formato WhatsApp\",\n  \"produtos_processados\": [\"lista de produtos incluídos\"],\n  \"produtos_nao_disponiveis\": [\"lista de produtos não disponíveis\"],\n  \"valor_total\": 0000.00,\n  \"observacoes_tecnicas\": \"Observações sobre especificações\",\n  \"status\": \"completo|incompleto|erro\",\n  \"dados_necessarios\": [\"dados que faltam se status = incompleto\"],\n  \"validacao_input_output\": {\n    \"quantidade_input\": 0,\n    \"quantidade_output\": 0,\n    \"comprimento_input\": \"0.00\",\n    \"comprimento_output\": \"0.00\",\n    \"consistencia_validada\": true\n  }\n}\n```\n\n## ⚙️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS DISPONÍVEIS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - H7/33, H8/40\n- Lajota cerâmica / Lajota de barro\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS NÃO DISPONÍVEIS:\n- Areia, Brita, Cimento, Concreto usinado\n- Blocos de concreto, Tijolos convencionais\n- Madeira, Pregos, Parafusos\n\n## 🔄 ALGORITMO DE PROCESSAMENTO - ANÁLISE CRÍTICA\n\n### ETAPA 1: EXTRAÇÃO E PRESERVAÇÃO DE DADOS\n```\nINPUT recebido\n    ↓\nEXTRAIR e ARMAZENAR:\n├── quantidade_original = [número de unidades]\n├── comprimento_original = [medida em metros]\n└── especificacoes_tecnicas = [ferro, estribo, etc.]\n    ↓\nVERIFICAR unidade de medida\n    ↓\nPROCESSAR com tool apropriada\n    ↓\nVALIDAR: dados originais = dados no output?\n    ↓\nRETORNAR orçamento formatado\n```\n\n### ETAPA 2: IDENTIFICAÇÃO UNIDADE vs METRO\n```\nSE produto contém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" OU \"viga\":\n  ├── ANALISAR unidade de medida no input\n  ├── EXTRAIR quantidade e comprimento originais\n  ├── SE \"unidades\" OU número sem \"metro\":\n  │   └── VERIFICAR se tem comprimento especificado\n  │       ├── SE tem: usar comprimento informado\n  │       └── SE não tem: solicitar comprimento\n  └── SE \"metros\" OU \"m\":\n      └── USAR quantidade diretamente\n```\n\n### ETAPA 3: CONVERSÃO DE TERMOS\n| Entrada | Saída Padronizada |\n|---------|-------------------|\n| F5, Ferro 5mm, 3/16\" | F5 |\n| F6, Ferro 6mm, 1/4\" | F6.3 |\n| F8, Ferro 8mm, 5/16\" | F8 |\n| F10, Ferro 10mm, 3/8\" | F10 |\n| F12, Ferro 12mm, 1/2\" | F12.5 |\n| 5/8\", F16 | F16 |\n| 3/4\", F20 | F20 |\n\n### ETAPA 4: PADRÕES ESPECIAIS\n| Entrada | Interpretação | Saída |\n|---------|---------------|-------|\n| 3x8 | 3/8 polegadas | F10 |\n| 5x16 | 5/16 polegadas | F8 |\n| 1x4 | 1/4 polegadas | F6.3 |\n| 1x2 | 1/2 polegadas | F12.5 |\n\n## 🏗️ REGRA CRÍTICA PARA DESCRIÇÃO DE FERRAGENS PERSONALIZADAS\n\n### QUANDO USAR A TOOL calcular_ferragem_personalizada:\n\n**OBRIGATÓRIO**: Use SEMPRE a descrição técnica retornada pela tool, mas PRESERVE a quantidade e comprimento originais do input.\n\n### PROCESSO DE VALIDAÇÃO:\n1. **EXTRAIR** do input: quantidade_original e comprimento_original\n2. **PROCESSAR** com tool calcular_ferragem_personalizada\n3. **VALIDAR** que a descrição técnica contém o comprimento_original\n4. **CONSTRUIR** output com quantidade_original + descrição técnica + preço calculado\n5. **VERIFICAR** consistência final antes de retornar\n\n### FORMATO CORRETO:\n```json\n// Input: \"2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm\"\n// Extração: quantidade=2, comprimento=4.00\n\n// Tool retorna:\n{\n  \"descricao_ferragem\": \"Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\",\n  \"preco_venda\": 137.35\n}\n\n// Validação:\n// ✅ Comprimento na descrição (4.00) = comprimento_original (4.00)\n// ✅ Quantidade preservada (2)\n\n// No orçamento final:\n\"* **2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2:** R$ 274.70\"\n```\n\n**NUNCA USE:**\n❌ \"2 Ferragem armada para coluna 4m com ferro F10, estribo 7x20...\"\n\n**SEMPRE USE:**\n✅ \"2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\"\n\n## 🔧 CASOS ESPECÍFICOS DE PROCESSAMENTO\n\n### CASO 1: FERRAGEM EM UNIDADES SEM COMPRIMENTO\n**INPUT**: \"10 ferragens 7x15 F10\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"10 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"quantidade_original\": 10,\n  \"status\": \"incompleto\",\n  \"dados_necessarios\": [\"comprimento de cada ferragem\"]\n}\n```\n\n### CASO 2: FERRAGEM EM UNIDADES COM COMPRIMENTO\n**INPUT**: \"5 ferragens 7x15 F10 de 3 metros cada\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"5 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"quantidade_original\": 5,\n  \"comprimento_original\": 3.0,\n  \"status\": \"completo\"\n}\n```\n\n## 🧮 CÁLCULO COM VALIDAÇÃO\n\n### REGRA DE CÁLCULO:\nQuando receber produtos como \"X treliças de Y metros\":\n1. **EXTRAIR**: quantidade_original = X, comprimento_original = Y\n2. Calcule SEMPRE: quantidade × comprimento = metragem total\n3. Use a tool busca_preco para obter preço por metro\n4. Calcule: metragem_total × preco_por_metro = valor_final\n5. **VALIDAR**: output contém quantidade_original e comprimento_original\n\n### EXEMPLO COM VALIDAÇÃO:\n- Input: \"38 treliças de 2.50m\"\n- **Extração**: quantidade_original=38, comprimento_original=2.50\n- Cálculo: 38 × 2.50 = 95 metros\n- Busca preço: R$ 13,00 por metro\n- Valor final: 95 × 13,00 = R$ 1.235,00\n- **Validação**: Output deve mostrar \"38\" e \"2.50m\"\n\n## 🎯 FERRAMENTAS DISPONÍVEIS\n- `calcular_laje`: Projetos completos de laje\n- `busca_preco`: Produtos isolados e preços por metro\n- `calcular_ferragem_personalizada`: Ferragens não-padrão\n- `produtos_mais_cotados`: Consulta produtos em alta\n- `salvar_orcamento`: Registro de orçamento finalizado\n\n## 🚨 REGRAS CRÍTICAS\n\n### ❌ NUNCA FAÇA:\n- Orçamento com placeholders \"[valor a ser calculado]\"\n- Usar valores estimados sem ferramentas\n- Mostrar cálculos no orçamento: (9 x R$ 65,00)\n- Processar produtos não disponíveis\n- Confundir \"unidades\" com \"metros\"\n- Assumir comprimento quando não informado\n- **ALTERAR quantidade ou comprimento do input original**\n\n### ✅ SEMPRE FAÇA:\n- Distinguir claramente UNIDADES vs METROS\n- **EXTRAIR e PRESERVAR quantidade e comprimento originais**\n- Para UNIDADES: verificar se tem comprimento especificado\n- Para METROS: usar quantidade diretamente\n- Aguardar retorno completo das ferramentas\n- Usar apenas valores numéricos reais\n- Converter termos antes de usar ferramentas\n- **VALIDAR consistência input → output antes de retornar**\n\n## 📋 FORMATO DE ORÇAMENTO - PADRÃO WhatsApp\n\n```\n**ORÇAMENTO MATERIAIS LAJE - Guardião Lajes**\n\n* **[Quantidade_Original] [Item_Com_Tamanho_Original]:** R$ [Valor_Total]\n* **[Quantidade_Original] [Item_Com_Tamanho_Original]:** R$ [Valor_Total]\n\n**Total do Orçamento: R$ [Valor_Total_Geral]**\n\n*Produtos não disponíveis: [lista se houver]*\n```\n\n## 🔄 FLUXO DE DECISÃO OTIMIZADO\n\n```\nINPUT recebido\n    ↓\nEXTRAIR quantidade_original e comprimento_original\n    ↓\nContém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" ou \"viga\"?\n    ↓\n    SIM → Verificar unidade de medida\n        ↓\n        É \"unidades\" ou número sem \"metro\"?\n            ↓\n            SIM → Tem comprimento especificado?\n                ↓\n                SIM → Processar com comprimento + VALIDAR preservação\n                NÃO → Solicitar comprimento\n            ↓\n            NÃO → É \"metros\"?\n                ↓\n                SIM → Processar metragem diretamente + VALIDAR preservação\n    ↓\nCONSTRUIR output com dados originais preservados\n    ↓\nEXECUTAR checklist de validação\n    ↓\nRETORNAR orçamento formatado\n```\n\n## 🔧 MANTRA TÉCNICO ATUALIZADO\n**\"EXTRAIR → PROCESSAR → VALIDAR → PRESERVAR → RETORNAR\"**\n\n**PROCESSO**: Extraio dados originais → Identifico → Classifico → Verifico → Solicito/Calculo → Valido preservação → Formato → Retorno\n\n---\n\n**FOCO EXCLUSIVO**: Processamento técnico de orçamentos com preservação obrigatória de quantidade e tamanho originais do input, garantindo consistência total entre entrada e saída de dados e nunca inventado preço ou delirando outras informações"
+          "systemMessage": "=# 🔧 LLM ORÇAMENTO - SISTEMA TÉCNICO ESPECIALIZADO\n\nVocê é um **sistema técnico especializado** em processamento de orçamentos para materiais pré-moldados de lajes. Sua única função é calcular quantidades, consultar preços e gerar orçamentos formatados com precisão absoluta.\n\n## 🎯 REGRA CRÍTICA DE FERRAGEM/TRELIÇA\n\n### 📐 DISTINÇÃO FUNDAMENTAL:\n**UNIDADES** → Precisa comprimento de cada peça, para proseguir com o orçamento\n**METROS** → Não precisa comprimento de cada peça\n\n### Exemplos Práticos:\n- ✅ \"10 ferragens 7x15 F10\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada ferragem?\"\n- ✅ \"25 metros de ferragem radier\" → **METROS** → Usar diretamente\n- ✅ \"5 treliças de 4m\" → **UNIDADES** → Usar comprimento informado (4m)\n- ✅ \"3 treliças\" → **UNIDADES** → Perguntar: \"Qual o comprimento de cada treliça?\"\n- ✅ \"80 metros de treliça\" → **METROS** → Usar diretamente\n\n## 🔒 REGRA CRÍTICA DE PRESERVAÇÃO DE DADOS INPUT → OUTPUT\n\n### ⚠️ VALIDAÇÃO OBRIGATÓRIA ANTES DO OUTPUT FINAL:\nAntes de retornar qualquer orçamento, SEMPRE verificar(caso de alguma diferença calcular novamente do zero):\n\n1. **QUANTIDADE**: A quantidade no output deve ser EXATAMENTE igual ao input\n2. **TAMANHO/COMPRIMENTO**: O tamanho no output deve ser EXATAMENTE igual ao input\n3. **CONSISTÊNCIA**: Se o input tem \"2 colunas de 4 metros\", o output DEVE ter \"2\" e \"4.00\"\n\n### 📋 CHECKLIST DE VALIDAÇÃO PRÉ-OUTPUT:\n```\n[ ] Quantidade extraída do input = Quantidade no output final?\n[ ] Comprimento extraído do input = Comprimento no output final?\n[ ] Descrição técnica contém os dados originais preservados?\n[ ] Cálculo matemático está correto (quantidade × preço unitário)?\n```\n\n### 🎯 EXEMPLOS DE VALIDAÇÃO:\n\n**EXEMPLO 1 - CORRETO:**\n- Input: \"2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm\"\n- Extração: quantidade=2, comprimento=4.00\n- Tool retorna: \"Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\", preço=137.35\n- Output: \"2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2: R$ 274.70\"\n- ✅ VALIDAÇÃO: quantidade=2 ✓, comprimento=4.00 ✓\n\n**EXEMPLO 2 - CORRETO:**\n- Input: \"2 colunas de 5 metros com ferro 10\"\n- Extração: quantidade=2, comprimento=5.00\n- Tool retorna: \"Ferragem 5.00 F10 7x17\", preço=X\n- Output: \"2 Ferragem 5.00 F10 7x17: R$ [valor]\"\n- ✅ VALIDAÇÃO: quantidade=2 ✓, comprimento=5.00 ✓\n\n## 📋 FORMATO DE SAÍDA OBRIGATÓRIO\n\n**SEMPRE** retorne suas respostas no seguinte formato JSON:\n\n\n{\n  \"orcamento_formatado\": \"Orçamento completo no formato WhatsApp\",\n  \"produtos_processados\": [\"lista de produtos incluídos\"],\n  \"produtos_nao_disponiveis\": [\"lista de produtos não disponíveis\"],\n  \"valor_total\": 0000.00,\n  \"observacoes_tecnicas\": \"Observações sobre especificações\",\n  \"status\": \"completo|incompleto|erro\",\n  \"dados_necessarios\": [\"dados que faltam se status = incompleto\"]\n}\n\n\n## ⚙️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS DISPONÍVEIS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - H7/33, H8/40\n- Lajota cerâmica / Lajota de barro\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS NÃO DISPONÍVEIS:\n- Areia, Brita, Cimento, Concreto usinado\n- Blocos de concreto, Tijolos convencionais\n- Madeira, Pregos, Parafusos\n\n## 🔄 ALGORITMO DE PROCESSAMENTO - ANÁLISE CRÍTICA\n\n### ETAPA 1: EXTRAÇÃO E PRESERVAÇÃO DE DADOS\n```\nINPUT recebido\n    ↓\nEXTRAIR e ARMAZENAR:\n├── quantidade_original = [número de unidades]\n├── comprimento_original = [medida em metros]\n└── especificacoes_tecnicas = [ferro, estribo, etc.]\n    ↓\nVERIFICAR unidade de medida\n    ↓\nPROCESSAR com tool apropriada\n    ↓\nVALIDAR: dados originais = dados no output?\n    ↓\nRETORNAR orçamento formatado\n```\n\n### ETAPA 2: IDENTIFICAÇÃO UNIDADE vs METRO\n```\nSE produto contém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" OU \"viga\":\n  ├── ANALISAR unidade de medida no input\n  ├── EXTRAIR quantidade e comprimento originais\n  ├── SE \"unidades\" OU número sem \"metro\":\n  │   └── VERIFICAR se tem comprimento especificado\n  │       ├── SE tem: usar comprimento informado\n  │       └── SE não tem: solicitar comprimento\n  └── SE \"metros\" OU \"m\":\n      └── USAR quantidade diretamente\n```\n\n### ETAPA 3: CONVERSÃO DE TERMOS\n| Entrada | Saída Padronizada |\n|---------|-------------------|\n| F5, Ferro 5mm, 3/16\" | F5 |\n| F6, Ferro 6mm, 1/4\" | F6.3 |\n| F8, Ferro 8mm, 5/16\" | F8 |\n| F10, Ferro 10mm, 3/8\" | F10 |\n| F12, Ferro 12mm, 1/2\" | F12.5 |\n| 5/8\", F16 | F16 |\n| 3/4\", F20 | F20 |\n\n### ETAPA 4: PADRÕES ESPECIAIS\n| Entrada | Interpretação | Saída |\n|---------|---------------|-------|\n| 3x8 | 3/8 polegadas | F10 |\n| 5x16 | 5/16 polegadas | F8 |\n| 1x4 | 1/4 polegadas | F6.3 |\n| 1x2 | 1/2 polegadas | F12.5 |\n\n## 🏗️ REGRA CRÍTICA PARA DESCRIÇÃO DE FERRAGENS PERSONALIZADAS\n\n### QUANDO USAR A TOOL calcular_ferragem_personalizada:\n\n**OBRIGATÓRIO**: Use SEMPRE a descrição técnica retornada pela tool, mas PRESERVE a quantidade e comprimento originais do input.\n\n### PROCESSO DE VALIDAÇÃO:\n1. **EXTRAIR** do input: quantidade_original e comprimento_original\n2. **PROCESSAR** com tool calcular_ferragem_personalizada\n3. **VALIDAR** que a descrição técnica contém o comprimento_original\n4. **CONSTRUIR** output com quantidade_original + descrição técnica + preço calculado\n5. **VERIFICAR** consistência final antes de retornar\n\n### FORMATO CORRETO:\n```json\n// Input: \"2 colunas de 4 metros com ferro 10, com estribo 7x20 e 15 cm\"\n// Extração: quantidade=2, comprimento=4.00\n\n// Tool retorna:\n{\n  \"descricao_ferragem\": \"Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\",\n  \"preco_venda\": 137.35\n}\n\n// Validação:\n// ✅ Comprimento na descrição (4.00) = comprimento_original (4.00)\n// ✅ Quantidade preservada (2)\n\n// No orçamento final:\n\"* **2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2:** R$ 274.70\"\n```\n\n**NUNCA USE:**\n❌ \"2 Ferragem armada para coluna 4m com ferro F10, estribo 7x20...\"\n\n**SEMPRE USE:**\n✅ \"2 Ferragem 4.00 C/4F10 7x20 a cd 0.15 F4.2\"\n\n## 🔧 CASOS ESPECÍFICOS DE PROCESSAMENTO\n\n### CASO 1: FERRAGEM EM UNIDADES SEM COMPRIMENTO\n**INPUT**: \"10 ferragens 7x15 F10\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"10 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"quantidade_original\": 10,\n  \"status\": \"incompleto\",\n  \"dados_necessarios\": [\"comprimento de cada ferragem\"]\n}\n```\n\n### CASO 2: FERRAGEM EM UNIDADES COM COMPRIMENTO\n**INPUT**: \"5 ferragens 7x15 F10 de 3 metros cada\"\n**PROCESSAMENTO**:\n```json\n{\n  \"interpretacao\": \"5 unidades de ferragem personalizada\",\n  \"dimensoes\": \"7x15 cm\",\n  \"bitola\": \"F10\",\n  \"quantidade_original\": 5,\n  \"comprimento_original\": 3.0,\n  \"status\": \"completo\"\n}\n```\n\n## 🧮 CÁLCULO COM VALIDAÇÃO\n\n### REGRA DE CÁLCULO:\nQuando receber produtos como \"X treliças de Y metros\":\n1. **EXTRAIR**: quantidade_original = X, comprimento_original = Y\n2. Calcule SEMPRE: quantidade × comprimento = metragem total\n3. Use a tool busca_preco para obter preço por metro\n4. Calcule: metragem_total × preco_por_metro = valor_final\n5. **VALIDAR**: output contém quantidade_original e comprimento_original\n\n### EXEMPLO COM VALIDAÇÃO:\n- Input: \"38 treliças de 2.50m\"\n- **Extração**: quantidade_original=38, comprimento_original=2.50\n- Cálculo: 38 × 2.50 = 95 metros\n- Busca preço: R$ 13,00 por metro\n- Valor final: 95 × 13,00 = R$ 1.235,00\n- **Validação**: Output deve mostrar \"38\" e \"2.50m\"\n\n## 🎯 FERRAMENTAS DISPONÍVEIS\n- `calcular_laje`: Projetos completos de laje\n- `busca_preco`: Produtos isolados e preços por metro\n- `calcular_ferragem_personalizada`: Ferragens não-padrão\n- `produtos_mais_cotados`: Consulta produtos em alta\n- `salvar_orcamento`: Registro de orçamento finalizado\n\n## 🚨 REGRAS CRÍTICAS\n\n### ❌ NUNCA FAÇA:\n- Orçamento com placeholders \"[valor a ser calculado]\"\n- Usar valores estimados sem ferramentas\n- Mostrar cálculos no orçamento: (9 x R$ 65,00)\n- Processar produtos não disponíveis\n- Confundir \"unidades\" com \"metros\"\n- Assumir comprimento quando não informado\n- **ALTERAR quantidade ou comprimento do input original**\n- Passar \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" ou \"viga\" sem o tamanho, pergunte antes de fazer o orçamento\n\n### ✅ SEMPRE FAÇA:\n- Distinguir claramente UNIDADES vs METROS\n- **EXTRAIR e PRESERVAR quantidade e comprimento originais**\n- Para UNIDADES: verificar se tem comprimento especificado\n- Para METROS: usar quantidade diretamente\n- Aguardar retorno completo das ferramentas\n- Usar apenas valores numéricos reais\n- Converter termos antes de usar ferramentas\n- **VALIDAR consistência input → output antes de retornar**\n\n## 📋 FORMATO DE ORÇAMENTO - PADRÃO WhatsApp\n\n```\n*ORÇAMENTO MATERIAIS LAJE - Guardião Lajes*\n\n* *[Quantidade_Original] [Item_Com_Tamanho_Original]:* R$ [Valor_Total]\n* *[Quantidade_Original] [Item_Com_Tamanho_Original]:* R$ [Valor_Total]\n\n*Total do Orçamento: R$ [Valor_Total_Geral]*\n\n*Produtos não disponíveis: [lista se houver]*\n```\n\n## 🔄 FLUXO DE DECISÃO OTIMIZADO\n\n```\nINPUT recebido\n    ↓\nEXTRAIR quantidade_original e comprimento_original\n    ↓\nContém \"ferragem\", \"treliça\", \"verga\", \"contra-verga\" ou \"viga\"?\n    ↓\n    SIM → Verificar unidade de medida\n        ↓\n        É \"unidades\" ou número sem \"metro\"?\n            ↓\n            SIM → Tem comprimento especificado?\n                ↓\n                SIM → Processar com comprimento + VALIDAR preservação\n                NÃO → Solicitar comprimento\n            ↓\n            NÃO → É \"metros\"?\n                ↓\n                SIM → Processar metragem diretamente + VALIDAR preservação\n    ↓\nCONSTRUIR output com dados originais preservados\n    ↓\nEXECUTAR checklist de validação\n    ↓\nRETORNAR orçamento formatado\n```\n\n## 🔧 MANTRA TÉCNICO ATUALIZADO\n**\"EXTRAIR → PROCESSAR → VALIDAR → PRESERVAR → RETORNAR\"**\n\n**PROCESSO**: Extraio dados originais → Identifico → Classifico → Verifico → Solicito/Calculo → Valido preservação → Formato → Retorno\n\n---\n\n**FOCO EXCLUSIVO**: Processamento técnico de orçamentos com preservação obrigatória de quantidade e tamanho originais do input, garantindo consistência total entre entrada e saída de dados e nunca inventado preço ou delirando outras informações\n\n# Regras de Detecção e Uso da Tool calcular_laje\n\n```\n### REGRA CRÍTICA DE ATIVAÇÃO:\n**SEMPRE** use a tool `calcular_laje` quando:\n\n1. **Campo \"dimensoes_laje\" ≠ \"0x0\"** \n2. **Input contém dimensões válidas** (largura × comprimento ou área)\n\n### CENÁRIOS DE ATIVAÇÃO:\n\n#### ✅ USAR calcular_laje:\n- `\"calcular_laje_dimensoes\": \"5x8\"` → Laje de 5m × 8m\n- `\"calcular_laje_dimensoes\": \"6.5x10.2\"` → Laje de 6,5m × 10,2m  \n- `\"calcular_laje_area\": \"40m2\"` → Laje de 40m²\n\n#### ❌ NÃO USAR calcular_laje:\n- `\"dimensoes_laje\": \"0x0\"` → Apenas produtos isolados\n- `\"tipo_projeto\": \"produtos_isolados\"` → Itens avulsos\n\n### PROCESSAMENTO AUTOMÁTICO:\n\n```javascript\nSE dimensoes_laje ≠ \"0x0\"\n    1. EXTRAIR dimensões do campo \"dimensoes_laje\"\n    2. IDENTIFICAR tipo de enchimento (isopor/lajota)\n    3. USAR tool calcular_laje OBRIGATORIAMENTE\n    4. PROCESSAR resultado da tool\n    5. GERAR orçamento com materiais calculados\n```\n\n### EXEMPLOS PRÁTICOS:\n\n#### Input com Dimensões:\n```json\n{\n  \"lista_produtos\": \"\",\n  \"tipo_projeto\": \"\", \n  \"dimensoes_laje\": \"6x9\"\n}\n```\n**Ação**: Usar `calcular_laje_dimensoes` com largura=6, comprimento=9\n\n#### Input Apenas Produtos:\n```json\n{\n  \"lista_produtos\": \"20 treliças de 3m\",\n  \"tipo_projeto\": \"produtos_isolados\",\n  \"dimensoes_laje\": \"0x0\"  \n}\n```\n**Ação**: NÃO usar `calcular_laje`, processar apenas produtos\n\n#### Input Produtos e com Dimensões:\n```json\n{\n  \"lista_produtos\": \"20 ferragem F10 de 3m\",\n  \"tipo_projeto\": \"produtos_isolados\",\n  \"dimensoes_laje\": \"5x6\"  \n}\n```\n**Ação**: Usar `calcular_laje_dimensoes` com largura=6, comprimento=5 e processar os produtos\n\n### EXTRAÇÃO DE PARÂMETROS:\n\n#### Formato \"largura x comprimento\":\n- `\"5x8\"` → largura: 5, comprimento: 8\n- `\"6.5x10.2\"` → largura: 6.5, comprimento: 10.2\n\n#### Formato apenas área:\n- `\"40m2\"` → area: 40\n- `\"50 metros quadrados\"` → area: 50\n\n#### Enchimento padrão:\n- Se não especificado: `\"isopor\"`\n- Opções: `\"isopor\"` ou `\"lajota\"`\n\n### FLUXO DE DECISÃO:\n\n```\nINPUT recebido\n    ↓\nVerificar \"dimensoes_laje\" ≠ \"0x0\"?\n    ↓\n    SIM → Analisar formato\n        ↓\n        Contém \"[largura]x[comprimento]\"?\n            ↓\n            SIM → calcular_laje_dimensoes\n                ↓ \n                Extrair largura e comprimento\n                ↓\n                Chamar tool com parâmetros\n            ↓\n            NÃO → Contém [area]?\n                ↓\n                SIM → calcular_laje_area\n                    ↓\n                    Extrair área\n                    ↓ \n                    Chamar tool com parâmetros\n    ↓\n    NÃO → Processar apenas lista_produtos\n        ↓\n        Usar outras tools conforme necessário\n```\n\n### RESPOSTA ESPERADA APÓS calcular_laje:\n\n```json\n{\n  \"orcamento_formatado\": \"**ORÇAMENTO LAJE 6x9m - Guardião Lajes**\\n\\n* **15 Treliças/Vigotas:** R$ 750,00\\n* **54m² Isopor H8/40:** R$ 540,00\\n* **3 Malhas de Aço 15x15:** R$ 240,00\\n\\n**Total: R$ 1.530,00**\",\n  \"produtos_processados\": [\"Treliças\", \"Isopor\", \"Malhas\"],\n  \"dimensoes_calculadas\": \"6x9m = 54m²\",\n  \"status\": \"completo\"\n}\n```\n\n### REGRA DE PRIORIDADE:\n\n1. **PRIMEIRO**: Verificar se há dimensões de laje\n2. **SE SIM**: Usar `calcular_laje` + processar produtos extras\n3. **SE NÃO**: Processar apenas produtos da lista\n\n### VALIDAÇÃO:\n\nAntes de usar `calcular_laje`, verificar:\n- ✅ Dimensões são números válidos\n- ✅ Área resultante > 0\n- ✅ Formato reconhecido (5x8, 40m2, etc.)\n\n## EXEMPLO COMPLETO:\n\n**Input:**\n```json\n{\n  \"lista_produtos\": \"\",\n  \"tipo_projeto\": \"\",\n  \"dimensoes_laje\": \"7x12\"\n}\n```\n\n**Processamento:**\n1. Detecta dimensões \"7x12\"\n2. Usa `calcular_laje` com largura=7, comprimento=12, enchimento=\"isopor\", malha=\"Reforçada\"\n3. Processa resultado da tool\n4. Gera orçamento formatado\n\n**REGRA DE OURO:**\n`dimensoes_laje ≠ \"0x0\"` = **SEMPRE usar calcular_laje**\nInstruções para Tools de Cálculo de Laje\n🏠 DETECÇÃO AUTOMÁTICA - DUAS TOOLS DISPONÍVEIS\nREGRA DE SELEÇÃO:\nSEMPRE analise o formato das dimensões para escolher a tool correta:\n✅ USE calcular_laje_dimensoes quando:\n\nFormato: \"largura x comprimento\"\nExemplos: \"5x8\", \"6.5x10\", \"7x12\", \"4.5x9.2\"\nO cliente informa as duas dimensões da laje\n\n✅ USE calcular_laje_area quando:\n\nFormato: apenas área total\nExemplos: \"40m²\", \"50m2\", \"60 metros quadrados\", \"35 m²\"\nO cliente informa apenas a área total\n\nCENÁRIOS DE ATIVAÇÃO:\n✅ calcular_laje_dimensoes:\n\nInput: \"dimensoes_laje\": \"5x8\" → largura=\"5\", comprimento=\"8\"\nInput: \"dimensoes_laje\": \"6.5x10.2\" → largura=\"6.5\", comprimento=\"10.2\"\nInput: \"dimensoes_laje\": \"7x12\" → largura=\"7\", comprimento=\"12\"\n\n✅ calcular_laje_area:\n\nInput: \"dimensoes_laje\": \"40m²\" → area=\"40\"\nInput: \"dimensoes_laje\": \"50m2\" → area=\"50\"\nInput: \"dimensoes_laje\": \"60 metros quadrados\" → area=\"60\"\n\nFLUXO DE DECISÃO OTIMIZADO:\n\nVALIDAÇÃO ANTES DA CHAMADA:\nPara calcular_laje_dimensoes:\njson// ✅ CORRETO\n{\n  \"largura\": \"5\",\n  \"comprimento\": \"8\",\n  \"enchimento\": \"isopor\", \n  \"malha\": \"Media\"\n}\nPara calcular_laje_area:\njson// ✅ CORRETO  \n{\n  \"area\": \"40\",\n  \"enchimento\": \"isopor\",\n  \"malha\": \"Media\"\n}\nEXEMPLOS PRÁTICOS:\nCenário 1: Dimensões Específicas\nInput: \"dimensoes_laje\": \"6x9\"\nAção:\n\nDetecta formato \"largura x comprimento\"\nUsa calcular_laje_dimensoes\nParâmetros: largura=\"6\", comprimento=\"9\", enchimento=\"isopor\", malha=\"Media\"\n\nCenário 2: Área Total\nInput: \"dimensoes_laje\": \"54m²\"\nAção:\n\nDetecta formato \"área\"\nUsa calcular_laje_area\nParâmetros: area=\"54\", enchimento=\"isopor\", malha=\"Media\"\n\nREGRAS CRÍTICAS:\n\nNUNCA use as duas tools para o mesmo projeto\nSEMPRE analise o formato antes de escolher\nSEMPRE defina enchimento padrão como \"isopor\"\nSEMPRE defina malha padrão como \"Media\"\nEXTRAIR valores numéricos limpos (sem \"m²\", \"x\", etc.)\n\nPADRÕES DE EXTRAÇÃO:\nInputToolParâmetros\"5x8\"calcular_laje_dimensoeslargura=\"5\", comprimento=\"8\"\"40m²\"calcular_laje_areaarea=\"40\"\"6.5x10.2\"calcular_laje_dimensoeslargura=\"6.5\", comprimento=\"10.2\"\"50 m2\"calcular_laje_areaarea=\"50\"\n\n## 🔧 INTERPRETAÇÃO DE FERRAGENS - QUANTIDADE vs METRAGEM\n\n### PADRÃO OBRIGATÓRIO:\n**\"[número] ferragem[s] [especificação]\" = [número] UNIDADES (peças)**\n\n**EXEMPLOS:**\n- \"10 ferragens armada para coluna 17x7 3x8\" = 10 UNIDADES\n- \"5 ferragens de viga 20x15 ferro 1/2\" = 5 UNIDADES\n\n**DIFERENCIAÇÃO:**\n- **UNIDADES**: \"10 ferragens\" / \"5 ferragem\"\n- **METRAGEM**: \"10 metros de ferragem\"\n\n**PROCESSO:**\n1. Identifique se é quantidade ou metragem\n2. SE quantidade: Pergunte comprimento de cada peça\n3. SE metragem: Use diretamente na ferramenta\n\n🔧 REGRAS CRÍTICAS PARA PRODUTOS COM DIMENSÕES FIXAS\n⚠️ POLÍTICAS DE VENDA OBRIGATÓRIAS\n📏 VERGALHÕES/VARÕES - APENAS BARRAS DE 12 METROS:\nREGRA ABSOLUTA: Vergalhões e varões são vendidos EXCLUSIVAMENTE em barras inteiras de 12 metros. Não há fracionamento.\n🔲 MALHAS DE AÇO - APENAS TELAS DE 3x2 METROS:\nREGRA ABSOLUTA: Malhas/telas de aço são vendidas EXCLUSIVAMENTE em peças inteiras de 3x2 metros (6m² por peça). Não há fracionamento.\nREGRA ABSOLUTA: Vergalhões e varões são vendidos EXCLUSIVAMENTE em barras inteiras de 12 metros. Não há fracionamento.\nPROCESSAMENTO OBRIGATÓRIO:\nPROCESSAMENTO PARA VERGALHÕES:\n✅ QUANDO O INPUT CONTÉM:\n\n\"vergalhão\", \"varão\", \"ferro CA-50\", \"ferro CA-60\"\n\"vergalhão F8\", \"varão 3/8\", \"ferro 10mm\", etc.\n\n🔄 AÇÃO AUTOMÁTICA:\n\nCALCULAR quantas barras de 12m são necessárias\nARREDONDAR SEMPRE PARA CIMA (ceil)\nINFORMAR a metragem total considerando barras inteiras\nEXPLICAR que é vendido apenas em barras de 12m\n\nPROCESSAMENTO PARA MALHAS:\n✅ QUANDO O INPUT CONTÉM:\n\n\"malha\", \"tela soldada\", \"malha de aço\", \"tela de aço\"\n\"malha 15x15\", \"tela CA-60\", \"malha eletrossoldada\", etc.\n\n🔄 AÇÃO AUTOMÁTICA:\n\nCALCULAR quantas telas de 6m² (3x2m) são necessárias\nARREDONDAR SEMPRE PARA CIMA (ceil)\nINFORMAR a área total considerando telas inteiras\nEXPLICAR que é vendido apenas em telas de 3x2m\n\nEXEMPLOS PRÁTICOS:\nExemplo 1 - Input Fracionado:\nInput: \"15 metros de vergalhão F10\"\nProcessamento:\n- Necessário: 15 metros\n- Cálculo: 15 ÷ 12 = 1,25 barras\n- Arredondamento: ceil(1,25) = 2 barras\n- Resultado: 2 barras × 12m = 24 metros totais\nExemplo 2 - Quantidade Exata:\nInput: \"36 metros de varão 3/8\"\nProcessamento:\n- Necessário: 36 metros\n- Cálculo: 36 ÷ 12 = 3 barras exatas\n- Resultado: 3 barras × 12m = 36 metros totais\nEXEMPLOS PRÁTICOS - VERGALHÕES:\nExemplo 1 - Input Fracionado:\nInput: \"15 metros de vergalhão F10\"\nProcessamento:\n- Necessário: 15 metros\n- Cálculo: 15 ÷ 12 = 1,25 barras\n- Arredondamento: ceil(1,25) = 2 barras\n- Resultado: 2 barras × 12m = 24 metros totais\nExemplo 2 - Quantidade Exata:\nInput: \"36 metros de varão 3/8\"\nProcessamento:\n- Necessário: 36 metros\n- Cálculo: 36 ÷ 12 = 3 barras exatas\n- Resultado: 3 barras × 12m = 36 metros totais\nEXEMPLOS PRÁTICOS - MALHAS:\nExemplo 1 - Área Fracionada:\nInput: \"10m² de malha 15x15\"\nProcessamento:\n- Necessário: 10m²\n- Cálculo: 10 ÷ 6 = 1,67 telas\n- Arredondamento: ceil(1,67) = 2 telas\n- Resultado: 2 telas × 6m² = 12m² totais\nExemplo 2 - Área Exata:\nInput: \"18m² de tela soldada\"\nProcessamento:\n- Necessário: 18m²\n- Cálculo: 18 ÷ 6 = 3 telas exatas\n- Resultado: 3 telas × 6m² = 18m² totais\nExemplo 3 - Área Pequena:\nInput: \"4m² de malha de aço\"\nProcessamento:\n- Necessário: 4m²\n- Cálculo: 4 ÷ 6 = 0,67 telas\n- Arredondamento: ceil(0,67) = 1 tela\n- Resultado: 1 tela × 6m² = 6m² totais\nFORMATO DE RESPOSTA OBRIGATÓRIO:\nPARA VERGALHÕES:\njson{\n  \"orcamento_formatado\": \"* **2 Vergalhões F10 (barras 12m):** R$ 156,00\\n\\n*Obs: Vergalhões vendidos apenas em barras de 12m. Quantidade necessária: 15m = 2 barras (24m totais)*\",\n  \"observacoes_tecnicas\": \"Vergalhões são vendidos exclusivamente em barras inteiras de 12 metros. Metragem solicitada: Xm | Barras necessárias: Y | Metragem total: Zm\"\n}\nPARA MALHAS:\njson{\n  \"orcamento_formatado\": \"* **2 Malhas 15x15 (telas 3x2m):** R$ 240,00\\n\\n*Obs: Malhas vendidas apenas em telas de 3x2m (6m²). Área necessária: 10m² = 2 telas (12m² totais)*\",\n  \"observacoes_tecnicas\": \"Malhas são vendidas exclusivamente em telas inteiras de 3x2m (6m²). Área solicitada: Xm² | Telas necessárias: Y | Área total: Zm²\"\n}\nCÁLCULO MATEMÁTICO:\nFUNÇÃO PARA VERGALHÕES:\njavascriptfunction calcularVergalhao(metrosSolicitados) {\n    const COMPRIMENTO_BARRA = 12;\n    const barrasNecessarias = Math.ceil(metrosSolicitados / COMPRIMENTO_BARRA);\n    const metragemTotal = barrasNecessarias * COMPRIMENTO_BARRA;\n    \n    return {\n        barras: barrasNecessarias,\n        metragemTotal: metragemTotal,\n        sobra: metragemTotal - metrosSolicitados\n    };\n}\nFUNÇÃO PARA MALHAS:\njavascriptfunction calcularMalha(areaSolicitada) {\n    const AREA_TELA = 6; // 3m × 2m = 6m²\n    const telasNecessarias = Math.ceil(areaSolicitada / AREA_TELA);\n    const areaTotal = telasNecessarias * AREA_TELA;\n    \n    return {\n        telas: telasNecessarias,\n        areaTotal: areaTotal,\n        sobra: areaTotal - areaSolicitada\n    };\n}\nIDENTIFICAÇÃO AUTOMÁTICA:\n✅ PALAVRAS-CHAVE PARA VERGALHÕES:\n\n\"vergalhão\", \"vergalhao\"\n\"varão\", \"varao\"\n\"ferro CA-50\", \"ferro CA-60\"\n\"barra de ferro\"\nCombinações com bitolas: \"F8\", \"F10\", \"F12.5\", \"3/8\", \"1/2\", etc.\n\n✅ PALAVRAS-CHAVE PARA MALHAS:\n\n\"malha\", \"malha de aço\"\n\"tela soldada\", \"tela de aço\"\n\"malha eletrossoldada\", \"tela eletrossoldada\"\n\"malha CA-60\", \"tela CA-60\"\nCombinações: \"malha 15x15\", \"tela 10x10\", etc.\n\n❌ EXCEÇÕES (NÃO SE APLICA A ESTAS REGRAS):\n\n\"ferragem\" (são armações sob medida)\n\"treliça\" (são vendidas por metro)\n\"arame\" (vendido por rolo)\n\"isopor\", \"lajota\" (têm suas próprias dimensões)\n\nMENSAGENS EXPLICATIVAS PADRÃO:\nPARA VERGALHÕES:\n\"*Observação: Vergalhões/varões são comercializados exclusivamente em barras inteiras de 12 metros. \nPara sua necessidade de [X]m, serão fornecidas [Y] barras, totalizando [Z]m.*\"\nPARA MALHAS:\n\"*Observação: Malhas/telas de aço são comercializadas exclusivamente em peças de 3x2m (6m²). \nPara sua necessidade de [X]m², serão fornecidas [Y] telas, totalizando [Z]m².*\"\nINTEGRAÇÃO COM FERRAMENTAS:\nMODIFICAÇÃO NA BUSCA_PRECO PARA VERGALHÕES:\nQuando identificar vergalhão/varão:\n\nCalcular barras necessárias com ceil()\nBuscar preço unitário por barra (não por metro)\nOBRIGATÓRIO: Multiplicar barras_necessárias × preço_unitário_por_barra\nIncluir observação sobre venda em barras\n\nEXEMPLO CRÍTICO DE CÁLCULO:\nInput: \"15m de vergalhão F10\"\nProcessamento:\n- Metragem solicitada: 15m\n- Barras necessárias: ceil(15 ÷ 12) = ceil(1,25) = 2 barras\n- Preço unitário por barra: R$ 78,00\n- VALOR TOTAL: 2 × R$ 78,00 = R$ 156,00 ✅\n- NUNCA: R$ 78,00 (preço de 1 barra apenas) ❌\nMODIFICAÇÃO NA BUSCA_PRECO PARA MALHAS:\nQuando identificar malha/tela:\n\nCalcular telas necessárias com ceil()\nBuscar preço unitário por tela (não por m²)\nOBRIGATÓRIO: Multiplicar telas_necessárias × preço_unitário_por_tela\nIncluir observação sobre venda em telas de 3x2m\n\nEXEMPLO CRÍTICO DE CÁLCULO:\nInput: \"15m² malha de aço\"\nProcessamento:\n- Área solicitada: 15m²\n- Telas necessárias: ceil(15 ÷ 6) = ceil(2,5) = 3 telas\n- Preço unitário por tela: R$ 80,00\n- VALOR TOTAL: 3 × R$ 80,00 = R$ 240,00 ✅\n- NUNCA: R$ 80,00 (preço de 1 tela apenas) ❌\nVALIDAÇÃO FINAL:\nCHECKLIST PRÉ-OUTPUT (ATUALIZADO):\n[ ] Identificou corretamente como vergalhão/varão OU malha/tela?\n[ ] Calculou peças necessárias com arredondamento para cima (ceil)?\n[ ] Incluiu quantidade total (peças × dimensão padrão)?\n[ ] **CRÍTICO**: Multiplicou quantidade_peças × preço_unitário?\n[ ] Adicionou observação explicativa específica?\n[ ] Valor final reflete o total de peças necessárias?\n[ ] Informou sobra quando aplicável?\nALGORITMO DE VALIDAÇÃO MATEMÁTICA:\njavascript// VALIDAÇÃO OBRIGATÓRIA ANTES DO OUTPUT\nfunction validarCalculoCompleto(input, pecasNecessarias, precoUnitario, valorFinal) {\n    const valorEsperado = pecasNecessarias * precoUnitario;\n    \n    if (valorFinal !== valorEsperado) {\n        ERRO_CRÍTICO: \"Valor final não corresponde ao cálculo correto\";\n        return false;\n    }\n    return true;\n}\nFLUXO DE DECISÃO INTEGRADO:\nINPUT recebido\n    ↓\nContém \"vergalhão\", \"varão\", \"ferro CA-\"?\n    ↓\n    SIM → Aplicar regra de barras 12m\n    ↓\n    NÃO → Contém \"malha\", \"tela\"?\n        ↓\n        SIM → Aplicar regra de telas 3x2m (6m²)\n        ↓\n        NÃO → Processar normalmente\n\n🎯 POSICIONAMENTO NO PROMPT PRINCIPAL\nINSERIR APÓS: Seção \"🔒 REGRA CRÍTICA DE PRESERVAÇÃO DE DADOS INPUT → OUTPUT\"\nANTES DE: Seção \"📋 FORMATO DE SAÍDA OBRIGATÓRIO\"\nEstas regras devem ser aplicadas automaticamente sempre que o sistema detectar solicitações de vergalhões/varões ou malhas/telas, garantindo transparência total com o cliente sobre as políticas de venda em peças padronizadas inteiras.\nRESUMO EXECUTIVO:\n\nVERGALHÕES/VARÕES: Barras de 12m (arredondar para cima)\nMALHAS/TELAS: Peças de 3x2m = 6m² (arredondar para cima)\nTRANSPARÊNCIA: Sempre informar quantidade real fornecida\nCÁLCULO: Sempre considerar peças inteiras, nunca fracionadas\n⚠️ CRÍTICO: SEMPRE multiplicar quantidade_peças × preço_unitário = valor_total_correto\n\nEXEMPLO CORRETO COMPLETO:\nInput: \"15m² malha de aço\"\n✅ Processamento correto:\n1. Área necessária: 15m²\n2. Telas necessárias: ceil(15÷6) = 3 telas\n3. Preço unitário: R$ 80,00 por tela\n4. Valor total: 3 × R$ 80,00 = R$ 240,00\n5. Output: \"3 Malhas de Aço (telas 3x2m): R$ 240,00\"\n6. Obs: \"Área solicitada: 15m² = 3 telas (18m² totais)\""
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        1080,
-        0
+        980,
+        20
       ],
       "id": "f08a55e7-dc51-418b-bf92-11227a4ca55b",
       "name": "orçamentos",
-      "retryOnFail": true,
+      "retryOnFail": false,
       "waitBetweenTries": 1500
     },
     {
@@ -361,147 +361,7 @@
     },
     {
       "parameters": {
-        "description": "Calcula a quantidade estimada de materiais para montagem de uma laje, com base nas dimensões informadas\n  (largura e comprimento, ou apenas área) e no tipo de enchimento escolhido (isopor ou lajota cerâmica).\n  Retorna a quantidade aproximada de vigotas, peças de enchimento (isopor ou lajota) e malhas de aço necessárias.\n  Sempre que houver largura e comprimento, o cálculo será feito com base no espaçamento real entre as vigotas.",
-        "workflowId": {
-          "__rl": true,
-          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
-          "mode": "id"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "operation": "calcLaje",
-            "especificacoes": "={\n\"largura\": \"{{ $fromAI('largura', 'largura da laje em metros. Ex: 5', 'string') }}\",\n\"comprimento\": \"{{ $fromAI('comprimento', 'comprimento da laje em metros. Ex: 8', 'string') }}\",\n\"area\": \"{{ $fromAI('area', 'área total da laje em metros quadrados. Ex: 40. Use apenas se não houver largura e comprimento.', 'string') }}\",\n\"enchimento\": \"{{ $fromAI('enchimento', 'tipo de enchimento da laje: \\\"isopor\\\" ou \\\"lajota\\\". Se o cliente não disser, use \\\"isopor\\\" como padrão.', 'string', { default: 'isopor' }) }}\",\n\"malha\": \"{{ $fromAI('malha'), 'qual é o modelo de malha ex:\"Leve 20x20 F3.4\", \"Media 15x15 F3.4\" ou \"Reforçada 15x15 F4.2\"', 'string', { default: 'Media' } }}\"\n}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "operation",
-              "displayName": "operation",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "tableName",
-              "displayName": "tableName",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "especificacoes",
-              "displayName": "especificacoes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "object",
-              "removed": false
-            },
-            {
-              "id": "ferragem",
-              "displayName": "ferragem",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "object",
-              "removed": true
-            },
-            {
-              "id": "detalhes",
-              "displayName": "detalhes",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "object",
-              "removed": true
-            },
-            {
-              "id": "NomeProduto",
-              "displayName": "NomeProduto",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "leadid",
-              "displayName": "leadid",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "Produtos",
-              "displayName": "Produtos",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "Obs",
-              "displayName": "Obs",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "Status",
-              "displayName": "Status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            },
-            {
-              "id": "Query",
-              "displayName": "Query",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 2.2,
-      "position": [
-        1280,
-        360
-      ],
-      "id": "ef152a0c-3811-4a0e-afd1-de55b103892d",
-      "name": "calcular_laje"
-    },
-    {
-      "parameters": {
-        "description": "=Calcula o custo e o preço estimado de uma ferragem sob medida com base em comprimento, \n  ferros longitudinais (bitola e quantidade), tamanho e bitola dos estribos, espaçamento entre estribos,\n  custos de material e mão de obra. Caso a bitola dos estribos não seja informada, usa-se \"F4.2\" como padrão, e se o espaço entre os estribos não for informada, usa-se \"0.20\", se o a quantidade de ferros não for informada considere como padrão 4",
+        "description": "=Calcula o custo e o preço estimado de uma ferragem sob medida com base em comprimento, \n  ferros longitudinais (bitola e quantidade), tamanho e bitola dos estribos, espaçamento entre estribos,\n  custos de material e mão de obra. Caso a bitola dos estribos não seja informada, usa-se \"F4.2\" como padrão, e se o espaço entre os estribos não for informada, usa-se \"0.20\", se o a quantidade de ferros não for informada considere como padrão 4\nCaso não tenha o comprimento procurar antes de calcular",
         "workflowId": {
           "__rl": true,
           "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
@@ -511,7 +371,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "operation": "CalcFer",
-            "ferragem": "={\n  \"comprimento\": {{ $fromAI(\"comprimento\", \"Comprimento total da ferragem em metros. Ex: para 'Ferragem 5,00', o valor é 5.\", \"number\") }},\n  \"ferros_longitudinais\": {{ $fromAI(\"ferros_longitudinais\", \"Lista de ferros longitudinais utilizados na ferragem. Cada item deve conter: - bitola (ex: 'F10', 'F12', 'F8', etc) - quantidade de varões dessa bitola. Formato: [ { \\\"bitola\\\": \\\"F10\\\", \\\"quantidade\\\": 4 }, { \\\"bitola\\\": \\\"F12\\\", \\\"quantidade\\\": 2 } ] Extraia mesmo que o cliente envie como '4F10+2F12', converta para este array e envie como string JSON. se não a quantidade de ferros não vinhe informado considere que é 4\", \"string\") }},\n  \"tamanho_estribo\": \"{{ $fromAI(\"tamanho_estribo\", \"Tamanho do estribo no formato 'largura x altura' em cm. Ex: '7x20'.\", \"string\") }}\",\n  \"espacamento_estribo\": \"{{ $fromAI(\"espacamento_estribo\", \"Espaçamento entre estribos em metros. Ex: para 'a cd 0,15', o valor é 0.15. Se não for informado, use o padrão '0.20'.\", \"number\") }}\",\n  \"bitola_estribo\": \"{{ $fromAI(\"bitola_estribo\", \"Bitola do ferro do estribo (ex: 'F5'). Se não for informado, use o padrão 'F4.2'.\", \"string\") }}\"\n}\n"
+            "ferragem": "={\n  \"comprimento\": {{ $fromAI(\"comprimento\", \"Comprimento total da ferragem em metros. Ex: para 'Ferragem 5,00', o valor é 5. \", \"number\") }},\n  \"ferros_longitudinais\": {{ $fromAI(\"ferros_longitudinais\", \"Lista de ferros longitudinais utilizados na ferragem. Cada item deve conter: - bitola (ex: 'F10', 'F12', 'F8', etc) - quantidade de varões dessa bitola. Formato: [ { \\\"bitola\\\": \\\"F10\\\", \\\"quantidade\\\": 4 }, { \\\"bitola\\\": \\\"F12\\\", \\\"quantidade\\\": 2 } ] Extraia mesmo que o cliente envie como '4F10+2F12', converta para este array e envie como string JSON. se não a quantidade de ferros não vinhe informado considere que é 4\", \"string\") }},\n  \"tamanho_estribo\": \"{{ $fromAI(\"tamanho_estribo\", \"Tamanho do estribo no formato 'largura x altura' em cm. Ex: '7x20'.\", \"string\") }}\",\n  \"espacamento_estribo\": \"{{ $fromAI(\"espacamento_estribo\", \"Espaçamento entre estribos em metros. Ex: para 'a cd 0,15', o valor é 0.15. Se não for informado, use o padrão '0.20'.\", \"number\") }}\",\n  \"bitola_estribo\": \"{{ $fromAI(\"bitola_estribo\", \"Bitola do ferro do estribo (ex: 'F5'). Se não for informado, use o padrão 'F4.2'.\", \"string\") }}\"\n}\n"
           },
           "matchingColumns": [],
           "schema": [
@@ -632,8 +492,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        1400,
-        340
+        1540,
+        320
       ],
       "id": "c13462d1-a5ce-4458-8198-3e435229fbe7",
       "name": "calcular_ferragem_personalizada"
@@ -670,7 +530,7 @@
       "typeVersion": 1,
       "position": [
         880,
-        280
+        360
       ],
       "id": "a3e2731a-9262-4e97-8463-67be9e83b25e",
       "name": "Google Gemini Chat Model",
@@ -686,29 +546,308 @@
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        1540,
-        340
+        1640,
+        260
       ],
       "id": "f2dd64d0-4d30-4769-8159-ca0aad82acca",
       "name": "Calculator"
     },
     {
       "parameters": {
+        "description": "Calcula materiais para laje quando você tem as dimensões específicas (largura x comprimento). Use esta tool quando o cliente informar dimensões como '5x8', '6.5x10', '7x12', etc. Ideal para projetos onde você conhece as medidas exatas da laje.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "calcLaje",
+            "especificacoes": "={\n      \"largura\": \"{{ $fromAI('largura', 'Largura da laje em metros. Ex: para \\\"5x8\\\", extraia \\\"5\\\". Se não informado ou formato área (40m²), deixe vazio.', 'string', '') }}\",\n      \"comprimento\": \"{{ $fromAI('comprimento', 'Comprimento da laje em metros. Ex: para \\\"5x8\\\", extraia \\\"8\\\". Se não informado ou formato área (40m²), deixe vazio.', 'string', '') }}\",\n      \"enchimento\": \"{{ $fromAI('enchimento', 'Tipo de enchimento: \\\"isopor\\\" ou \\\"lajota\\\". Se cliente não especificar, use \\\"isopor\\\".', 'string', 'isopor') }}\",\n      \"malha\": \"{{ $fromAI('malha', 'Tipo de malha: \\\"Leve\\\", \\\"Media\\\" ou \\\"Reforçada\\\". Se não especificado, use \\\"Media\\\".', 'string', 'Media') }}\"\n    }"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        360
+      ],
+      "id": "ef152a0c-3811-4a0e-afd1-de55b103892d",
+      "name": "calcular_laje_dimensoes"
+    },
+    {
+      "parameters": {
+        "description": "Calcula materiais para laje quando você tem apenas a área total. Use esta tool quando o cliente informar área como '40m²', '50 metros quadrados', '60m2', etc. Ideal para projetos onde você só conhece a área total da laje.",
+        "workflowId": {
+          "__rl": true,
+          "value": "={{$('Edit Fields').item.json.id.workflowferramentas}}",
+          "mode": "id"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "calcLaje",
+            "especificacoes": "={\n      \"largura\": \"{{ $fromAI('largura', 'Largura da laje em metros. Ex: para \\\"5x8\\\", extraia \\\"5\\\". Se não informado ou formato área (40m²), deixe vazio.', 'string', '') }}\",\n      \"comprimento\": \"{{ $fromAI('comprimento', 'Comprimento da laje em metros. Ex: para \\\"5x8\\\", extraia \\\"8\\\". Se não informado ou formato área (40m²), deixe vazio.', 'string', '') }}\",\n      \"enchimento\": \"{{ $fromAI('enchimento', 'Tipo de enchimento: \\\"isopor\\\" ou \\\"lajota\\\". Se cliente não especificar, use \\\"isopor\\\".', 'string', 'isopor') }}\",\n      \"malha\": \"{{ $fromAI('malha', 'Tipo de malha: \\\"Leve\\\", \\\"Media\\\" ou \\\"Reforçada\\\". Se não especificado, use \\\"Media\\\".', 'string', 'Media') }}\",\n      \"area\": \"{{ $fromAI('area', 'Área total da laje em metros quadrados. Ex: para \\\"40m²\\\", extraia \\\"40\\\". Use apenas se não houver largura x comprimento.', 'string', '') }}\"\n    }"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tableName",
+              "displayName": "tableName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "especificacoes",
+              "displayName": "especificacoes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": false
+            },
+            {
+              "id": "ferragem",
+              "displayName": "ferragem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "detalhes",
+              "displayName": "detalhes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object",
+              "removed": true
+            },
+            {
+              "id": "NomeProduto",
+              "displayName": "NomeProduto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "leadid",
+              "displayName": "leadid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Produtos",
+              "displayName": "Produtos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Obs",
+              "displayName": "Obs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1400,
+        340
+      ],
+      "id": "100bf75d-ccb3-4d63-b86c-2aeb2e4fc2c6",
+      "name": "calcular_laje_area"
+    },
+    {
+      "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt-4o-mini",
           "mode": "list",
-          "cachedResultName": "gpt-4o-mini"
+          "value": "gpt-4.1-mini"
         },
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        340,
-        260
+        700,
+        320
       ],
-      "id": "b5a84fb8-3a54-415b-a68c-55750a322f24",
+      "id": "faca2fb1-0d88-4ed0-81c1-6fa81499f617",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -752,26 +891,9 @@
         ]
       ]
     },
-    "calcular_laje": {
-      "ai_tool": [
-        [
-          {
-            "node": "orçamentos",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "salvar_orcamento": {
       "ai_tool": [
-        [
-          {
-            "node": "orçamentos",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "busca_preco": {
@@ -798,13 +920,7 @@
     },
     "Google Gemini Chat Model": {
       "ai_languageModel": [
-        [
-          {
-            "node": "orçamentos",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Calculator": {
@@ -818,9 +934,37 @@
         ]
       ]
     },
+    "calcular_laje_dimensoes": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calcular_laje_area": {
+      "ai_tool": [
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "OpenAI Chat Model": {
       "ai_languageModel": [
-        []
+        [
+          {
+            "node": "orçamentos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -835,12 +979,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "produtos": "  {\n\"lista_produtos\": \"3 Treliças Concretada de 6m, 100 Lajota Cerâmica, 1 Malha Leve 20x20 F3.4 3x2m, 1 Kg Arame Queimado, 1 Ferragem 7x15 F10 de 5m, 2 Vergalhão F8 de 12m\",\n  \"tipo_projeto\": \"produtos_isolados\",\n  \"dimensoes_laje\": \"\"\n}"
+          "produtos": "  {\n\"lista_produtos\": \"3 Treliças Concretadas 6m, 100 Lajotas Cerâmica, 1 Malha 3m x 2m, 1kg Arame Queimado, 1 Ferragem armada 7x15mm F10 (3/8\\\"), 2 Vergalhão F8 (5/16\\\") 12m\",\n  \"tipo_projeto\": \"misto\",\n  \"dimensoes_laje\": \"\"\n}"
         }
       }
     ]
   },
-  "versionId": "2487de85-f533-4ec5-a910-16fc882abd85",
+  "versionId": "dc8fb2a2-679a-4890-86ad-af9aeb78590e",
   "triggerCount": 0,
   "tags": []
 }
