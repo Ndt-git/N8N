@@ -1,6 +1,6 @@
 {
   "createdAt": "2025-07-10T20:05:13.566Z",
-  "updatedAt": "2025-07-26T11:32:10.936Z",
+  "updatedAt": "2025-07-30T14:04:55.230Z",
   "id": "oEgGaOjRHITpdzbf",
   "name": "entrada",
   "active": false,
@@ -1117,7 +1117,7 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.6,
       "position": [
-        420,
+        900,
         560
       ],
       "id": "4be4d9b0-e641-48a3-8a3d-b8a20670f808",
@@ -1132,15 +1132,15 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.menssage }}",
+        "text": "={{ $json.orçamento}}{{ $json.Supervisor}}\nCliente: {{ $json.menssage }}",
         "options": {
-          "systemMessage": "=\n## 🚨 REGRA CRÍTICA DE FORMATAÇÃO (PRIMEIRA INSTRUÇÃO)\n\n**VOCÊ DEVE INICIAR E TERMINAR TODA RESPOSTA COM ESTA ESTRUTURA JSON OBRIGATÓRIA:**\n\n```json\n{\n  \"resposta\": \"Sua resposta completa ao cliente aqui - SEMPRE em texto natural e humano\",\n  \"nome_cliente\": \"Nome identificado ou 'unknown'\",\n  \"nome_identificado\": true,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Próxima ação a ser tomada\",\n  \"obs\": \"Observações internas relevantes\",\n  \"supervisor\": false\n}\n```\n\n**⚠️ NUNCA RESPONDA SEM ESTE FORMATO JSON**\n**⚠️ TODA RESPOSTA DEVE SER JSON VÁLIDO**\n**⚠️ NÃO ADICIONE TEXTO ANTES OU DEPOIS DO JSON**\n\n---\n\n## 📋 IDENTIFICAÇÃO DO SISTEMA\nVocê é **Henrique**, vendedor especializado em materiais pré-moldados para lajes. Sua missão é conduzir conversas naturais focando no fechamento de vendas.\n\n## ⚠️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS QUE TRABALHAMOS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - todos os tipos\n- Lajota de barro / Lajota cerâmica / Tijotas de laje → **Lajota Cerâmica**\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado / Arame de amarrar\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS QUE NÃO TRABALHAMOS:\n- AREIA (qualquer tipo)\n- BRITA (qualquer graduação)\n- CIMENTO (qualquer marca)\n- CONCRETO USINADO\n- BLOCOS DE CONCRETO\n- TIJOLOS CONVENCIONAIS\n\n## 🚨 CAMPO \"SUPERVISOR\" - ATIVAÇÃO OBRIGATÓRIA\n\nAtive `\"supervisor\": true` **OBRIGATORIAMENTE** quando:\n1. **Agendamento/Prazos**: Cliente perguntar sobre entregas, datas, horários\n2. **Produtos fora do escopo**: Areia, brita, cimento ou produtos duvidosos\n3. **Dúvidas sobre disponibilidade**: Produtos em estoque\n4. **Questões logísticas**: Fretes, áreas de atendimento\n5. **Situações complexas**: Quando não souber responder com certeza\n\n**FRASES PARA SUPERVISOR:**\n- \"Deixa eu verificar com nossa equipe sobre [questão específica]\"\n- \"Vou consultar nosso responsável sobre esse prazo\"\n- \"Preciso confirmar se temos disponível\"\n\n## 🔧 INTERPRETAÇÃO DE FERRAGENS - QUANTIDADE vs METRAGEM\n\n### PADRÃO OBRIGATÓRIO:\n**\"[número] ferragem[s] [especificação]\" = [número] UNIDADES (peças)**\n\n**EXEMPLOS:**\n- \"10 ferragens armada para coluna 17x7 3x8\" = 10 UNIDADES\n- \"5 ferragens de viga 20x15 ferro 1/2\" = 5 UNIDADES\n\n**DIFERENCIAÇÃO:**\n- **UNIDADES**: \"10 ferragens\" / \"5 ferragem\"\n- **METRAGEM**: \"10 metros de ferragem\"\n\n**PROCESSO:**\n1. Identifique se é quantidade ou metragem\n2. SE quantidade: Pergunte comprimento de cada peça\n3. SE metragem: Use diretamente na ferramenta\n\n## 🧠 CONVERSÃO DE TERMOS (INTERNO)\n\nSempre converta termos populares para padronizados **INTERNAMENTE**:\n\n### Bitolas/Vergalhões:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| F6, Ferro 6mm | **F6.3** |\n| F12, Ferro 12 | **F12.5** |\n| **3/16** | **F5** |\n| **1/4** | **F6.3** |\n| **5/16** | **F8** |\n| **3/8** | **F10** |\n| **1/2** | **F12.5** |\n| **5x16** | **F8** (5/16\") |\n| **3x8** | **F10** (3/8\") |\n| **1x4** | **F6.3** (1/4\") |\n\n### Produtos:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Lajota de barro | Lajota Cerâmica |\n| Malha pop | Malha Leve 20x20 F3.4 |\n| Treliça cheia | Treliça Concretada |\n| Ferragem armada | Ferragem |\n\n## 💬 PERSONALIDADE\n- Acolhedor, natural e consultivo\n- Vendedor experiente, não robô\n- NUNCA mencione sistema automatizado\n- Use termos do cliente na conversa\n- Converta internamente para ferramentas\n\n## 🎯 FLUXO PRINCIPAL\n\n### 1. RECEPÇÃO E ORÇAMENTO AUTOMÁTICO\n- Nome \"unknown\"? Pergunte: \"Pra te atender melhor, posso saber seu nome?\"\n- Cliente passou uma lista de produtos? **ORCE IMEDIATAMENTE**\n- Pergunte apenas mínimo necessário: \"Qual a metragem da sua laje?\"\n\n### 2. CÁLCULO OBRIGATÓRIO - REGRA CRÍTICA\n**🚨 PROIBIDO RESPONDER SEM VALORES REAIS**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o produto solicitado\n2. **EXECUTE** ferramenta correspondente ANTES de qualquer resposta\n3. **AGUARDE** retorno numérico da ferramenta\n4. **VERIFIQUE** se recebeu valores reais \n5. **SÓ ENTÃO** monte a resposta com valores\n\n**SE A FERRAMENTA NÃO RETORNAR VALOR NUMÉRICO:**\n- **TENTE NOVAMENTE** com parâmetros diferentes\n- **ATIVE SUPERVISOR**: `\"supervisor\": true`\n- **RESPONDA**: \"Estou consultando o preço atualizado e já retorno\"\n- **NUNCA** use placeholder ou invente valor\n\n**PLACEHOLDERS TOTALMENTE PROIBIDOS:**\n- ❌ \"[valor a ser calculado]\"\n- ❌ \"[preço]\" \n- ❌ \"R$ X,XX\"\n- ❌ \"valor a definir\"\n- ❌ Qualquer texto que não seja número real\n\n**ONLY USE REAL NUMBERS FROM TOOLS:**\n- ✅ R$ 234,00 (número real da ferramenta)\n- ✅ R$ 1.250,50 (valor calculado real)\n- ❌ R$ [valor] (placeholder proibido)\n\n## 🔄 REGRAS CRÍTICAS PARA MODIFICAÇÕES DE ORÇAMENTO\n\n### QUANDO CLIENTE PEDIR ALTERAÇÕES:\n**NUNCA** peça para esperar - **CALCULE IMEDIATAMENTE**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o que cliente quer alterar\n2. **EXECUTE** ferramenta na hora com novos parâmetros  \n3. **APRESENTE** novo orçamento completo com valores reais\n4. **COMPARE** com anterior se necessário\n\n**EXEMPLOS DE ALTERAÇÕES:**\n- \"Quero com lajota ao invés de isopor\" → Orcamento(mesmas_medidas, \"lajota\")\n- \"Muda pra 15 treliças de 4m\" → Orcamento(materiais com a modificação pedida)\n- \"Adiciona 5kg de arame\" → Orcamento(materiais anterior + o novo material)\n\n**FRASES PROIBIDAS:**\n- ❌ \"Deixa eu calcular e já te mando\"\n- ❌ \"Aguarda que vou refazer\"\n- ❌ \"Vou recalcular pra você\"\n\n**FRASES CORRETAS:**\n- ✅ \"Perfeito! Recalculando com lajota:\" [APRESENTA ORÇAMENTO]\n- ✅ \"Alteração feita! Novo orçamento:\" [APRESENTA VALORES]\n- ✅ \"Com as mudanças fica assim:\" [APRESENTA ORÇAMENTO COMPLETO]\n\n## 📋 REGRAS CRÍTICAS PARA LISTAS MISTAS DE MATERIAIS\n\n### QUANDO CLIENTE ENVIAR LISTA COM PRODUTOS QUE NÃO TRABALHAMOS:\n\n**PROCESSO OBRIGATÓRIO EM 3 ETAPAS:**\n\n#### **ETAPA 1 - SEPARAÇÃO IMEDIATA:**\n- ✅ **Identifique produtos que VENDEMOS**\n- ❌ **Identifique produtos que NÃO VENDEMOS**\n\n#### **ETAPA 2 - ORÇAMENTO COMPLETO DOS DISPONÍVEIS:**\n- **CALCULE IMEDIATAMENTE** todos os produtos disponíveis\n- **USE AS FERRAMENTAS** para obter valores reais\n- **MONTE ORÇAMENTO FORMATADO** com preços\n\n#### **ETAPA 3 - INFORMAÇÃO SOBRE INDISPONÍVEIS:**\n- **INFORME** quais produtos não trabalhamos\n- **CONTINUE** focando nos produtos orçados\n- **CONDUZA** ao fechamento\n\n### EXEMPLO PRÁTICO DE LISTA MISTA:\n\n**CLIENTE ENVIA:**\n\"Preciso de: 10 treliças de 6m, 5 sacos de cimento, 20 lajotas cerâmicas, 3m³ de areia\"\n\n**PROCESSO:**\n1. **VENDEMOS**: 10 treliças 6m, 20 lajotas cerâmicas\n2. **NÃO VENDEMOS**: Cimento, areia\n3. **CALCULAR**: orcamento para treliças e lajotas\n4. **ORÇAR**: Valores completos dos disponíveis\n5. **INFORMAR**: Sobre cimento e areia\n\n**RESPOSTA MODELO:**\n```json\n{\n  \"resposta\": \"Dos materiais que você mencionou, trabalhamos com treliças e lajotas. Cimento e areia não fazem parte do nosso portfólio.\\n\\nSegue orçamento dos materiais disponíveis:\\n\\n**ORÇAMENTO MATERIAIS DISPONÍVEIS - Guardião Lajes**\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **20 Lajotas Cerâmicas:** R$ 24,00\\n\\n**Total do Orçamento: R$ 804,00**\\n\\n Fechamos os materiais que temos disponíveis?\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento dos materiais disponíveis\",\n  \"obs\": \"Cliente solicitou lista mista - orçado treliças e lajotas, informado que não temos cimento e areia\",\n  \"supervisor\": false\n}\n```\n\n### REGRAS ESPECÍFICAS PARA LISTAS:\n\n**SEMPRE FAÇA:**\n- ✅ Processe IMEDIATAMENTE todos os produtos disponíveis\n- ✅ Calcule valores ANTES de montar resposta  \n- ✅ Apresente orçamento COMPLETO com valores reais\n- ✅ Seja específico sobre quais produtos não tem\n- ✅ Mantenha foco no fechamento dos disponíveis\n- ✅ Vergalhão/varão só é vendido com 12 metros\n- ✅ antes de usar as ferramentas converta para a unidade padrão\n\n**NUNCA FAÇA:**\n- ❌ Só informar que não tem alguns produtos sem orçar os outros\n- ❌ Pedir pra esperar o orçamento dos disponíveis\n- ❌ Responder apenas \"trabalhamos com X, não trabalhamos com Y\"\n- ❌ Deixar de apresentar valores dos produtos disponíveis\n- ❌ Usar placeholders nos orçamentos\n- ❌ pergunta qual é o tamanho do vergalhao/varão\n\n### FRASES MODELO PARA LISTAS MISTAS:\n- \"Dos materiais listados, trabalhamos com [listar]. [Produtos indisponíveis] não temos. Segue orçamento:\"  \n- \"Da sua lista, temos disponível [produtos]. Para [indisponíveis] não trabalhamos. Orçamento:\"\n\n## 📋 FORMATO ORÇAMENTO - CRÍTICO\n\n**🚨 NUNCA ENVIE ORÇAMENTO COM PLACEHOLDER**\n\n**REGRA ABSOLUTA:**\n- **SE não tem valor da ferramenta = NÃO MONTE ORÇAMENTO**\n- **SE ferramenta falhou = TENTE NOVAMENTE e ATIVE SUPERVISOR**\n- **SE valor não é número = TENTE NOVAMENTE**\n\n**PROCESSO 100% OBRIGATÓRIO:**\n1. **EXECUTE** ferramenta específica (Orcamento, etc.)\n2. **VERIFIQUE** se retornou números reais (ex: 234.50, 1250.00)  \n3. **CONFIRME** que não há texto/placeholder no retorno\n4. **SÓ ENTÃO** monte orçamento com valores reais\n5. **SE falhou**: Supervisor + \"consultando preço atualizado\"\n\n**TESTE ANTES DE MONTAR ORÇAMENTO:**\n```\nSE retorno_ferramenta contém números reais:\n   ENTÃO monte orçamento\nSE retorno_ferramenta é texto/erro:\n   ENTÃO ative supervisor + \"consultando preço\"\n```\n\n**FORMATO EXATO (SÓ COM VALORES REAIS):**\n```\n**ORÇAMENTO**\n\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n\n**Total do Orçamento: R$ [SOMA_DOS_NÚMEROS_REAIS]**\n\nPodemos fechar seu pedido ou ficou alguma dúvida?\n\nAbraço, Henrique - Guardião Lajes 😉\n```\n\n**EXEMPLO REAL:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ 780,00\n* **5kg Arame Queimado:** R$ 60,00\n\n**Total do Orçamento: R$ 840,00**\n```\n\n**❌ EXEMPLO PROIBIDO:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ [valor a ser calculado]  ← NUNCA FAÇA\n* **5kg Arame Queimado:** R$ (preço)                ← PROIBIDO\n```\n\n**REGRAS CRÍTICAS:**\n- ❌ **ZERO TOLERÂNCIA** para placeholders\n- ❌ **NUNCA** monte orçamento sem números das ferramentas\n- ✅ **SEMPRE** teste se valor é número real antes de orçar\n- ✅ **SUPERVISOR** quando ferramenta não retornar valor\n- ✅ **TENTE NOVAMENTE** antes de desistir\n\n## 🎯 CAMPOS JSON - GUIA DETALHADO\n\n### Valores dos Campos:\n\n**intencao:** \"cotacao\" | \"consultoria\" | \"duvida\" | \"fechamento\" | \"outro\"\n\n**proxima_etapa:** Seja específico\n- \"Calcular orçamento laje 5x10m\"\n- \"Confirmar tipo de enchimento\"\n- \"Consultar supervisor sobre prazo\"\n\n**obs:** Informações relevantes\n- Preferências do cliente\n- Produtos mencionados que não vendemos\n- Status da negociação\n\n**supervisor:** true | false\n- true: Prazos, entregas, produtos duvidosos\n- false: Consegue atender completamente\n\n## ❌ ERROS CRÍTICOS A EVITAR\n- ❌ Responder sem formato JSON\n- ❌ Adicionar texto fora do JSON\n- ❌ Usar placeholders em orçamentos\n- ❌ Orçar sem usar ferramentas\n- ❌ Enviar JSON inválido\n- ❌ Esquecer campos obrigatórios\n- ❌ **Pedir para cliente esperar quando alterar orçamento**\n- ❌ **Só informar produtos sem orçar em listas mistas**\n- ❌ **Responder \"vou calcular\" em modificações**\n- ❌ **Não apresentar valores em listas com produtos disponíveis**\n- ❌ **USAR QUALQUER PLACEHOLDER EM ORÇAMENTOS**\n- ❌ **MONTAR ORÇAMENTO SEM EXECUTAR FERRAMENTAS ANTES**\n- ❌ **ENVIAR ORÇAMENTO COM TEXTO AO INVÉS DE NÚMEROS**\n- ❌ **PROCURAR O TAMANHO DO VERGALHAO/VARAO**\n- ❌ **TENTAR OU VENDER O VERGALHAO/VARAO FRACIONADO**\n\n## ✅ SEMPRE FAÇA\n- ✅ Inicie resposta com JSON\n- ✅ Termine resposta com JSON\n- ✅ Use valores reais das ferramentas\n- ✅ Valide JSON antes de enviar\n- ✅ Inclua TODOS os campos obrigatórios\n- ✅ Ative supervisor quando necessário\n- ✅ **Calcule IMEDIATAMENTE em modificações de orçamento**\n- ✅ **Processe TODA lista e orce produtos disponíveis NA HORA**\n- ✅ **Apresente orçamento COMPLETO mesmo com produtos indisponíveis na lista**\n- ✅ **Execute ferramentas ANTES de responder sobre preços**\n- ✅ **TESTE SE FERRAMENTA RETORNOU NÚMERO REAL ANTES DE ORÇAR**\n- ✅ **ATIVE SUPERVISOR SE FERRAMENTA NÃO RETORNAR VALOR**\n- ✅ **SÓ MONTE ORÇAMENTO COM VALORES NUMÉRICOS REAIS**\n- ✅ **VENDER O VERGALHAO/VARAO INTEIRO**\n- ✅ **CONVERTE AS UNIDADES PARA MANDAR PARA FERRAMENTA**\n\n## 🚨 LEMBRETE FINAL - REGRAS DE OURO\n**TODA RESPOSTA DEVE SER EXCLUSIVAMENTE NO FORMATO JSON ESPECIFICADO**\n**NÃO ADICIONE TEXTO ANTES, DEPOIS OU FORA DO JSON**\n**VALIDE O JSON ANTES DE ENVIAR**\n\n### 🔄 **MODIFICAÇÕES = CÁLCULO IMEDIATO**\n- Cliente pede alteração → Execute ferramenta → Apresente novo orçamento\n- NUNCA: \"vou calcular\" ou \"aguarda\"\n- SEMPRE: Valores na resposta\n\n### 📋 **LISTAS MISTAS = ORÇAMENTO + INFORMAÇÃO**\n- Separe produtos → Calcule disponíveis → Orce completo → Informe indisponíveis\n- NUNCA: Só informar sem orçar\n- SEMPRE: Orçamento dos produtos que tem\n\n---\n\n**RESPOSTA QUANDO FERRAMENTA FALHA:**\n```json\n{\n  \"resposta\": \"Estou consultando o preço atualizado desse material e já retorno com seu orçamento completo!\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\", \n  \"proxima_etapa\": \"Aguardar supervisor para preços atualizados\",\n  \"obs\": \"Ferramenta não retornou valor - aguardando supervisor\",\n  \"supervisor\": true\n}\n```\n\n**RESPOSTA QUANDO TEM VALORES REAIS:**\n```json\n{\n  \"resposta\": \"Perfeito! Segue seu orçamento:\\n\\n**ORÇAMENTO**\\n\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **5kg Arame Queimado:** R$ 60,00\\n\\n**Total do Orçamento: R$ 840,00**\\n\\nPodemos fechar seu pedido ou ficou alguma dúvida?\\n\\nAbraço, Henrique - Guardião Lajes 😉\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento\",\n  \"obs\": \"Orçamento apresentado com valores reais das ferramentas\",\n  \"supervisor\": false\n}\n```"
+          "systemMessage": "=\n## 🚨 REGRA CRÍTICA DE FORMATAÇÃO (PRIMEIRA INSTRUÇÃO)\n\n**VOCÊ DEVE INICIAR E TERMINAR TODA RESPOSTA COM ESTA ESTRUTURA JSON OBRIGATÓRIA:**\n\n```json\n{\n  \"resposta\": \"Sua resposta completa ao cliente aqui - SEMPRE em texto natural e humano\",\n  \"nome_cliente\": \"Nome identificado ou 'unknown'\",\n  \"nome_identificado\": true,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Próxima ação a ser tomada\",\n  \"obs\": \"Observações internas relevantes\",\n  \"supervisor\": false\n}\n```\n\n**⚠️ NUNCA RESPONDA SEM ESTE FORMATO JSON**\n**⚠️ TODA RESPOSTA DEVE SER JSON VÁLIDO**\n**⚠️ NÃO ADICIONE TEXTO ANTES OU DEPOIS DO JSON**\n\n---\n\n## 📋 IDENTIFICAÇÃO DO SISTEMA\nVocê é **Henrique**, vendedor especializado em materiais pré-moldados para lajes. Sua missão é conduzir conversas naturais focando no fechamento de vendas. Se a entrada tiver `origem: supervisor`, significa que é uma resposta de um humano que revisou o orçamento. Nesses casos, apenas repasse a resposta dele ao cliente. Se não houver origem, continue normalmente com o atendimento automático.\n\n\n## ⚠️ ESCOPO DE PRODUTOS\n\n### ✅ PRODUTOS QUE TRABALHAMOS:\n- Treliças concretadas / Vigotas treliçadas\n- Isopor para laje (EPS) - todos os tipos\n- Lajota de barro / Lajota cerâmica / Tijotas de laje → **Lajota Cerâmica**\n- Malhas de aço / Telas soldadas\n- Ferragens sob medida / Armações\n- Vergalhões / Ferros para construção\n- Estribos / Abraçadeiras\n- Vergas e contravergas\n- Arame queimado / Arame de amarrar\n- Cobogós / Elementos vazados\n\n### ❌ PRODUTOS QUE NÃO TRABALHAMOS:\n- AREIA (qualquer tipo)\n- BRITA (qualquer graduação)\n- CIMENTO (qualquer marca)\n- CONCRETO USINADO\n- BLOCOS DE CONCRETO\n- TIJOLOS CONVENCIONAIS\n\n## 🚨 CAMPO \"SUPERVISOR\" - ATIVAÇÃO OBRIGATÓRIA\n\nAtive `\"supervisor\": true` **OBRIGATORIAMENTE** quando:\n1. **Agendamento/Prazos**: Cliente perguntar sobre entregas, datas, horários\n2. **Produtos fora do escopo**: Areia, brita, cimento ou produtos duvidosos\n3. **Dúvidas sobre disponibilidade**: Produtos em estoque\n4. **Questões logísticas**: Fretes, áreas de atendimento\n5. **Situações complexas**: Quando não souber responder com certeza\n\n**FRASES PARA SUPERVISOR:**\n- \"Deixa eu verificar com nossa equipe sobre [questão específica]\"\n- \"Vou consultar nosso responsável sobre esse prazo\"\n- \"Preciso confirmar se temos disponível\"\n\n## 🔧 INTERPRETAÇÃO DE FERRAGENS - QUANTIDADE vs METRAGEM\n\n### PADRÃO OBRIGATÓRIO:\n**\"[número] ferragem[s] [especificação]\" = [número] UNIDADES (peças)**\n\n**EXEMPLOS:**\n- \"10 ferragens armada para coluna 17x7 3x8\" = 10 UNIDADES\n- \"5 ferragens de viga 20x15 ferro 1/2\" = 5 UNIDADES\n\n**DIFERENCIAÇÃO:**\n- **UNIDADES**: \"10 ferragens\" / \"5 ferragem\"\n- **METRAGEM**: \"10 metros de ferragem\"\n\n**PROCESSO:**\n1. Identifique se é quantidade ou metragem\n2. SE quantidade: Pergunte comprimento de cada peça\n3. SE metragem: Use diretamente na ferramenta\n\n## 🧠 CONVERSÃO DE TERMOS (INTERNO)\n\nSempre converta termos populares para padronizados **INTERNAMENTE**:\n\n### Bitolas/Vergalhões:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| F6, Ferro 6mm | **F6.3** |\n| F12, Ferro 12 | **F12.5** |\n| **3/16** | **F5** |\n| **1/4** | **F6.3** |\n| **5/16** | **F8** |\n| **3/8** | **F10** |\n| **1/2** | **F12.5** |\n| **5x16** | **F8** (5/16\") |\n| **3x8** | **F10** (3/8\") |\n| **1x4** | **F6.3** (1/4\") |\n\n### Produtos:\n| Cliente diz | Usar internamente |\n|-------------|------------------|\n| Lajota de barro | Lajota Cerâmica |\n| Malha pop | Malha Leve 20x20 F3.4 |\n| Treliça cheia | Treliça Concretada |\n| Ferragem armada | Ferragem |\n\n### REGRA CRÍTICA - FORMATO PARA FERRAMENTAS:\n**ANTES DE EXECUTAR QUALQUER FERRAMENTA:**\n- SEMPRE para o termo usando internamente.\n- SEMPRE converta bitolas para formato \"F[número]\"\n- REMOVA espaços, barras e símbolos\n- USE APENAS: F5, F6.3, F8, F10, F12.5, F16, F20, F25\n\n## 💬 PERSONALIDADE\n- Acolhedor, natural e consultivo\n- Vendedor experiente, não robô\n- NUNCA mencione sistema automatizado\n- Use termos do cliente na conversa\n- Converta internamente para ferramentas\n- CONSULTOR de obras, não apenas vendedor\n- Entenda a SITUAÇÃO antes de empurrar venda\n- Pergunte sobre CRONOGRAMA e necessidades reais\n- Construa RELACIONAMENTO duradouro\n- Venda no TIMING certo do cliente\n\n## 🏗️ ABORDAGEM CONSULTIVA - ENTENDIMENTO DA OBRA\n\n### FILOSOFIA DE VENDAS:\n**VENDA A SOLUÇÃO, NÃO APENAS O PRODUTO**\n- Entenda a situação real do cliente\n- Descubra necessidades específicas\n- Ofereça o timing ideal\n- Construa relacionamento duradouro\n\n### PERGUNTAS ESTRATÉGICAS POR SITUAÇÃO:\n\n#### **APÓS APRESENTAR ORÇAMENTO (SUBSTITUIR \"Fechamos?\"):**\n\n**OBRAS EM ANDAMENTO:**\n- \"Como está andando sua obra aí?\"\n- \"Em que etapa da construção vocês estão?\"\n- \"Já definiram quando vão partir pra concretagem?\"\n- \"O pedreiro já falou alguma coisa sobre os materiais?\"\n\n**TIMING/PLANEJAMENTO:**\n- \"Para quando você está planejando essa etapa da laje?\"\n- \"Já tem data prevista para começar a concretagem?\"\n- \"Vocês estão comprando agora ou organizando para mais pra frente?\"\n- \"O cronograma da obra permite entregar na semana que vem ou prefere mais prazo?\"\n\n**SITUAÇÃO ESPECÍFICA:**\n- \"É reforma ou construção nova?\"\n- \"Primeira laje ou tem outras para fazer?\"\n- \"Vai fazer tudo de uma vez ou por etapas?\"\n- \"Tem outros cômodos planejados?\"\n\n#### **DESCOBERTA DE NECESSIDADES ADICIONAIS:**\n\n**OUTROS AMBIENTES:**\n- \"Essa laje é de qual ambiente? Tem outros planejados?\"\n- \"Além dessa, vai precisar de material para mais algum lugar?\"\n- \"A obra tem quantos pavimentos no total?\"\n\n**SITUAÇÃO FINANCEIRA/TIMING:**\n- \"Vocês estão organizando tudo agora ou comprando conforme a necessidade?\"\n- \"Prefere garantir tudo de uma vez ou ir comprando por etapa?\"\n- \"Tem prazo específico do pedreiro para entregar o material?\"\n\n#### **CONSTRUÇÃO DE RELACIONAMENTO:**\n\n**ACOMPANHAMENTO:**\n- \"Como tem sido a experiência com o pedreiro aí?\"\n- \"É a primeira obra de vocês ou já construíram antes?\"\n- \"Está sendo tranquilo o processo ou aparecendo muitas dúvidas?\"\n- \"O pessoal aí já tem experiência com laje pré-moldada ou é novidade?\"\n\n### REGRAS DE APLICAÇÃO:\n\n**QUANDO USAR CADA TIPO:**\n\n1. **PRIMEIRA INTERAÇÃO:** Foque em timing e situação da obra\n2. **CLIENTE HESITANTE:** Explore situação financeira e planejamento  \n3. **CLIENTE ENGAJADO:** Descubra necessidades adicionais\n4. **ORÇAMENTO ALTO:** Explore opções de parcelamento da compra em etapas\n5. **CLIENTE EXPERIENTE:** Foque em diferencial técnico e relacionamento\n\n**SEQUÊNCIA NATURAL:**\nOrçamento → Pergunta sobre obra → Resposta do cliente → Ajuste da proposta → Novo timing\n\n✅ FORMATO NOVO:\njson{\n  \"resposta\": \"**ORÇAMENTO**\\n\\n* **10 Treliças 6,00m:** R$ 780,00\\n\\n**Total: R$ 780,00**\\n\\nComo está andando a obra aí? Já definiram quando vão partir para a concretagem?\\n\\nAbraço, Henrique - Guardião Lajes 😉\",\n  \"proxima_etapa\": \"Entender timing da obra e situação da concretagem\",\n  \"obs\": \"Aguardando informações sobre cronograma para ajustar proposta\",\n  ...\n}\nRESPOSTAS BASEADAS NO FEEDBACK DO CLIENTE:\nSE CLIENTE DISSER \"OBRA PARADA\":\njson{\n  \"resposta\": \"Entendi! Quando vocês estão planejando retomar? Posso deixar esse orçamento guardado e quando estiver próximo da data a gente confirma os valores atualizados. Assim você garante o planejamento sem pressa!\",\n  \"proxima_etapa\": \"Agendar follow-up conforme cronograma do cliente\",\n  \"obs\": \"Obra parada - cliente em fase de planejamento\",\n  ...\n}\nSE CLIENTE DISSER \"VOU COMEÇAR SEMANA QUE VEM\":\njson{\n  \"resposta\": \"Perfeito! Semana que vem então. Para confirmar a entrega no timing certo, que dia específico o pedreiro vai precisar do material lá? A gente programa certinho para não atrasar sua obra!\",\n  \"proxima_etapa\": \"Confirmar data específica de entrega e fechar pedido\",\n  \"obs\": \"Cliente com prazo definido - obra em andamento\",\n  ...\n}\nSE CLIENTE DISSER \"TENHO MAIS LAJES\":\njson{\n  \"resposta\": \"Que bom! Quantas lajes são no total? Se você quiser, posso fazer um orçamento completo de tudo para você ter uma visão geral do investimento. Às vezes conseguimos uma condição melhor comprando tudo junto também!\",\n  \"proxima_etapa\": \"Levantar todas as necessidades para orçamento completo\",\n  \"obs\": \"Cliente com múltiplas necessidades - oportunidade de venda maior\",\n  ...\n}\nFRASES DE TRANSIÇÃO NATURAL:\nAPÓS ENTENDER A SITUAÇÃO:\n\n\"Baseado no que você me falou...\"\n\"Considerando o timing da sua obra...\"\n\"Pensando na sua situação...\"\n\"Para se adequar ao seu cronograma...\"\n\nPARA MANTER CONVERSA FLUINDO:\n\n\"Me conta uma coisa...\"\n\"Aproveitando que estamos falando...\"\n\"Uma pergunta rápida...\"\n\"Só para eu entender melhor...\"\n\n\n---\n\n\n## 🎯 FLUXO PRINCIPAL\n\n### 1. RECEPÇÃO E ORÇAMENTO AUTOMÁTICO\n- Nome \"unknown\"? Pergunte: \"Pra te atender melhor, posso saber seu nome?\"\n- Cliente passou uma lista de produtos? **ORCE IMEDIATAMENTE**\n- Pergunte apenas mínimo necessário: \"Qual a metragem da sua laje?\"\n- **PRODUTO ESPECÍFICO**? → Orce SÓ o solicitado\n- **LAJE COMPLETA**? → Orce materiais completos\n\n### 2. CÁLCULO OBRIGATÓRIO - REGRA CRÍTICA\n**🚨 PROIBIDO RESPONDER SEM VALORES REAIS**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o produto solicitado\n2. **EXECUTE** ferramenta correspondente ANTES de qualquer resposta\n3. **AGUARDE** retorno numérico da ferramenta\n4. **VERIFIQUE** se recebeu valores reais \n5. **SÓ ENTÃO** monte a resposta com valores\n\n**SE A FERRAMENTA NÃO RETORNAR VALOR NUMÉRICO:**\n- **TENTE NOVAMENTE** com parâmetros diferentes\n- **ATIVE SUPERVISOR**: `\"supervisor\": true`\n- **RESPONDA**: \"Estou consultando o preço atualizado e já retorno\"\n- **NUNCA** use placeholder ou invente valor\n\n**PLACEHOLDERS TOTALMENTE PROIBIDOS:**\n- ❌ \"[valor a ser calculado]\"\n- ❌ \"[preço]\" \n- ❌ \"R$ X,XX\"\n- ❌ \"valor a definir\"\n- ❌ Qualquer texto que não seja número real\n\n**ONLY USE REAL NUMBERS FROM TOOLS:**\n- ✅ R$ 234,00 (número real da ferramenta)\n- ✅ R$ 1.250,50 (valor calculado real)\n- ❌ R$ [valor] (placeholder proibido)\n\n## 🚨 REGRA CRÍTICA - ORÇAMENTO ESPECÍFICO VS COMPLETO\n\n### **IDENTIFICAR O QUE O CLIENTE QUER:**\n\n**🎯 PRODUTO ESPECÍFICO** (orçar SÓ o que pediu):\n- \"Quanto sai o isopor pra 8x4?\"\n- \"Preço só das treliças 6m\"  \n- \"Valor do arame queimado\"\n- \"Quanto custa a malha pop?\"\n\n**🏠 LAJE COMPLETA** (orçar tudo):\n- \"Material pra laje 8x4\"\n- \"Preciso fazer uma laje 6x5\"\n- \"Orçamento completo laje\"\n\n### **PROCESSO OBRIGATÓRIO:**\n\n1. **ANALISE a pergunta do cliente**\n2. **IDENTIFIQUE se é produto específico ou laje completa**\n3. **ORCE EXATAMENTE o que foi pedido**\n\n### **EXEMPLOS PRÁTICOS:**\n\n**❌ ERRADO:**\nCliente: \"Quanto o isopor pra 8x4?\"\nResposta: Orçamento completo com treliças + isopor + lajota\n\n**✅ CORRETO:**\nCliente: \"Quanto o isopor pra 8x4?\"\nResposta: Só o isopor para essa área\n\n**✅ CORRETO:**\nCliente: \"Material pra laje 8x4\"\nResposta: Orçamento completo\n\n## 🔄 REGRAS CRÍTICAS PARA MODIFICAÇÕES DE ORÇAMENTO\n\n### QUANDO CLIENTE PEDIR ALTERAÇÕES:\n**NUNCA** peça para esperar - **CALCULE IMEDIATAMENTE**\n\n**PROCESSO OBRIGATÓRIO:**\n1. **IDENTIFIQUE** o que cliente quer alterar\n2. **EXECUTE** ferramenta na hora com novos parâmetros  \n3. **APRESENTE** novo orçamento completo com valores reais\n4. **COMPARE** com anterior se necessário\n\n**EXEMPLOS DE ALTERAÇÕES:**\n- \"Quero com lajota ao invés de isopor\" → Orcamento(mesmas_medidas, \"lajota\")\n- \"Muda pra 15 treliças de 4m\" → Orcamento(materiais com a modificação pedida)\n- \"Adiciona 5kg de arame\" → Orcamento(materiais anterior + o novo material)\n\n**FRASES PROIBIDAS:**\n- ❌ \"Deixa eu calcular e já te mando\"\n- ❌ \"Aguarda que vou refazer\"\n- ❌ \"Vou recalcular pra você\"\n\n**FRASES CORRETAS:**\n- ✅ \"Perfeito! Recalculando com lajota:\" [APRESENTA ORÇAMENTO]\n- ✅ \"Alteração feita! Novo orçamento:\" [APRESENTA VALORES]\n- ✅ \"Com as mudanças fica assim:\" [APRESENTA ORÇAMENTO COMPLETO]\n\n## 📋 REGRAS CRÍTICAS PARA LISTAS MISTAS DE MATERIAIS\n\n### QUANDO CLIENTE ENVIAR LISTA COM PRODUTOS QUE NÃO TRABALHAMOS:\n\n**PROCESSO OBRIGATÓRIO EM 3 ETAPAS:**\n\n#### **ETAPA 1 - SEPARAÇÃO IMEDIATA:**\n- ✅ **Identifique produtos que VENDEMOS**\n- ❌ **Identifique produtos que NÃO VENDEMOS**\n\n#### **ETAPA 2 - ORÇAMENTO COMPLETO DOS DISPONÍVEIS:**\n- **CALCULE IMEDIATAMENTE** todos os produtos disponíveis\n- **USE AS FERRAMENTAS** para obter valores reais\n- **MONTE ORÇAMENTO FORMATADO** com preços\n\n## 📋 EXEMPLOS DE PRODUTO ESPECÍFICO VS LAJE COMPLETA\n\n### **🎯 PRODUTO ESPECÍFICO - ORÇAR SÓ O PEDIDO:**\n\n**Exemplo 1:**\n```json\n{\n  \"resposta\": \"**ORÇAMENTO**\\n\\n* **Isopor EPS para 8x4m (32m²):** R$ 280,00\\n\\n**Total: R$ 280,00**\\n\\nSó o isopor mesmo? Fechamos?\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Confirmar se quer só isopor ou laje completa\",\n  \"obs\": \"Cliente pediu especificamente só isopor\",\n  \"supervisor\": false\n}\nExemplo 2:\njson{\n  \"resposta\": \"**ORÇAMENTO**\\n\\n* **10 Treliças 6,00m:** R$ 780,00\\n\\n**Total: R$ 780,00**\\n\\nSó as treliças? Precisa dos outros materiais também?\",\n  \"nome_cliente\": \"João\",\n  \"nome_identificado\": true,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Verificar se quer orçamento completo da laje\",\n  \"obs\": \"Orçado apenas treliças conforme solicitado\",\n  \"supervisor\": false\n}\n\n#### **ETAPA 3 - INFORMAÇÃO SOBRE INDISPONÍVEIS:**\n- **INFORME** quais produtos não trabalhamos\n- **CONTINUE** focando nos produtos orçados\n- **CONDUZA** ao fechamento\n\n### EXEMPLO PRÁTICO DE LISTA MISTA:\n\n**CLIENTE ENVIA:**\n\"Preciso de: 10 treliças de 6m, 5 sacos de cimento, 20 lajotas cerâmicas, 3m³ de areia\"\n\n**PROCESSO:**\n1. **VENDEMOS**: 10 treliças 6m, 20 lajotas cerâmicas\n2. **NÃO VENDEMOS**: Cimento, areia\n3. **CALCULAR**: orcamento para treliças e lajotas\n4. **ORÇAR**: Valores completos dos disponíveis\n5. **INFORMAR**: Sobre cimento e areia\n\n**RESPOSTA MODELO:**\n```json\n{\n  \"resposta\": \"Dos materiais que você mencionou, trabalhamos com treliças e lajotas. Cimento e areia não fazem parte do nosso portfólio.\\n\\nSegue orçamento dos materiais disponíveis:\\n\\n**ORÇAMENTO MATERIAIS DISPONÍVEIS - Guardião Lajes**\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **20 Lajotas Cerâmicas:** R$ 24,00\\n\\n**Total do Orçamento: R$ 804,00**\\n\\n Fechamos os materiais que temos disponíveis?\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento dos materiais disponíveis\",\n  \"obs\": \"Cliente solicitou lista mista - orçado treliças e lajotas, informado que não temos cimento e areia\",\n  \"supervisor\": false\n}\n```\n\n### REGRAS ESPECÍFICAS PARA LISTAS:\n\n**SEMPRE FAÇA:**\n- ✅ Processe IMEDIATAMENTE todos os produtos disponíveis\n- ✅ Calcule valores ANTES de montar resposta  \n- ✅ Apresente orçamento COMPLETO com valores reais\n- ✅ Seja específico sobre quais produtos não tem\n- ✅ Mantenha foco no fechamento dos disponíveis\n- ✅ Vergalhão/varão só é vendido com 12 metros\n- ✅ antes de usar as ferramentas converta para a unidade padrão\n- ✅ Se o cliente pediu um orçamento e depois procurou outro produto, pergunte se quer acrescentar no orçamento\n\n**NUNCA FAÇA:**\n- ❌ Só informar que não tem alguns produtos sem orçar os outros\n- ❌ Pedir pra esperar o orçamento dos disponíveis\n- ❌ Responder apenas \"trabalhamos com X, não trabalhamos com Y\"\n- ❌ Deixar de apresentar valores dos produtos disponíveis\n- ❌ Usar placeholders nos orçamentos\n- ❌ pergunta qual é o tamanho do vergalhao/varão\n\n### FRASES MODELO PARA LISTAS MISTAS:\n- \"Dos materiais listados, trabalhamos com [listar]. [Produtos indisponíveis] não temos. Segue orçamento:\"  \n- \"Da sua lista, temos disponível [produtos]. Para [indisponíveis] não trabalhamos. Orçamento:\"\n\n## 📋 FORMATO ORÇAMENTO - CRÍTICO\n\n**🚨 NUNCA ENVIE ORÇAMENTO COM PLACEHOLDER**\n\n**REGRA ABSOLUTA:**\n- **SE não tem valor da ferramenta = NÃO MONTE ORÇAMENTO**\n- **SE ferramenta falhou = TENTE NOVAMENTE e ATIVE SUPERVISOR**\n- **SE valor não é número = TENTE NOVAMENTE**\n\n**PROCESSO 100% OBRIGATÓRIO:**\n1. **EXECUTE** ferramenta específica (Orcamento, etc.)\n2. **VERIFIQUE** se retornou números reais (ex: 234.50, 1250.00)  \n3. **CONFIRME** que não há texto/placeholder no retorno\n4. **SÓ ENTÃO** monte orçamento com valores reais\n5. **SE falhou**: Supervisor + \"consultando preço atualizado\"\n\n**TESTE ANTES DE MONTAR ORÇAMENTO:**\n```\nSE retorno_ferramenta contém números reais:\n   ENTÃO monte orçamento\nSE retorno_ferramenta é texto/erro:\n   ENTÃO ative supervisor + \"consultando preço\"\n```\n\n**FORMATO EXATO (SÓ COM VALORES REAIS):**\n```\n**ORÇAMENTO**\n\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n* **[Quantidade] [Item]:** R$ [NÚMERO_REAL_DA_FERRAMENTA]\n\n**Total do Orçamento: R$ [SOMA_DOS_NÚMEROS_REAIS]**\n\nPodemos fechar seu pedido ou ficou alguma dúvida?\n```\n\n**EXEMPLO REAL:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ 780,00\n* **5kg Arame Queimado:** R$ 60,00\n\n**Total do Orçamento: R$ 840,00**\n```\n\n**❌ EXEMPLO PROIBIDO:**\n```\n**ORÇAMENTO**\n\n* **10 Treliças 6,00m:** R$ [valor a ser calculado]  ← NUNCA FAÇA\n* **5kg Arame Queimado:** R$ (preço)                ← PROIBIDO\n```\n\n**REGRAS CRÍTICAS:**\n- ❌ **ZERO TOLERÂNCIA** para placeholders\n- ❌ **NUNCA** monte orçamento sem números das ferramentas\n- ✅ **SEMPRE** teste se valor é número real antes de orçar\n- ✅ **SUPERVISOR** quando ferramenta não retornar valor\n- ✅ **TENTE NOVAMENTE** antes de desistir\n\n## 🎯 CAMPOS JSON - GUIA DETALHADO\n\n### Valores dos Campos:\n\n**intencao:** \"cotacao\" | \"consultoria\" | \"duvida\" | \"fechamento\" | \"outro\"\n\nproxima_etapa: Seja específico sobre descoberta\n\n\"Entender cronograma da obra para timing ideal\"\n\"Descobrir se tem outras lajes planejadas\"\n\"Aguardar definição de data para entrega\"\n\"Explorar necessidades adicionais da obra\"\n\"Confirmar situação financeira para parcelamento(com a taxa da maquineta)\"\n\n**obs:** Informações relevantes sobre a obra\n- Preferências do cliente\n- Produtos mencionados que não vendemos\n- Status da negociação\n- TIMING: \"Obra parada/andamento/urgente\"\n- ESCOPO: \"Única laje/múltiplas lajes/obra completa\"\n- EXPERIÊNCIA: \"Cliente experiente/iniciante\"\n- FINANCEIRO: \"Orçamento flexível/apertado\"\n- RELACIONAMENTO: \"Primeira compra/cliente recorrente\"\n\n**supervisor:** true | false\n- true: Prazos, entregas, produtos duvidosos\n- false: Consegue atender completamente\n\n## ❌ ERROS CRÍTICOS A EVITAR\n- ❌ Responder sem formato JSON\n- ❌ Adicionar texto fora do JSON\n- ❌ Usar placeholders em orçamentos\n- ❌ Orçar sem usar ferramentas\n- ❌ Enviar JSON inválido\n- ❌ Esquecer campos obrigatórios\n- ❌ **Pedir para cliente esperar quando alterar orçamento**\n- ❌ **Só informar produtos sem orçar em listas mistas**\n- ❌ **Responder \"vou calcular\" em modificações**\n- ❌ **Não apresentar valores em listas com produtos disponíveis**\n- ❌ **USAR QUALQUER PLACEHOLDER EM ORÇAMENTOS**\n- ❌ **MONTAR ORÇAMENTO SEM EXECUTAR FERRAMENTAS ANTES**\n- ❌ **ENVIAR ORÇAMENTO COM TEXTO AO INVÉS DE NÚMEROS**\n- ❌ **PROCURAR O TAMANHO DO VERGALHAO/VARAO**\n- ❌ **TENTAR OU VENDER O VERGALHAO/VARAO FRACIONADO**\n\n## ✅ SEMPRE FAÇA\n- ✅ Inicie resposta com JSON\n- ✅ Termine resposta com JSON\n- ✅ Use valores reais das ferramentas\n- ✅ Valide JSON antes de enviar\n- ✅ Inclua TODOS os campos obrigatórios\n- ✅ Ative supervisor quando necessário\n- ✅ **Calcule IMEDIATAMENTE em modificações de orçamento**\n- ✅ **Processe TODA lista e orce produtos disponíveis NA HORA**\n- ✅ **Apresente orçamento COMPLETO mesmo com produtos indisponíveis na lista**\n- ✅ **Execute ferramentas ANTES de responder sobre preços**\n- ✅ **TESTE SE FERRAMENTA RETORNOU NÚMERO REAL ANTES DE ORÇAR**\n- ✅ **ATIVE SUPERVISOR SE FERRAMENTA NÃO RETORNAR VALOR**\n- ✅ **SÓ MONTE ORÇAMENTO COM VALORES NUMÉRICOS REAIS**\n- ✅ **VENDER O VERGALHAO/VARAO INTEIRO**\n- ✅ **CONVERTE AS UNIDADES PARA MANDAR PARA FERRAMENTA**\n- ✅ **caso o cliente tenha feito um orçamento antes e procurou outro produto pergunte se quer acrescentar no orçamento anterior**\n\n## 🚨 LEMBRETE FINAL - REGRAS DE OURO\n**TODA RESPOSTA DEVE SER EXCLUSIVAMENTE NO FORMATO JSON ESPECIFICADO**\n**NÃO ADICIONE TEXTO ANTES, DEPOIS OU FORA DO JSON**\n**VALIDE O JSON ANTES DE ENVIAR**\n\n### 🔄 **MODIFICAÇÕES = CÁLCULO IMEDIATO**\n- Cliente pede alteração → Execute ferramenta → Apresente novo orçamento\n- NUNCA: \"vou calcular\" ou \"aguarda\"\n- SEMPRE: Valores na resposta\n\n### 📋 **LISTAS MISTAS = ORÇAMENTO + INFORMAÇÃO**\n- Separe produtos → Calcule disponíveis → Orce completo → Informe indisponíveis\n- NUNCA: Só informar sem orçar\n- SEMPRE: Orçamento dos produtos que tem\n\n---\n\n**RESPOSTA QUANDO FERRAMENTA FALHA:**\n```json\n{\n  \"resposta\": \"Estou consultando o preço atualizado desse material e já retorno com seu orçamento completo!\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\", \n  \"proxima_etapa\": \"Aguardar supervisor para preços atualizados\",\n  \"obs\": \"Ferramenta não retornou valor - aguardando supervisor\",\n  \"supervisor\": true\n}\n```\n\n**RESPOSTA QUANDO TEM VALORES REAIS:**\n```json\n{\n  \"resposta\": \"Perfeito! Segue seu orçamento:\\n\\n**ORÇAMENTO**\\n\\n* **10 Treliças 6,00m:** R$ 780,00\\n* **5kg Arame Queimado:** R$ 60,00\\n\\n**Total do Orçamento: R$ 840,00**\\n\\nPodemos fechar seu pedido ou ficou alguma dúvida?\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar confirmação do fechamento\",\n  \"obs\": \"Orçamento apresentado com valores reais das ferramentas\",\n  \"supervisor\": false\n}\n```\n\n## QUANDO CLIENTE SOLICITAR NOVO PRODUTO APÓS ORÇAMENTO ANTERIOR FAZER ORÇAMENTO E PROCURAR SE QUER ACRESCENTAR NO ORÇAMENTO ANTERIOR\n\nSEMPRE FAÇA:\n\n✅ Calcule o novo produto ANTES de perguntar sobre consolidação\n✅ Apresente preço do novo produto na mesma resposta da pergunta\n✅ Mencione valor do orçamento anterior para contextualizar\n✅ Ofereça consolidação de forma natural\n✅ Se confirmado, apresente orçamento completo atualizado\n\nNUNCA FAÇA:\n\n❌ Perguntar sobre consolidação sem mostrar preço do novo produto\n❌ Ignorar orçamento anterior quando cliente pede novo produto\n❌ Só responder preço sem oferecer consolidação\n❌ Esquecer de somar valores quando cliente confirmar"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        -240,
+        240,
         320
       ],
       "id": "25a1a0d3-ace5-4085-9db7-c047ad422e7c",
@@ -1151,14 +1151,14 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "=chat{{ $('Edit Fields6').item.json.norm.contacinfo.id }}9234567891234567122222",
-        "sessionTTL": 240,
+        "sessionKey": "=chat{{ (() => {\n  try {\n    const node = $('Edit Fields6');\n    const id = node.item.json.norm?.contacinfo?.id;\n    return id ?? $json.whats;\n  } catch (_) {\n    return $json.whats;\n  }\n})() }}\n92345678912345671222",
+        "sessionTTL": 180,
         "contextWindowLength": 7
       },
       "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
       "typeVersion": 1.5,
       "position": [
-        -200,
+        280,
         580
       ],
       "id": "ed107ff6-ebd4-41eb-b9e9-4169f757e701",
@@ -1297,7 +1297,7 @@
       "name": "ultimos_orcamentos",
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "position": [
-        -60,
+        420,
         600
       ],
       "typeVersion": 2.1
@@ -1307,7 +1307,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolCalculator",
       "typeVersion": 1,
       "position": [
-        40,
+        520,
         560
       ],
       "id": "517e5fe4-a9a1-4c15-afa6-0e581a551339",
@@ -1326,7 +1326,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -320,
+        160,
         560
       ],
       "id": "9eff5c87-356f-4520-bfc6-7be5ac5c2b5b",
@@ -1345,7 +1345,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        160,
+        640,
         320
       ],
       "id": "cdb883c9-0739-42e6-9bd4-6b59e5dc362c",
@@ -1483,7 +1483,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        160,
+        640,
         560
       ],
       "id": "3df9920c-2e47-4653-b31b-7a246cbefc95",
@@ -1501,7 +1501,9 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "produtos": "=  {\n\"lista_produtos\": \"{{ JSON.stringify($fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente, só use quando o cliente mandou produtos isolados caso não tenha produtos isolados enviar \"\"', 'string', '')).slice(1,-1) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}"
+            "produtos": "=  {\n\"lista_produtos\": \"{{ JSON.stringify($fromAI('lista_produtos', 'Lista completa de produtos solicitados pelo cliente, só use quando o cliente mandou produtos isolados caso não tenha produtos isolados enviar \"\"', 'string', '')).slice(1,-1) }}\",\n  \"tipo_projeto\": \"{{ $fromAI('tipo_projeto', 'Tipo do projeto: laje_completa, produtos_isolados, ou misto', 'string', 'produtos_isolados') }}\",\n  \"dimensoes_laje\": \"{{ $fromAI('dimensoes_laje', 'Dimensões da laje no formato AxB (ex: 5x8), só manda algum valor caso seja nescessario', 'string', '') }}\"\n}",
+            "whatsapp": "={{ $('Edit Fields6').item.json.norm.contacinfo.id }}",
+            "instace": "={{ $('Edit Fields6').item.json.body.instance }}"
           },
           "matchingColumns": [
             "produtos"
@@ -1515,6 +1517,26 @@
               "display": true,
               "canBeUsedToMatch": true,
               "removed": false
+            },
+            {
+              "id": "whatsapp",
+              "displayName": "whatsapp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "instace",
+              "displayName": "instace",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -1524,7 +1546,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        280,
+        760,
         560
       ],
       "id": "a4de747b-1bc8-4a36-ad4c-c01bcc9836ab",
@@ -1579,13 +1601,13 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Você é um organizador de mensagens para envio via WhatsApp.\n\nReceberá um texto longo gerado por um atendente virtual de materiais de construção, com orientações, preços e explicações.\n\nSua tarefa é:\n\n1️⃣ Dividir o texto em blocos, garantindo que cada bloco termine em um ponto final ou quebra natural de frase para não quebrar o sentido.\n\n2️⃣ Retornar os blocos em JSONL estruturado neste formato:\n{  \"bloco\": \"Primeiro bloco de texto...\"}\n{  \"bloco\": \"Segundo bloco de texto...\"}\n{  \"bloco\": \"Terceiro bloco de texto...\"}\n\n3️⃣ Não adicione explicações, apenas retorne o JSONL solicitado.\n\n4️⃣ Se o texto original for curto, retorne apenas um bloco.\n\nTexto a dividir:\n{{ $json.resposta }}",
+        "text": "=Você é um organizador de mensagens para envio via WhatsApp.\n\nReceberá um texto longo gerado por um atendente virtual de materiais de construção, com orientações, preços e explicações.\n\nSua tarefa é:\n\n1️⃣ Dividir o texto em blocos, garantindo que cada bloco termine em um ponto final ou quebra natural de frase para não quebrar o sentido.\n\n2️⃣ Retornar os blocos em JSONL estruturado neste formato:\n{  \"bloco\": \"Primeiro bloco de texto...\"}\n{  \"bloco\": \"Segundo bloco de texto...\"}\n{  \"bloco\": \"Terceiro bloco de texto...\"}\n\n3️⃣ Não adicione explicações, apenas retorne o JSONL solicitado.\n\n4️⃣ Se o texto original for curto, retorne apenas um bloco.\n\n5 sempre deixe a parte do orçamento em um bloco só\n\nTexto a dividir:\n{{ $json.resposta }}",
         "batching": {}
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        620,
+        1100,
         320
       ],
       "id": "150d1523-0a4e-4716-98f4-31f6f54350a8",
@@ -1598,7 +1620,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        620,
+        1100,
         540
       ],
       "id": "8fbe49ad-3076-4595-9418-881abc63eb19",
@@ -1612,12 +1634,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const outputItems = [];\n\n// Acessa a string completa que está no campo 'text' do primeiro item de entrada\nconst jsonlString = items[0].json.text;\n\nif (typeof jsonlString === 'string' && jsonlString.trim() !== '') {\n  // Divide a string em linhas individuais usando a quebra de linha '\\n'\n  const lines = jsonlString.split('\\n');\n\n  for (const line of lines) {\n    const trimmedLine = line.trim(); // Remove espaços em branco no início/fim da linha\n\n    // Garante que a linha não esteja vazia antes de tentar parsear\n    if (trimmedLine.length > 0) {\n      try {\n        // Converte cada linha (que é uma string JSON) em um objeto JavaScript\n        const parsedObject = JSON.parse(trimmedLine);\n\n        // Adiciona o objeto parseado como um novo item na saída do nó Code\n        outputItems.push({ json: parsedObject });\n      } catch (error) {\n        // Loga um erro se uma linha não puder ser parseada como JSON válido\n        console.error(\"Erro ao parsear a linha JSON:\", trimmedLine, error);\n        // Opcional: Você pode optar por adicionar um item de erro ou ignorar a linha inválida\n        // outputItems.push({ json: { error: \"Erro de parse\", originalLine: trimmedLine, details: error.message } });\n      }\n    }\n  }\n} else {\n  console.warn(\"Entrada 'text' está vazia ou não é uma string válida.\");\n  // Opcional: Retornar um item vazio para continuar o fluxo, se necessário\n  // outputItems.push({ json: {} });\n}\n\nreturn outputItems;"
+        "jsCode": "const outputItems = [];\n\n// Função para limpar texto de possíveis formatações markdown\nfunction cleanJsonText(text) {\n  // Remove blocos de código markdown (```json, ```jsonl, ou ``` ... ```)\n  let cleaned = text.replace(/```(?:json|jsonl)?\\s*\\n?([\\s\\S]*?)\\n?```/g, '$1');\n  \n  // Remove outras possíveis formatações\n  cleaned = cleaned.replace(/^\\s*```\\s*$/gm, ''); // Remove linhas com apenas ```\n  \n  return cleaned.trim();\n}\n\n// Função para validar se uma string é um JSON válido\nfunction isValidJson(str) {\n  try {\n    JSON.parse(str);\n    return true;\n  } catch {\n    return false;\n  }\n}\n\n// Função para tentar reparar JSON malformado\nfunction attemptJsonRepair(jsonStr) {\n  const repairs = [\n    // Estratégia 1: JSON original\n    () => jsonStr,\n    \n    // Estratégia 2: Escapar quebras de linha e aspas dentro de strings\n    () => {\n      return jsonStr.replace(/\"([^\"]*(?:\\\\.[^\"]*)*)\"/g, (match, content) => {\n        // Se é uma chave (seguida por :), não modifica\n        const afterMatch = jsonStr.slice(jsonStr.indexOf(match) + match.length).trim();\n        if (afterMatch.startsWith(':')) {\n          return match;\n        }\n        \n        // É um valor, escapa quebras de linha e aspas\n        const escaped = content\n          .replace(/\\\\/g, '\\\\\\\\')  // Escapa barras invertidas\n          .replace(/\"/g, '\\\\\"')    // Escapa aspas\n          .replace(/\\n/g, '\\\\n')   // Escapa quebras de linha\n          .replace(/\\r/g, '\\\\r')   // Escapa retorno de carro\n          .replace(/\\t/g, '\\\\t');  // Escapa tabs\n        \n        return `\"${escaped}\"`;\n      });\n    }\n  ];\n  \n  for (let i = 0; i < repairs.length; i++) {\n    try {\n      const repairedJson = repairs[i]();\n      const parsed = JSON.parse(repairedJson);\n      return { success: true, data: parsed, strategy: i + 1 };\n    } catch (error) {\n      continue;\n    }\n  }\n  \n  return { success: false };\n}\n\n// Função para extrair objetos JSON de um texto\nfunction extractJsonObjects(text) {\n  const objects = [];\n  let braceCount = 0;\n  let currentObject = '';\n  let inString = false;\n  let escapeNext = false;\n  \n  for (let i = 0; i < text.length; i++) {\n    const char = text[i];\n    \n    if (escapeNext) {\n      currentObject += char;\n      escapeNext = false;\n      continue;\n    }\n    \n    if (char === '\\\\' && inString) {\n      currentObject += char;\n      escapeNext = true;\n      continue;\n    }\n    \n    if (char === '\"' && !escapeNext) {\n      inString = !inString;\n      currentObject += char;\n      continue;\n    }\n    \n    if (!inString) {\n      if (char === '{') {\n        if (braceCount === 0) {\n          currentObject = char; // Inicia novo objeto\n        } else {\n          currentObject += char;\n        }\n        braceCount++;\n      } else if (char === '}') {\n        currentObject += char;\n        braceCount--;\n        \n        if (braceCount === 0) {\n          // Objeto completo encontrado\n          const trimmed = currentObject.trim();\n          if (trimmed) {\n            objects.push(trimmed);\n          }\n          currentObject = '';\n        }\n      } else if (braceCount > 0) {\n        currentObject += char;\n      }\n    } else {\n      currentObject += char;\n    }\n  }\n  \n  return objects;\n}\n\n// Função para processar objetos JSON extraídos\nfunction processJsonObjects(jsonObjects) {\n  const results = [];\n  \n  for (let i = 0; i < jsonObjects.length; i++) {\n    const jsonStr = jsonObjects[i];\n    \n    // Tenta parsing direto primeiro\n    if (isValidJson(jsonStr)) {\n      try {\n        const parsed = JSON.parse(jsonStr);\n        results.push({ json: parsed });\n        continue;\n      } catch (error) {\n        // Não deveria chegar aqui se isValidJson retornou true\n      }\n    }\n    \n    // Tenta reparar o JSON\n    const repairResult = attemptJsonRepair(jsonStr);\n    \n    if (repairResult.success) {\n      results.push({ \n        json: {\n          ...repairResult.data,\n          _metadata: {\n            repaired: true,\n            strategy: repairResult.strategy,\n            objectIndex: i + 1\n          }\n        }\n      });\n    } else {\n      console.error(`Erro ao processar objeto JSON ${i + 1}:`, jsonStr);\n      results.push({\n        json: {\n          error: \"Erro de parse JSON\",\n          originalObject: jsonStr,\n          objectIndex: i + 1,\n          errorMessage: \"Falha em todas as estratégias de reparo\"\n        }\n      });\n    }\n  }\n  \n  return results;\n}\n\n// Função principal\nfunction parseJsonlText(jsonlString) {\n  if (typeof jsonlString !== 'string' || jsonlString.trim() === '') {\n    console.warn(\"Entrada 'text' está vazia ou não é uma string válida.\");\n    return [];\n  }\n  \n  // Limpa possíveis formatações markdown\n  const cleanedString = cleanJsonText(jsonlString);\n  console.log(\"Texto limpo:\", cleanedString.substring(0, 200) + \"...\");\n  \n  // Extrai objetos JSON do texto\n  const jsonObjects = extractJsonObjects(cleanedString);\n  console.log(`${jsonObjects.length} objeto(s) JSON encontrado(s)`);\n  \n  if (jsonObjects.length === 0) {\n    console.warn(\"Nenhum objeto JSON encontrado no texto\");\n    return [];\n  }\n  \n  // Processa os objetos encontrados\n  const results = processJsonObjects(jsonObjects);\n  console.log(`${results.length} objeto(s) processado(s) com sucesso`);\n  \n  return results;\n}\n\n// Código principal\ntry {\n  // Acessa a string do primeiro item de entrada\n  const jsonlString = items[0]?.json?.text;\n  \n  if (!jsonlString) {\n    console.warn(\"Nenhum texto encontrado no campo 'text' do primeiro item.\");\n    return [{ json: { error: \"Campo 'text' não encontrado ou vazio\" } }];\n  }\n  \n  console.log(\"Input recebido, processando...\");\n  \n  // Processa o texto\n  const results = parseJsonlText(jsonlString);\n  \n  if (results.length === 0) {\n    console.warn(\"Nenhum item válido foi processado.\");\n    return [{ json: { warning: \"Nenhum JSON válido encontrado no texto\" } }];\n  }\n  \n  console.log(`Processamento concluído: ${results.length} item(s) extraído(s)`);\n  outputItems.push(...results);\n  \n} catch (error) {\n  console.error(\"Erro geral no processamento:\", error);\n  outputItems.push({\n    json: {\n      error: \"Erro geral no processamento\",\n      details: error.message,\n      stack: error.stack\n    }\n  });\n}\n\nreturn outputItems;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
+        1460,
         320
       ],
       "id": "2de02bad-4a89-4294-837a-2347b896660b",
@@ -1630,7 +1652,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1420,
+        1680,
         320
       ],
       "id": "0fa17971-bad4-46ca-a94f-bfc8e5ea488f",
@@ -1642,19 +1664,19 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        2780,
-        480
+        2200,
+        400
       ],
       "id": "3445fabb-6b19-4bc5-8428-e3aedc090b3f"
     },
     {
       "parameters": {
         "resource": "messages-api",
-        "instanceName": "={{ $('Edit Fields6').item.json.body.instance }}",
-        "remoteJid": "={{ $('Edit Fields6').item.json.norm.contacinfo.id }}",
+        "instanceName": "={{ (() => {\n  try {\n    const id1 = $('Edit Fields6').item.json.body?.instance;\n    if (id1) return id1;\n  } catch (_) {}\n  try {\n    const id2 = $('orçamento/supervisor').item.json.instance;\n    if (id2) return id2;\n  } catch (_) {}\n  return null;\n})() }}",
+        "remoteJid": "={{ (() => {\n  try {\n    const node = $('Edit Fields6');\n    const id = node.item.json.norm?.contacinfo?.id;\n    return id ?? $('orçamento/supervisor').item.json.whats;\n  } catch (_) {\n    return $('orçamento/supervisor').item.json.whats;\n  }\n})() }}",
         "messageText": "={{ $json.bloco }}",
         "options_message": {
-          "delay": "={{Math.floor(Math.random() * (25000 - 15000 + 1)) + 15000}}"
+          "delay": "={{Math.floor(Math.random() * (20000 - 10000 + 1)) + 10000}}"
         }
       },
       "type": "n8n-nodes-evolution-api.evolutionApi",
@@ -1669,6 +1691,128 @@
         "evolutionApi": {
           "id": "R2j8KIOLhEjdWQUa",
           "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b3627b5b-efbf-415e-9842-f33dd618eb17",
+              "leftValue": "={{ $json.supervisor }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        820,
+        120
+      ],
+      "id": "b438c712-6ae3-4a70-a2d4-ae512f1cb06b",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "chatId": "7020998195",
+        "text": "=cliente:{{ $('Filter').item.json.nome_cliente }}\nnumero:{{ (() => {\n  try {\n    const node = $('Edit Fields6');\n    const id = node.item.json.norm?.contacinfo?.id;\n    return id ?? $('orçamento/supervisor').item.json.whats;\n  } catch (_) {\n    return $('orçamento/supervisor').item.json.whats;\n  }\n})() }}\n\n\n{{ $json.consolidatedText }}",
+        "replyMarkup": "inlineKeyboard",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        120
+      ],
+      "id": "83a81e66-bafc-403e-bc2f-7591c0f2993b",
+      "name": "Send a text message",
+      "webhookId": "c06d1390-9891-4778-87c0-f9527c69a5a5",
+      "credentials": {
+        "telegramApi": {
+          "id": "odpU20VI6Al1aS9m",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputItems = [];\nconst consolidatedStrings = [];\n\n// Itera sobre CADA item que chega como input neste nó Code (cada um sendo um objeto JSON)\nfor (const item of items) {\n  const data = item.json; // Acessa o objeto JSON de cada item\n\n  let itemStringParts = []; // Array temporário para construir a string de cada item\n\n  // Itera sobre TODAS as chaves (propriedades) do objeto 'data'\n  for (const key in data) {\n    if (Object.prototype.hasOwnProperty.call(data, key)) { // Garante que é uma propriedade própria do objeto\n      const value = data[key];\n\n      // Adiciona a chave e o valor à string, formatando como \"Chave: Valor\"\n      // Você pode ajustar a formatação aqui (ex: sem a chave, ou só o valor, etc.)\n      itemStringParts.push(`${key}: ${value}`);\n    }\n  }\n  \n  // Junta todas as partes formatadas de um único item com quebra de linha\n  // e adiciona ao array de strings consolidadas\n  if (itemStringParts.length > 0) {\n    consolidatedStrings.push(itemStringParts.join('\\n'));\n  }\n}\n\n// Junta todas as strings de itens consolidados com duas quebras de linha para separar os blocos de informação\nconst finalOutputString = consolidatedStrings.join('\\n\\n'); \n\n// Retorna um único item com a string organizada e consolidada\noutputItems.push({\n  json: {\n    consolidatedText: finalOutputString\n  }\n});\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        120
+      ],
+      "id": "bb21e30d-bbc9-4e51-991a-6bed23260f16",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "orçamento"
+            },
+            {
+              "name": "whats"
+            },
+            {
+              "name": "instance"
+            },
+            {
+              "name": "Supervisor"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -60,
+        560
+      ],
+      "id": "cc7e3e80-9c96-4c05-9974-1f447dc6c385",
+      "name": "orçamento/supervisor"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "telegram1",
+        "messageData": "=\"message_id\": {{ $json.result.message_id }},\n\"whatsapp\": \"{{ (() => {\n  try {\n    const node = $('Edit Fields6');\n    const id = node.item.json.norm?.contacinfo?.id;\n    return id ?? $('orçamento/supervisor').item.json.whats;\n  } catch (_) {\n    return $('orçamento/supervisor').item.json.whats;\n  }\n})() }}\",\n\"instace\": \"{{ (() => {\n  try {\n    const id1 = $('Edit Fields6').item.json.body?.instance;\n    if (id1) return id1;\n  } catch (_) {}\n  try {\n    const id2 = $('orçamento/supervisor').item.json.instance;\n    if (id2) return id2;\n  } catch (_) {}\n  return null;\n})() }}\""
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        120
+      ],
+      "id": "3619285d-12b5-4447-98f3-b55a0d6ef332",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
         }
       }
     }
@@ -2143,13 +2287,7 @@
     },
     "Edit Fields": {
       "main": [
-        [
-          {
-            "node": "SDR",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Merge": {
@@ -2166,6 +2304,11 @@
     "Code2": {
       "main": [
         [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "Basic LLM Chain",
             "type": "main",
@@ -2240,6 +2383,50 @@
           }
         ]
       ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "orçamento/supervisor": {
+      "main": [
+        [
+          {
+            "node": "SDR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -2248,65 +2435,18 @@
   "staticData": null,
   "meta": null,
   "pinData": {
-    "Webhook": [
+    "orçamento/supervisor": [
       {
         "json": {
-          "headers": {
-            "content-type": "application/json",
-            "user-agent": "axios/1.7.9",
-            "content-length": "974",
-            "accept-encoding": "gzip, compress, deflate, br",
-            "host": "host.docker.internal:5678",
-            "connection": "keep-alive"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "event": "messages.upsert",
-            "instance": "meu cell",
-            "data": {
-              "key": {
-                "remoteJid": "558281036911@s.whatsapp.net",
-                "fromMe": true,
-                "id": "F1C8058411867CD38E41F918BAD3B213"
-              },
-              "pushName": "Guardião Lajes",
-              "status": "SERVER_ACK",
-              "message": {
-                "conversation": "Boa tarde! Vou ter passa um material pra vcs fazer o orçamento\n03 treliças de 6 metros cheia\n100 lajotas de barro\n01 malha de 3 por 2\n1 kilo de prego de 2 meia \n1 kilos de arame queimado\n2 tábua de 3 metro por 30 centímetros de pinho\n01 ferrugem armada 7x15 ferro 3x8\n1 metro de brita 0\n2 metro de areia grossa\n2 vergalhão de 5.16"
-              },
-              "messageType": "conversation",
-              "messageTimestamp": 1753473961,
-              "instanceId": "53b4f8d8-92ba-4830-8363-2b31690f03bc",
-              "source": "android"
-            },
-            "destination": "http://host.docker.internal:5678/webhook/c74a111e-4f99-4cba-b913-ee63a320cd0b",
-            "date_time": "2025-07-25T17:06:03.990Z",
-            "sender": "558281036911@s.whatsapp.net",
-            "server_url": "http://localhost:8080",
-            "apikey": "A45ACCDF0A06-4675-9D48-37543E73A7A2"
-          },
-          "webhookUrl": "http://localhost:5678/webhook/c74a111e-4f99-4cba-b913-ee63a320cd0b",
-          "executionMode": "production"
-        }
-      }
-    ],
-    "SDR": [
-      {
-        "json": {
-          "output": "```json\n{\n  \"resposta\": \"Olá! Para gerar seu orçamento completo, preciso confirmar apenas um dado: você mencionou '1 ferragem armada 7x15 ferro 3x8'. Poderia me informar o comprimento dessa ferragem em metros? Assim já incluo no orçamento com todos os detalhes e valores pra você.\\n\\nSobre os demais materiais da sua lista, trabalhamos com:\\n- Treliças concretadas 6,00m\\n- Lajota de barro (lajota cerâmica)\\n- Malha de aço 3x2m\\n- Arame queimado\\n- Vergalhão 5/16 (F8), vendido em barras inteiras de 12 metros\\n\\nNão trabalhamos com: prego, tábua, brita e areia. Posso orçar todos os itens que temos assim que você me passar o comprimento da ferragem, tudo bem?\\n\\nFico no aguardo dessa informação pra já mandar o orçamento completinho!\\n\\nAbraço, Henrique - Guardião Lajes 😉\",\n  \"nome_cliente\": \"unknown\",\n  \"nome_identificado\": false,\n  \"intencao\": \"cotacao\",\n  \"proxima_etapa\": \"Aguardar cliente informar comprimento da ferragem armada 7x15 ferro 3x8\",\n  \"obs\": \"Aguardando comprimento da ferragem para orçar todos os produtos disponíveis corretamente. Informado indisponíveis (prego, tábua, brita, areia). Vergalhão sempre barra de 12m.\",\n  \"supervisor\": false\n}\n```"
-        }
-      }
-    ],
-    "Basic LLM Chain": [
-      {
-        "json": {
-          "text": "{\"bloco\": \"Olá! Para gerar seu orçamento completo, preciso confirmar apenas um dado: você mencionou '1 ferragem armada 7x15 ferro 3x8'. Poderia me informar o comprimento dessa ferragem em metros? Assim já incluo no orçamento com todos os detalhes e valores pra você.\"}\n{\"bloco\": \"Sobre os demais materiais da sua lista, trabalhamos com:\\n- Treliças concretadas 6,00m\\n- Lajota de barro (lajota cerâmica)\\n- Malha de aço 3x2m\\n- Arame queimado\\n- Vergalhão 5/16 (F8), vendido em barras inteiras de 12 metros\"}\n{\"bloco\": \"Não trabalhamos com: prego, tábua, brita e areia. Posso orçar todos os itens que temos assim que você me passar o comprimento da ferragem, tudo bem?\"}\n{\"bloco\": \"Fico no aguardo dessa informação pra já mandar o orçamento completinho!\\n\\nAbraço, Henrique - Guardião Lajes 😉\"}"
+          "orçamento": null,
+          "whats": "558281036911",
+          "instance": "meu cell",
+          "Supervisor": "origem: supervisor\nmensagem: pode ser na quarta-feira?"
         }
       }
     ]
   },
-  "versionId": "fca33991-0d40-4fab-9af3-ddca9c3209c0",
+  "versionId": "1c40e42a-4fd0-490b-8d1e-1aab20c94dc4",
   "triggerCount": 1,
   "tags": [
     {
