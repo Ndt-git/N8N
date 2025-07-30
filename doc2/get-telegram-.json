@@ -1,0 +1,1087 @@
+{
+  "createdAt": "2025-07-28T17:00:22.492Z",
+  "updatedAt": "2025-07-29T20:53:02.257Z",
+  "id": "jEVx8RqtlViCGqVu",
+  "name": "Get telegram",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -120,
+        -180
+      ],
+      "id": "2ecf82b9-2172-4674-b298-44434305a985",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot8459170116:AAGarCLBWoQkNJWSxTh_HzQd9V8orvKCQWk/getUpdates",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        -180
+      ],
+      "id": "f16831e5-c81e-41b6-853f-625b4935223e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputItems = [];\n\n// Acessa o array 'result' do primeiro item de entrada\n// Assumimos que o JSON completo está em items[0].json\nconst updates = items[0].json.result;\n\n// Verifica se 'updates' é um array e não está vazio\nif (Array.isArray(updates) && updates.length > 0) {\n    // Itera sobre cada 'update' no array 'result'\n    for (const update of updates) {\n        // Para cada 'update', cria um novo item no n8n\n        // O JSON de cada novo item será o próprio objeto 'update'\n        outputItems.push({ json: update });\n    }\n} else {\n    // Se não houver updates ou o formato for inesperado, você pode lidar com isso.\n    // Por exemplo, pode enviar um item vazio ou um item de erro.\n    console.warn(\"Nenhum 'update' encontrado ou formato de entrada inesperado.\");\n    // outputItems.push({ json: { status: \"No updates found\" } }); // Opcional\n}\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        -180
+      ],
+      "id": "cd26a174-64d2-4e4a-8a27-4cab33aec656",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "baa5b0bf-8d0c-46a0-9e5f-57cb3f580ba9",
+              "leftValue": "={{$('id_orc').item.json.propertyName.map(str => (str.match(/\"message_id\": (\\d+)/) || [])[1] ? parseInt((str.match(/\"message_id\": (\\d+)/) || [])[1], 10) : null)}}",
+              "rightValue": "={{ $('Code').item.json.message.reply_to_message ? $('Code').item.json.message.reply_to_message.message_id : null }}",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1140,
+        -180
+      ],
+      "id": "8070da00-bb2a-4f5a-a3f4-4a3447ff0b33",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "oEgGaOjRHITpdzbf",
+          "mode": "list",
+          "cachedResultName": "entrada"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "orçamento": "={{ $json.texto }}",
+            "instance": "={{ $json.instace }}",
+            "whats": "={{ $json.whatsapp }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "orçamento",
+              "displayName": "orçamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "whats",
+              "displayName": "whats",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "instance",
+              "displayName": "instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Supervisor",
+              "displayName": "Supervisor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2640,
+        -280
+      ],
+      "id": "10c6cd4d-5022-44d4-b33a-6fb3c18713f0",
+      "name": "Execute Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3360e541-f3ae-4f42-b09f-3fbc9386563d",
+              "leftValue": "={{ $json.message.text.toLowerCase() }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        -340
+      ],
+      "id": "d866057d-52d9-43b2-b3eb-a076011a3162",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3360e541-f3ae-4f42-b09f-3fbc9386563d",
+              "leftValue": "={{ $json.message.text.toLowerCase() }}",
+              "rightValue": "nop",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        -100
+      ],
+      "id": "16075f37-a243-4384-bbf2-73774bf4b005",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "control",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        160,
+        -180
+      ],
+      "id": "fc0bb3fa-76fb-4bff-90f8-1d6a34f2b62b",
+      "name": "control",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "telegram",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        340,
+        -180
+      ],
+      "id": "ec5f5192-2a2e-44ef-b998-539c088cd2dd",
+      "name": "id_orc",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "control",
+        "messageData": "=\"message_id\": {{ $json.message.message_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        -340
+      ],
+      "id": "81d21a29-c319-4c77-afc2-7247874f6c0a",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "68598310-02b4-42ec-94d5-5d2c5c7c3c74",
+              "leftValue": "={{$('control').item.json.propertyName.map(str => (str.match(/\"message_id\": (\\d+)/) || [])[1] ? parseInt((str.match(/\"message_id\": (\\d+)/) || [])[1], 10) : null)}}",
+              "rightValue": "={{ $json.message.message_id }}",
+              "operator": {
+                "type": "array",
+                "operation": "notContains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1580,
+        -340
+      ],
+      "id": "e71febeb-9305-4e7a-9a05-be63ae631611",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3033621b-ab8c-423d-a429-a68acc7490df",
+              "name": "texto",
+              "value": "={{ $('Redis').item.json.message.reply_to_message.text.replace('\\n\\nThis message was sent automatically with n8n', '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2460,
+        -280
+      ],
+      "id": "26a91a98-6d11-4442-a5e9-caf6f1c2550e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "telegram",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2120,
+        -280
+      ],
+      "id": "4c9f31df-180f-492f-a849-d6901662bff5",
+      "name": "id_orc1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputItems = [];\n\n\n\n// 1. Obter o message_id da reply_to_message do nó 'Redis'\n\n// Use o operador de encadeamento opcional para segurança\n\nconst replyToMessageId = $('Redis').item.json.message.reply_to_message?.message_id;\n\n\n\n// Verifica se replyToMessageId foi encontrado. Se não, não há o que comparar.\n\nif (replyToMessageId === undefined || replyToMessageId === null) {\n\n    console.warn(\"message_id da reply_to_message não encontrado no nó 'Redis'.\");\n\n    return []; // Retorna um array vazio para não processar mais\n\n}\n\n\n\n// 2. Obter o array propertyName do input atual do Code node\n\n// Assumimos que o array propertyName é o input principal deste nó Code\n\nconst propertyNameArray = items[0].json.propertyName;\n\n\n\nlet foundItem = null;\n\n\n\nif (Array.isArray(propertyNameArray)) {\n\n    for (const str of propertyNameArray) {\n\n        // A. Extrair message_id da string propertyName\n\n        const messageIdMatch = str.match(/\"message_id\": (\\d+)/);\n\n        const currentMessageId = messageIdMatch && messageIdMatch[1] ? parseInt(messageIdMatch[1], 10) : null;\n\n\n\n        // B. Comparar com o replyToMessageId do Redis\n\n        if (currentMessageId === replyToMessageId) {\n\n            // C. Se encontrou correspondência, extrai todos os pares chave-valor da string\n\n            const regex = /\"(\\w+)\":\\s*(\"[^\"]*\"|\\d+|[^,}\\n]+)/g;\n\n            let match;\n\n            const tempObject = {};\n\n\n\n            while ((match = regex.exec(str)) !== null) {\n\n                let key = match[1];\n\n                let value = match[2];\n\n\n\n                // Limpa aspas de strings e tenta converter números\n\n                if (value.startsWith('\"') && value.endsWith('\"')) {\n\n                    value = value.substring(1, value.length - 1);\n\n                } else {\n\n                    const numValue = Number(value);\n\n                    if (!isNaN(numValue) && String(numValue) === value) {\n\n                        value = numValue;\n\n                    }\n\n                }\n\n                tempObject[key] = value;\n\n            }\n\n\n\n            foundItem = tempObject;\n\n            break; // Encontrou, sai do loop\n\n        }\n\n    }\n\n}\n\n\n\n// 3. Retornar o item encontrado\n\nif (foundItem) {\n\n    outputItems.push({ json: foundItem });\n\n} else {\n\n    // Caso não encontre nenhum item correspondente\n\n    console.warn(`Nenhuma linha em propertyName encontrada com message_id = ${replyToMessageId}`);\n\n}\n\n\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2300,
+        -280
+      ],
+      "id": "6cc072b6-056f-4748-9fb4-03090f74d7ea",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1960,
+        -340
+      ],
+      "id": "f5c23fa8-8a52-483d-82f7-37d2593aef53",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        -280
+      ],
+      "id": "75a43dc8-d883-4dd2-9e6c-80909554210f"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -440
+      ],
+      "id": "c68bf68c-9fda-4779-aae4-900696043a71",
+      "name": "When clicking ‘Execute workflow’",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.telegram.org/bot7576435571:AAF5IbQDHiy6L0B-ZPgxoTiPKKn2PBrfnB8/getUpdates",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        40
+      ],
+      "id": "c67a65d5-aee2-4dbc-8479-4a6a21be735d",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "control1",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        160,
+        40
+      ],
+      "id": "ec01b010-cc27-4d5a-b9f3-a60a0afd3ebe",
+      "name": "control1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputItems = [];\n\n// Acessa o array 'result' do primeiro item de entrada\n// Assumimos que o JSON completo está em items[0].json\nconst updates = items[0].json.result;\n\n// Verifica se 'updates' é um array e não está vazio\nif (Array.isArray(updates) && updates.length > 0) {\n    // Itera sobre cada 'update' no array 'result'\n    for (const update of updates) {\n        // Para cada 'update', cria um novo item no n8n\n        // O JSON de cada novo item será o próprio objeto 'update'\n        outputItems.push({ json: update });\n    }\n} else {\n    // Se não houver updates ou o formato for inesperado, você pode lidar com isso.\n    // Por exemplo, pode enviar um item vazio ou um item de erro.\n    console.warn(\"Nenhum 'update' encontrado ou formato de entrada inesperado.\");\n    // outputItems.push({ json: { status: \"No updates found\" } }); // Opcional\n}\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        40
+      ],
+      "id": "1f323599-6439-4544-9e80-048744d295e1",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "telegram1",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        380,
+        40
+      ],
+      "id": "b4b31979-fd97-4a94-af36-a4a6a2e37cfc",
+      "name": "id_chat",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "baa5b0bf-8d0c-46a0-9e5f-57cb3f580ba9",
+              "leftValue": "={{$('id_chat').item.json.propertyName.map(str => (str.match(/\"message_id\": (\\d+)/) || [])[1] ? parseInt((str.match(/\"message_id\": (\\d+)/) || [])[1], 10) : null)}}",
+              "rightValue": "={{ $('Code2').item.json.message.reply_to_message ? $('Code2').item.json.message.reply_to_message.message_id : null }}",
+              "operator": {
+                "type": "array",
+                "operation": "contains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1060,
+        40
+      ],
+      "id": "813c6356-ffd7-44f7-abfe-7d6100bb95d1",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "68598310-02b4-42ec-94d5-5d2c5c7c3c74",
+              "leftValue": "={{$('control1').item.json.propertyName.map(str => (str.match(/\"message_id\": (\\d+)/) || [])[1] ? parseInt((str.match(/\"message_id\": (\\d+)/) || [])[1], 10) : null)}}",
+              "rightValue": "={{ $json.message.message_id }}",
+              "operator": {
+                "type": "array",
+                "operation": "notContains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        40
+      ],
+      "id": "ad031e14-0fd6-4e61-b77a-380334b8f6f8",
+      "name": "Filter5"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "control1",
+        "messageData": "=\"message_id\": {{ $json.message.message_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        100
+      ],
+      "id": "3e06a2e4-df48-4571-82f8-01295270ed2d",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "oEgGaOjRHITpdzbf",
+          "mode": "list",
+          "cachedResultName": "entrada"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "instance": "={{ $json.instace }}",
+            "whats": "={{ $json.whatsapp }}",
+            "Supervisor": "={{ $json.texto }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "orçamento",
+              "displayName": "orçamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            },
+            {
+              "id": "whats",
+              "displayName": "whats",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "instance",
+              "displayName": "instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "Supervisor",
+              "displayName": "Supervisor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2420,
+        100
+      ],
+      "id": "115382b0-5c5d-47ea-9ea4-fecf79606baa",
+      "name": "Execute Workflow1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3033621b-ab8c-423d-a429-a68acc7490df",
+              "name": "texto",
+              "value": "=origem: supervisor\nmensagem: {{ $('Redis1').item.json.message.text.replace('\\n\\nThis message was sent automatically with n8n', '') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        100
+      ],
+      "id": "ce20dc9b-7280-4495-b86d-c6e7875716d3",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputItems = [];\n\n\n\n// 1. Obter o message_id da reply_to_message do nó 'Redis'\n\n// Use o operador de encadeamento opcional para segurança\n\nconst replyToMessageId = $('Redis1').item.json.message.reply_to_message?.message_id;\n\n\n\n// Verifica se replyToMessageId foi encontrado. Se não, não há o que comparar.\n\nif (replyToMessageId === undefined || replyToMessageId === null) {\n\n    console.warn(\"message_id da reply_to_message não encontrado no nó 'Redis'.\");\n\n    return []; // Retorna um array vazio para não processar mais\n\n}\n\n\n\n// 2. Obter o array propertyName do input atual do Code node\n\n// Assumimos que o array propertyName é o input principal deste nó Code\n\nconst propertyNameArray = items[0].json.propertyName;\n\n\n\nlet foundItem = null;\n\n\n\nif (Array.isArray(propertyNameArray)) {\n\n    for (const str of propertyNameArray) {\n\n        // A. Extrair message_id da string propertyName\n\n        const messageIdMatch = str.match(/\"message_id\": (\\d+)/);\n\n        const currentMessageId = messageIdMatch && messageIdMatch[1] ? parseInt(messageIdMatch[1], 10) : null;\n\n\n\n        // B. Comparar com o replyToMessageId do Redis\n\n        if (currentMessageId === replyToMessageId) {\n\n            // C. Se encontrou correspondência, extrai todos os pares chave-valor da string\n\n            const regex = /\"(\\w+)\":\\s*(\"[^\"]*\"|\\d+|[^,}\\n]+)/g;\n\n            let match;\n\n            const tempObject = {};\n\n\n\n            while ((match = regex.exec(str)) !== null) {\n\n                let key = match[1];\n\n                let value = match[2];\n\n\n\n                // Limpa aspas de strings e tenta converter números\n\n                if (value.startsWith('\"') && value.endsWith('\"')) {\n\n                    value = value.substring(1, value.length - 1);\n\n                } else {\n\n                    const numValue = Number(value);\n\n                    if (!isNaN(numValue) && String(numValue) === value) {\n\n                        value = numValue;\n\n                    }\n\n                }\n\n                tempObject[key] = value;\n\n            }\n\n\n\n            foundItem = tempObject;\n\n            break; // Encontrou, sai do loop\n\n        }\n\n    }\n\n}\n\n\n\n// 3. Retornar o item encontrado\n\nif (foundItem) {\n\n    outputItems.push({ json: foundItem });\n\n} else {\n\n    // Caso não encontre nenhum item correspondente\n\n    console.warn(`Nenhuma linha em propertyName encontrada com message_id = ${replyToMessageId}`);\n\n}\n\n\n\nreturn outputItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        100
+      ],
+      "id": "679d7e2f-c87b-4e9b-889c-50cf1ce5191b",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1520,
+        40
+      ],
+      "id": "cd04ee93-75cb-48f6-8f9e-1b4e6d4631a5",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        2620,
+        100
+      ],
+      "id": "616ffe22-40ed-4ae9-8f02-9a3c4e72d9da"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "telegram1",
+        "keyType": "list",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1900,
+        100
+      ],
+      "id": "cae18bc1-f83f-4e97-865b-a1495cf8e3d7",
+      "name": "id_chat1",
+      "credentials": {
+        "redis": {
+          "id": "sA2U6PkBocrwko3a",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "control": {
+      "main": [
+        [
+          {
+            "node": "id_orc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "id_orc": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "id_orc1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "id_orc1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "control",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "control1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "control1": {
+      "main": [
+        [
+          {
+            "node": "id_chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "id_chat": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "Filter5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow1": {
+      "main": [
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis1": {
+      "main": [
+        [
+          {
+            "node": "id_chat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "id_chat1": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "fd8843b9-8766-40ba-bac7-2291abf4f9f9",
+  "triggerCount": 1,
+  "tags": []
+}
